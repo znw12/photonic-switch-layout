@@ -38,6 +38,9 @@ def compare_bundles(directories, out, baseline=None):
                 pad_rows=cfg["pad_rows"],
                 pad_distribution=cfg.get("pad_distribution", "central"),
                 lane_pitch_um=cfg["lane_pitch"],
+                interstage_routing=cfg.get("interstage_routing", "legacy"),
+                shuffle_pitch_um=cfg.get("shuffle_pitch"),
+                objective=next(c["objective"] for c in report["candidates"] if c["id"]==summary["selected_candidate"]),
                 pad_row_stagger_um=cfg.get("pad_row_stagger", 0),
                 pad_bank_width_mm=report["metrics"]
                 .get("pad_banks", {})
@@ -66,6 +69,8 @@ def compare_bundles(directories, out, baseline=None):
                 length_max_mm=uniformity["length"]["max"] / 1000,
                 bend_min=uniformity["bends"]["min"],
                 bend_max=uniformity["bends"]["max"],
+                crossing_min=uniformity["crossings"]["min"],
+                crossing_max=uniformity["crossings"]["max"],
                 normalized_hash=report["normalized_hash"],
             )
         )
@@ -83,7 +88,7 @@ def compare_bundles(directories, out, baseline=None):
         target_width_mm=20,
         global_optimum_proven=False,
         results=records,
-        smallest_area=min(valid, key=lambda r: r["area_mm2"])["bundle"],
+        smallest_area=min(valid, key=lambda r: tuple(r["objective"])+ (r["bundle"],))["bundle"],
         smallest_width=min(valid, key=lambda r: r["width_mm"])["bundle"],
         smallest_maximum_dimension=min(valid, key=lambda r: r["maximum_dimension_mm"])[
             "bundle"
@@ -111,7 +116,7 @@ def compare_bundles(directories, out, baseline=None):
         label_counts[location] = label_index + 1
         ax.scatter(r["width_mm"], r["height_mm"], s=70)
         ax.annotate(
-            f"{r['pad_distribution']} / {r['lane_pitch_um']:g} um lanes\n"
+            f"{r['interstage_routing']} / q={r['shuffle_pitch_um']}\n"
             f"{r['pad_rows']} rows / {r['fold_bands']} bands / {r['pad_row_stagger_um']:g} um stagger",
             (r["width_mm"], r["height_mm"]),
             xytext=(5, 5 + 14 * label_index),

@@ -19,6 +19,8 @@ class Config:
     wg_width: float = 1.0
     wg_clearance: float = 5.0
     lane_pitch: float = 80.0
+    interstage_routing: str = "legacy"
+    shuffle_pitch: float | None = None
     mzi_length: float = 1000.0
     mzi_height: float = 100.0
     terminal_names: tuple[str, str] = ("return", "control")
@@ -135,6 +137,20 @@ class Config:
             self.pad_rows != 4 or self.fold_bands != 1
         ):
             raise ValueError("stage pad distribution requires four rows and one band")
+        if self.interstage_routing not in ("legacy", "continuous", "compressed"):
+            raise ValueError("invalid interstage_routing")
+        if self.interstage_routing != "legacy" and (
+            self.pad_distribution != "stage" or self.pad_rows != 4 or self.fold_bands != 1
+        ):
+            raise ValueError("new interstage routing requires stage pads, four rows and one band")
+        if self.interstage_routing == "compressed":
+            q = self.shuffle_pitch
+            if (type(q) not in (int, float) or not math.isfinite(q)
+                or not self.wg_width + self.wg_clearance < q <= self.lane_pitch
+                or abs(q / self.grid - round(q / self.grid)) > 1e-7):
+                raise ValueError("shuffle_pitch must be finite, on grid and within clearance/lane pitch")
+        elif self.shuffle_pitch is not None:
+            raise ValueError("shuffle_pitch only applies to compressed routing")
         if (
             type(self.pad_row_stagger) not in (int, float)
             or not math.isfinite(self.pad_row_stagger)

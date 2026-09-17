@@ -46,8 +46,15 @@ def main(argv=None):
             p.add_argument("--pad-row-stagger", type=float)
             p.add_argument("--pad-distribution", choices=("central", "stage"))
             p.add_argument("--lane-pitch", type=float)
+            p.add_argument("--interstage-routing", choices=("legacy","continuous","compressed"))
+            p.add_argument("--shuffle-pitch", type=float)
             p.add_argument("--fold-bands", type=int)
     sub.add_parser("verify").add_argument("directory")
+    study = sub.add_parser("interstage-study")
+    study.add_argument("--config", default="examples/benes/distributed/pitch60.json")
+    study.add_argument("--out", default="output/benes/interstage")
+    study.add_argument("--scope", choices=("full","placement","all"), default="all")
+    study.add_argument("--reuse", action="store_true", help="independently reverify matching existing bundles")
     comparison = sub.add_parser("compare")
     comparison.add_argument("directories", nargs="+")
     comparison.add_argument("--out", default="output/benes/reshape/comparison")
@@ -68,6 +75,8 @@ def main(argv=None):
                 pad_row_stagger=getattr(args, "pad_row_stagger", None),
                 pad_distribution=getattr(args, "pad_distribution", None),
                 lane_pitch=getattr(args, "lane_pitch", None),
+                interstage_routing=getattr(args, "interstage_routing", None),
+                shuffle_pitch=getattr(args, "shuffle_pitch", None),
                 fold_bands=getattr(args, "fold_bands", None),
             )
             pairs = request_pairs(args.connections, cfg.active_ports)
@@ -88,6 +97,13 @@ def main(argv=None):
             from .workflow import verify_bundle
 
             print(json.dumps(verify_bundle(args.directory), indent=2))
+        elif args.command == "interstage-study":
+            from .interstage_study import run_full, run_placement
+            cfg=Config.load(args.config)
+            if args.scope in ("full","all"):
+                run_full(cfg,args.out,args.reuse)
+            if args.scope in ("placement","all"):
+                run_placement(cfg,Path(args.out)/"placement")
         elif args.command == "compare":
             from .comparison import compare_bundles
 

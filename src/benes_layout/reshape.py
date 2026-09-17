@@ -16,10 +16,21 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
             "this routing profile requires declared insulated M2 overpasses"
         )
     lib, net = Library(cfg), Network(cfg)
+    orders = candidate.get("stage_orders")
+    if orders is not None:
+        from .placement import validate_orders, boundary_permutation, permutation_block
+        validate_orders(net, orders)
+        if cfg.interstage_routing != "legacy" or cfg.pad_distribution != "stage" or candidate["row_order"] != "normal":
+            raise ValueError("placement experiments require legacy backend and normal stage pad profile")
     lib.mzi().metadata["allowed_transforms"] = [0, 180]
     if component_factory:
         component_factory(lib)
     validate_components(lib)
+    blocks = [
+        (permutation_block(lib, boundary_permutation(net, orders, s)) if orders is not None
+         else lib.shuffle_block(b["size"], b["inverse"]))
+        for s, b in enumerate(net.boundaries)
+    ]
     if 180 not in lib.mzi().metadata["allowed_transforms"] and cfg.fold_bands > 1:
         raise ValueError("folding requires an MZI permitting 180-degree rotation")
     top = lib.cell("BENES_CHIP", "chip")
@@ -84,9 +95,7 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
     widths = []
     for s in range(net.depth):
         widths.append(
-            lib.shuffle_block(
-                net.boundaries[s]["size"], net.boundaries[s]["inverse"]
-            ).metadata["width"]
+            blocks[s].metadata["width"]
             if s < net.depth - 1
             else 0.0
         )
@@ -162,10 +171,14 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
     )
     if pad_groups is not None:
         m["pad_groups"] = pad_groups
+    if cfg.interstage_routing != "legacy" or orders is not None:
+        m["interstage"] = [dict(stage=s, **b.metadata) for s,b in enumerate(blocks)]
     terminals = []
     reverse_rows = candidate["row_order"] == "reverse"
 
-    def physical(lane):
+    def physical(lane, stage=0):
+        if orders is not None:
+            return 2*orders[stage][lane//2] + lane%2
         return p - 1 - lane if reverse_rows else lane
 
     for s in stages:
@@ -174,7 +187,7 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
         terms = []
         for index in range(count):
             sid = switch_id(s["stage"], index)
-            row = p - 2 - 2 * index if reverse_rows else 2 * index
+            row = physical(2*index, s["stage"]) - int(reverse_rows)
             lib.ref(stage_cell, lib.mzi(), 0, row * pitch, id=sid)
             at = point(s["x"], s["origin_y"], s["angle"], [0, row * pitch])
             m["instances"].append(
@@ -270,12 +283,13 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
         folding = not last and nxt["band"] != s["band"]
         if not last:
             boundary = net.boundaries[si]
-            block = lib.shuffle_block(boundary["size"], boundary["inverse"])
-            for base in range(0, p, boundary["size"]):
+            block = blocks[si]
+            block_size = p if orders is not None else boundary["size"]
+            for base in range(0, p, block_size):
                 at = point(s["escape_end"], s["origin_y"], angle, [0, base * pitch])
                 lib.ref(parent, block, *at, angle)
         for lane in range(p):
-            row = physical(lane)
+            row = physical(lane, si)
             dest = net.boundaries[si]["permutation"][lane] if not last else lane
             target = (
                 f"{switch_id(si+1,dest//2)}:i{dest%2}" if not last else f"out:{lane}"
@@ -285,8 +299,8 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
             at = point(s["escape_end"], s["origin_y"], angle, [0, row * pitch])
             straight(parent, route, start, at)
             if not last:
-                base, local = divmod(row, boundary["size"])
-                base *= boundary["size"]
+                base, local = divmod(row, block_size)
+                base *= block_size
                 for part in block.tracks[local]["pieces"]:
                     pos = point(
                         s["escape_end"],
@@ -300,9 +314,9 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
                         *pos,
                         part["entry"],
                         part["exit"],
-                        angle,
+                        (angle + part.get("angle", 0)) % 360,
                     )
-            output_row = physical(dest)
+            output_row = physical(dest, min(si+1, net.depth-1))
             at = point(s["route_end"], s["origin_y"], angle, [0, output_row * pitch])
             if folding:
                 edge = right if angle == 0 else 0.0
@@ -399,6 +413,10 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
         ),
     )
     m["crossing_count"] = sum(r["crossings"] for r in m["routes"]) // 2
+    m["placement_map"] = {i["id"]: dict(stage=i["stage"], row=i["row"],
+                                          pins={f"{side}{pin}": f"{side}{pin ^ i['pin_flip']}"
+                                                for side in ("i","o") for pin in (0,1)})
+                          for i in m["instances"]}
     frame = lib.cell("DIE_OUTLINE", "outline")
     lib.ref(top, frame)
     a, b, c, d = m["die_bbox"]

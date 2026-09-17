@@ -1,0 +1,18 @@
+{
+  "tests": 237,
+  "pytest_result": "237 passed in 41.52s",
+  "full_candidates": 7,
+  "full_candidates_verified": 7,
+  "placement_primary_candidates": 18,
+  "placement_primary_verified": 18,
+  "placement_reference_candidates": 4,
+  "placement_references_verified": 4,
+  "minimum_bend_radius_um": 20,
+  "crossings": 7680,
+  "full_mzi_count": 832,
+  "full_pad_count": 1664,
+  "full_via_count": 4992,
+  "old_bundle": "output/benes/distributed/pitch60",
+  "old_bundle_readback_passed": true,
+  "normalized_geometry_repeat_passed": true
+}

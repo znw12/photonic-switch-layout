@@ -46,6 +46,7 @@ class Library(PrimitiveLibrary):
         c = super().crossing()
         for t in c.tracks:
             t.update(bends=0, angle=0, crossings=1)
+        c.metadata.setdefault("allowed_transforms", [0, 45, 90, 135, 180, 225, 270, 315])
         return c
 
     def bend(self, name, cx, cy, start, end):
@@ -100,6 +101,8 @@ class Library(PrimitiveLibrary):
         if (p / 2 - ay) * sqrt(2) <= cfg.crossing_half_length + cfg.wg_clearance:
             raise ValueError("lane pitch cannot fit crossing approaches")
         c = self.cell("EXCHANGE", "exchange")
+        if 45 not in self.crossing().metadata["allowed_transforms"]:
+            raise ValueError("crossing transform 45 is not permitted")
         self.ref(c, self.crossing(), *mid, angle=45)
         for name, cx, cy, a, b in (
             ("BEND_NE", 0, r, -pi / 2, -pi / 4),
@@ -143,6 +146,10 @@ class Library(PrimitiveLibrary):
         exchange pairs start at rows c+1,c+3,...,2m-c-3. Reversing the column
         sequence realizes the inverse. Repeated subnetwork groups share cells.
         """
+        if self.cfg.interstage_routing != "legacy":
+            from .interstage import shuffle_block
+
+            return shuffle_block(self, size, inverse)
         name = f"{'MERGE' if inverse else 'SPLIT'}_{size}"
         if name in self.cells:
             return self.cells[name]
@@ -258,5 +265,11 @@ def validate_components(lib):
 def point(x, y, angle, at):
     """Exact orthogonal transform without accumulating trigonometric drift."""
     a, b = at[:2]
-    a, b = {0: (a, b), 90: (-b, a), 180: (-a, -b), 270: (b, -a)}[angle % 360]
+    if angle % 90 == 0:
+        a, b = {0: (a, b), 90: (-b, a), 180: (-a, -b), 270: (b, -a)}[angle % 360]
+    else:
+        from math import cos, sin, radians
+
+        t = radians(angle)
+        a, b = a * cos(t) - b * sin(t), a * sin(t) + b * cos(t)
     return [snap(x + a), snap(y + b)]

@@ -48,7 +48,7 @@ def candidates(cfg):
     ]
 
 
-def generate(cfg, out, requests):
+def generate(cfg, out, requests, *, choices=None):
     from .layout import build_layout
     from .verify import verify_manifest, verify_gds, normalized_hash
     from .metrics import uniformity, realized, objective, pad_banks
@@ -78,7 +78,7 @@ def generate(cfg, out, requests):
     started = time.perf_counter()
     best = None
     records = []
-    for choice in candidates(cfg):
+    for choice in candidates(cfg) if choices is None else choices:
         start = time.perf_counter()
         scratch = out / ("." + choice["id"])
         scratch.mkdir(exist_ok=True)
@@ -226,6 +226,12 @@ def generate(cfg, out, requests):
             "Multirow pads use insulated M1 stems beneath M2 pads; packaging access is not qualified.",
         ],
     }
+    if "interstage" in m:
+        report["interstage"] = dict(requested_mode=cfg.interstage_routing,
+                                    requested_pitch=cfg.shuffle_pitch,
+                                    boundaries=m["interstage"],
+                                    compressed_boundaries=[b["stage"] for b in m["interstage"] if b["mode"]=="compressed"],
+                                    all_uncompressed=not any(b["mode"]=="compressed" for b in m["interstage"]))
     for filename, value in (
         ("config.json", cfg.to_dict()),
         ("manifest.json", m),
@@ -323,6 +329,8 @@ def verify_bundle(directory):
     Network(cfg).verify(settings)
     result = verify_manifest(m)
     result.update(verify_gds(directory / "layout.gds", m, names))
+    if "interstage" in m:
+        require(report["interstage"]["boundaries"]==m["interstage"],"interstage report mismatch")
     if "pad_banks" in report["metrics"]:
         require(
             pad_banks(m) == report["metrics"]["pad_banks"], "pad bank report mismatch"

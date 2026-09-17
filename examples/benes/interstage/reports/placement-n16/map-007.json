@@ -1,0 +1,1215 @@
+{
+  "assumptions": [
+    "Placeholder TFLN, crossing, termination and stack; no foundry or optical performance signoff.",
+    "Constant MZI count does not imply equal optical loss, state response, or group delay.",
+    "MZI geometric propagation length is an ideal black-box model; phase/coupler delay is unmodeled.",
+    "Insulated M2 over straight waveguides only in declared windows; no vias in these windows.",
+    "Single-connection operation requires unrequested inputs to be dark.",
+    "Rearrangeable operation may interrupt existing connections; no hitless guarantee.",
+    "Two dedicated pads per MZI; returns remain separate.",
+    "Multirow pads use insulated M1 stems beneath M2 pads; packaging access is not qualified."
+  ],
+  "baseline_comparison": {
+    "area_reduction_percent": 0.0,
+    "baseline": "map-007",
+    "baseline_area_um2": 27138518.541683998,
+    "improvement_found": false,
+    "selected": "map-007",
+    "selected_area_um2": 27138518.541683998
+  },
+  "candidates": [
+    {
+      "area_um2": 27138518.541683998,
+      "baseline": true,
+      "corridor": 1.0,
+      "equalization": {
+        "enabled": false
+      },
+      "gap": 1.0,
+      "height_um": 2344.012,
+      "id": "map-007",
+      "objective": [
+        27138518541684,
+        462.6239556671935,
+        20,
+        40,
+        75226.3003034726,
+        "map-007"
+      ],
+      "pad": 1.0,
+      "row_order": "normal",
+      "stage_orders": [
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        [
+          1,
+          0,
+          3,
+          2,
+          5,
+          4,
+          7,
+          6
+        ],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      ],
+      "status": "verified",
+      "timings_s": {
+        "build": 0.011490085998957511,
+        "export": 0.039409400000295136,
+        "geometry": 0.23852220700064208,
+        "readback": 0.11886133100051666,
+        "total": 0.410226818996307
+      },
+      "uniformity": {
+        "metrics": {
+          "angle": {
+            "max": 37.69911184307752,
+            "max_witness": [
+              "in:15",
+              "s00_m0007:o0",
+              "s01_m0003:o0",
+              "s02_m0001:o1",
+              "s03_m0001:o1",
+              "s04_m0001:o1",
+              "s05_m0003:o1",
+              "s06_m0007:o1"
+            ],
+            "min": 6.283185307179586,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0",
+              "s03_m0000:o0",
+              "s04_m0000:o0",
+              "s05_m0000:o0",
+              "s06_m0000:o0"
+            ],
+            "spread": 31.41592653589793
+          },
+          "bends": {
+            "max": 48,
+            "max_witness": [
+              "in:15",
+              "s00_m0007:o0",
+              "s01_m0003:o0",
+              "s02_m0001:o1",
+              "s03_m0001:o1",
+              "s04_m0001:o1",
+              "s05_m0003:o1",
+              "s06_m0007:o1"
+            ],
+            "min": 8,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0",
+              "s03_m0000:o0",
+              "s04_m0000:o0",
+              "s05_m0000:o0",
+              "s06_m0000:o0"
+            ],
+            "spread": 40
+          },
+          "crossings": {
+            "max": 24,
+            "max_witness": [
+              "in:15",
+              "s00_m0007:o0",
+              "s01_m0003:o0",
+              "s02_m0001:o1",
+              "s03_m0001:o1",
+              "s04_m0001:o1",
+              "s05_m0003:o1",
+              "s06_m0007:o1"
+            ],
+            "min": 4,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0",
+              "s03_m0000:o0",
+              "s04_m0000:o0",
+              "s05_m0000:o0",
+              "s06_m0000:o0"
+            ],
+            "spread": 20
+          },
+          "length": {
+            "max": 11932.955746800635,
+            "max_witness": [
+              "in:15",
+              "s00_m0007:o0",
+              "s01_m0003:o0",
+              "s02_m0001:o1",
+              "s03_m0001:o1",
+              "s04_m0001:o1",
+              "s05_m0003:o1",
+              "s06_m0007:o1"
+            ],
+            "min": 11470.331791133442,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0",
+              "s03_m0000:o0",
+              "s04_m0000:o0",
+              "s05_m0000:o0",
+              "s06_m0000:o0"
+            ],
+            "spread": 462.6239556671935
+          }
+        },
+        "scope": "exact extrema over all possible single paths between active interfaces"
+      },
+      "width_um": 11577.807
+    }
+  ],
+  "checks": {
+    "cell_references": 1275,
+    "electrical_extraction_passed": true,
+    "gds_cells": 155,
+    "gds_readback_passed": true,
+    "logical_edges": 128,
+    "manifest_geometry_passed": true,
+    "metal_regions": {
+      "M1": 224,
+      "M2": 224
+    },
+    "mzi_count": 56,
+    "optical_objects": 680,
+    "spare_terminations": 0,
+    "switch_depth_max": 7,
+    "switch_depth_min": 7,
+    "via_count": 336
+  },
+  "equalization": {
+    "enabled": false
+  },
+  "interstage": {
+    "all_uncompressed": true,
+    "boundaries": [
+      {
+        "columns": 8,
+        "inverse": false,
+        "mode": "experimental-adjacent",
+        "permutation": [
+          0,
+          8,
+          1,
+          9,
+          2,
+          10,
+          3,
+          11,
+          4,
+          12,
+          5,
+          13,
+          6,
+          14,
+          7,
+          15
+        ],
+        "size": 16,
+        "stage": 0,
+        "width": 612.552
+      },
+      {
+        "columns": 6,
+        "inverse": false,
+        "mode": "experimental-adjacent",
+        "permutation": [
+          2,
+          6,
+          3,
+          7,
+          0,
+          4,
+          1,
+          5,
+          10,
+          14,
+          11,
+          15,
+          8,
+          12,
+          9,
+          13
+        ],
+        "size": 16,
+        "stage": 1,
+        "width": 459.414
+      },
+      {
+        "columns": 3,
+        "inverse": false,
+        "mode": "experimental-adjacent",
+        "permutation": [
+          1,
+          3,
+          0,
+          2,
+          5,
+          7,
+          4,
+          6,
+          9,
+          11,
+          8,
+          10,
+          13,
+          15,
+          12,
+          14
+        ],
+        "size": 16,
+        "stage": 2,
+        "width": 229.707
+      },
+      {
+        "columns": 2,
+        "inverse": false,
+        "mode": "experimental-adjacent",
+        "permutation": [
+          0,
+          2,
+          1,
+          3,
+          4,
+          6,
+          5,
+          7,
+          8,
+          10,
+          9,
+          11,
+          12,
+          14,
+          13,
+          15
+        ],
+        "size": 16,
+        "stage": 3,
+        "width": 153.138
+      },
+      {
+        "columns": 4,
+        "inverse": false,
+        "mode": "experimental-adjacent",
+        "permutation": [
+          0,
+          2,
+          4,
+          6,
+          1,
+          3,
+          5,
+          7,
+          8,
+          10,
+          12,
+          14,
+          9,
+          11,
+          13,
+          15
+        ],
+        "size": 16,
+        "stage": 4,
+        "width": 306.276
+      },
+      {
+        "columns": 8,
+        "inverse": false,
+        "mode": "experimental-adjacent",
+        "permutation": [
+          0,
+          2,
+          4,
+          6,
+          8,
+          10,
+          12,
+          14,
+          1,
+          3,
+          5,
+          7,
+          9,
+          11,
+          13,
+          15
+        ],
+        "size": 16,
+        "stage": 5,
+        "width": 612.552
+      }
+    ],
+    "compressed_boundaries": [],
+    "requested_mode": "legacy",
+    "requested_pitch": null
+  },
+  "memory_method": "Linux ru_maxrss; process lifetime high-water resident memory, includes prior candidates and native libraries",
+  "metrics": {
+    "crossings": 112,
+    "die_bbox_um": [
+      -100.0,
+      -722.006,
+      11477.807,
+      1622.006
+    ],
+    "extents_um": {
+      "core": [
+        0.0,
+        -20.0,
+        11377.807,
+        920.0
+      ],
+      "fanout": [
+        0.0,
+        -622.006,
+        11377.807,
+        1522.006
+      ],
+      "pads": [
+        1076.513,
+        -622.006,
+        11317.296,
+        1522.006
+      ],
+      "terminations": null
+    },
+    "gds_bytes": 149116,
+    "pad_bank_width_lower_bound_um": 1360.0,
+    "pad_banks": {
+      "north": {
+        "bbox_um": [
+          1076.513,
+          1162.006,
+          11317.296,
+          1522.006
+        ],
+        "fanout_levels": 4,
+        "groups": [
+          {
+            "bbox_um": [
+              1076.513,
+              1162.006,
+              1311.513,
+              1522.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 0
+          },
+          {
+            "bbox_um": [
+              2961.089,
+              1162.006,
+              3196.089,
+              1522.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 1
+          },
+          {
+            "bbox_um": [
+              4692.527,
+              1162.006,
+              4927.527,
+              1522.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 2
+          },
+          {
+            "bbox_um": [
+              6194.258,
+              1162.006,
+              6429.258,
+              1522.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 3
+          },
+          {
+            "bbox_um": [
+              7619.42,
+              1162.006,
+              7854.42,
+              1522.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 4
+          },
+          {
+            "bbox_um": [
+              9197.72,
+              1162.006,
+              9432.72,
+              1522.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 5
+          },
+          {
+            "bbox_um": [
+              11082.296,
+              1162.006,
+              11317.296,
+              1522.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 6
+          }
+        ],
+        "height_um": 360.0,
+        "pad_count": 56,
+        "row_counts": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "width_um": 10240.783
+      },
+      "south": {
+        "bbox_um": [
+          1076.513,
+          -622.006,
+          11317.296,
+          -262.006
+        ],
+        "fanout_levels": 4,
+        "groups": [
+          {
+            "bbox_um": [
+              1076.513,
+              -622.006,
+              1311.513,
+              -262.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 0
+          },
+          {
+            "bbox_um": [
+              2961.089,
+              -622.006,
+              3196.089,
+              -262.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 1
+          },
+          {
+            "bbox_um": [
+              4692.527,
+              -622.006,
+              4927.527,
+              -262.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 2
+          },
+          {
+            "bbox_um": [
+              6194.258,
+              -622.006,
+              6429.258,
+              -262.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 3
+          },
+          {
+            "bbox_um": [
+              7619.42,
+              -622.006,
+              7854.42,
+              -262.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 4
+          },
+          {
+            "bbox_um": [
+              9197.72,
+              -622.006,
+              9432.72,
+              -262.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 5
+          },
+          {
+            "bbox_um": [
+              11082.296,
+              -622.006,
+              11317.296,
+              -262.006
+            ],
+            "pad_count": 8,
+            "row_counts": [
+              2,
+              2,
+              2,
+              2
+            ],
+            "stage": 6
+          }
+        ],
+        "height_um": 360.0,
+        "pad_count": 56,
+        "row_counts": [
+          14,
+          14,
+          14,
+          14
+        ],
+        "width_um": 10240.783
+      }
+    },
+    "unrouted_electrical": 0,
+    "unrouted_optical": 0,
+    "width_target_met": true,
+    "width_target_um": 20000
+  },
+  "normalized_hash": "e32c4560008df7f0266e7f5ba9e8582485f9745c7095e8078a9bb9ae01742c99",
+  "process_peak_rss_kib": 374272,
+  "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:09:02) [GCC 11.2.0]",
+  "realized": {
+    "paths": [
+      {
+        "angle": 6.283185307179586,
+        "bends": 8,
+        "crossings": 4,
+        "input": 0,
+        "length": 11470.331791133442,
+        "output": 0,
+        "switches": 7,
+        "witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0",
+          "s03_m0000:o0",
+          "s04_m0000:o0",
+          "s05_m0000:o0",
+          "s06_m0000:o0"
+        ]
+      },
+      {
+        "angle": 28.274333882308134,
+        "bends": 36,
+        "crossings": 18,
+        "input": 1,
+        "length": 11794.168560100476,
+        "output": 1,
+        "switches": 7,
+        "witness": [
+          "in:1",
+          "s00_m0000:o1",
+          "s01_m0004:o0",
+          "s02_m0004:o0",
+          "s03_m0004:o0",
+          "s04_m0004:o0",
+          "s05_m0004:o0",
+          "s06_m0000:o1"
+        ]
+      },
+      {
+        "angle": 18.84955592153876,
+        "bends": 24,
+        "crossings": 12,
+        "input": 2,
+        "length": 11655.38137340032,
+        "output": 2,
+        "switches": 7,
+        "witness": [
+          "in:2",
+          "s00_m0001:o0",
+          "s01_m0000:o1",
+          "s02_m0002:o0",
+          "s03_m0002:o0",
+          "s04_m0002:o0",
+          "s05_m0000:o1",
+          "s06_m0001:o0"
+        ]
+      },
+      {
+        "angle": 34.55751918948772,
+        "bends": 44,
+        "crossings": 22,
+        "input": 3,
+        "length": 11886.693351233916,
+        "output": 3,
+        "switches": 7,
+        "witness": [
+          "in:3",
+          "s00_m0001:o1",
+          "s01_m0004:o1",
+          "s02_m0006:o0",
+          "s03_m0006:o0",
+          "s04_m0006:o0",
+          "s05_m0004:o1",
+          "s06_m0001:o1"
+        ]
+      },
+      {
+        "angle": 15.707963267948966,
+        "bends": 20,
+        "crossings": 10,
+        "input": 4,
+        "length": 11609.1189778336,
+        "output": 4,
+        "switches": 7,
+        "witness": [
+          "in:4",
+          "s00_m0002:o0",
+          "s01_m0001:o0",
+          "s02_m0000:o1",
+          "s03_m0001:o0",
+          "s04_m0000:o1",
+          "s05_m0001:o0",
+          "s06_m0002:o0"
+        ]
+      },
+      {
+        "angle": 25.132741228718345,
+        "bends": 32,
+        "crossings": 16,
+        "input": 5,
+        "length": 11747.906164533759,
+        "output": 5,
+        "switches": 7,
+        "witness": [
+          "in:5",
+          "s00_m0002:o1",
+          "s01_m0005:o0",
+          "s02_m0004:o1",
+          "s03_m0005:o0",
+          "s04_m0004:o1",
+          "s05_m0005:o0",
+          "s06_m0002:o1"
+        ]
+      },
+      {
+        "angle": 21.99114857512855,
+        "bends": 28,
+        "crossings": 14,
+        "input": 6,
+        "length": 11701.643768967037,
+        "output": 6,
+        "switches": 7,
+        "witness": [
+          "in:6",
+          "s00_m0003:o0",
+          "s01_m0001:o1",
+          "s02_m0002:o1",
+          "s03_m0003:o0",
+          "s04_m0002:o1",
+          "s05_m0001:o1",
+          "s06_m0003:o0"
+        ]
+      },
+      {
+        "angle": 25.132741228718345,
+        "bends": 32,
+        "crossings": 16,
+        "input": 7,
+        "length": 11747.906164533759,
+        "output": 7,
+        "switches": 7,
+        "witness": [
+          "in:7",
+          "s00_m0003:o1",
+          "s01_m0005:o1",
+          "s02_m0006:o1",
+          "s03_m0007:o0",
+          "s04_m0006:o1",
+          "s05_m0005:o1",
+          "s06_m0003:o1"
+        ]
+      },
+      {
+        "angle": 25.132741228718345,
+        "bends": 32,
+        "crossings": 16,
+        "input": 8,
+        "length": 11747.906164533759,
+        "output": 8,
+        "switches": 7,
+        "witness": [
+          "in:8",
+          "s00_m0004:o0",
+          "s01_m0002:o0",
+          "s02_m0001:o0",
+          "s03_m0000:o1",
+          "s04_m0001:o0",
+          "s05_m0002:o0",
+          "s06_m0004:o0"
+        ]
+      },
+      {
+        "angle": 21.99114857512855,
+        "bends": 28,
+        "crossings": 14,
+        "input": 9,
+        "length": 11701.643768967037,
+        "output": 9,
+        "switches": 7,
+        "witness": [
+          "in:9",
+          "s00_m0004:o1",
+          "s01_m0006:o0",
+          "s02_m0005:o0",
+          "s03_m0004:o1",
+          "s04_m0005:o0",
+          "s05_m0006:o0",
+          "s06_m0004:o1"
+        ]
+      },
+      {
+        "angle": 25.132741228718345,
+        "bends": 32,
+        "crossings": 16,
+        "input": 10,
+        "length": 11747.906164533759,
+        "output": 10,
+        "switches": 7,
+        "witness": [
+          "in:10",
+          "s00_m0005:o0",
+          "s01_m0002:o1",
+          "s02_m0003:o0",
+          "s03_m0002:o1",
+          "s04_m0003:o0",
+          "s05_m0002:o1",
+          "s06_m0005:o0"
+        ]
+      },
+      {
+        "angle": 15.707963267948966,
+        "bends": 20,
+        "crossings": 10,
+        "input": 11,
+        "length": 11609.1189778336,
+        "output": 11,
+        "switches": 7,
+        "witness": [
+          "in:11",
+          "s00_m0005:o1",
+          "s01_m0006:o1",
+          "s02_m0007:o0",
+          "s03_m0006:o1",
+          "s04_m0007:o0",
+          "s05_m0006:o1",
+          "s06_m0005:o1"
+        ]
+      },
+      {
+        "angle": 34.55751918948772,
+        "bends": 44,
+        "crossings": 22,
+        "input": 12,
+        "length": 11886.693351233916,
+        "output": 12,
+        "switches": 7,
+        "witness": [
+          "in:12",
+          "s00_m0006:o0",
+          "s01_m0003:o0",
+          "s02_m0001:o1",
+          "s03_m0001:o1",
+          "s04_m0001:o1",
+          "s05_m0003:o0",
+          "s06_m0006:o0"
+        ]
+      },
+      {
+        "angle": 18.84955592153876,
+        "bends": 24,
+        "crossings": 12,
+        "input": 13,
+        "length": 11655.38137340032,
+        "output": 13,
+        "switches": 7,
+        "witness": [
+          "in:13",
+          "s00_m0006:o1",
+          "s01_m0007:o0",
+          "s02_m0005:o1",
+          "s03_m0005:o1",
+          "s04_m0005:o1",
+          "s05_m0007:o0",
+          "s06_m0006:o1"
+        ]
+      },
+      {
+        "angle": 28.274333882308134,
+        "bends": 36,
+        "crossings": 18,
+        "input": 14,
+        "length": 11794.168560100476,
+        "output": 14,
+        "switches": 7,
+        "witness": [
+          "in:14",
+          "s00_m0007:o0",
+          "s01_m0003:o1",
+          "s02_m0003:o1",
+          "s03_m0003:o1",
+          "s04_m0003:o1",
+          "s05_m0003:o1",
+          "s06_m0007:o0"
+        ]
+      },
+      {
+        "angle": 6.283185307179586,
+        "bends": 8,
+        "crossings": 4,
+        "input": 15,
+        "length": 11470.331791133442,
+        "output": 15,
+        "switches": 7,
+        "witness": [
+          "in:15",
+          "s00_m0007:o1",
+          "s01_m0007:o1",
+          "s02_m0007:o1",
+          "s03_m0007:o1",
+          "s04_m0007:o1",
+          "s05_m0007:o1",
+          "s06_m0007:o1"
+        ]
+      }
+    ],
+    "scope": "paths realized by the specified switch settings only",
+    "statistics": {
+      "angle": {
+        "max": 34.55751918948772,
+        "mean": 21.991148575128552,
+        "min": 6.283185307179586,
+        "spread": 28.274333882308134,
+        "stddev": 8.009521122207046
+      },
+      "bends": {
+        "max": 44,
+        "mean": 28,
+        "min": 8,
+        "spread": 36,
+        "stddev": 10.198039027185569
+      },
+      "crossings": {
+        "max": 22,
+        "mean": 14,
+        "min": 4,
+        "spread": 18,
+        "stddev": 5.0990195135927845
+      },
+      "length": {
+        "max": 11886.693351233916,
+        "mean": 11701.643768967038,
+        "min": 11470.331791133442,
+        "spread": 416.3615601004749,
+        "stddev": 117.94642887012526
+      }
+    }
+  },
+  "search": {
+    "bounds": {
+      "corridor_factors": [
+        1.0
+      ],
+      "gap_factors": [
+        1.0
+      ],
+      "max_candidates": 1,
+      "pad_factors": [
+        1.0
+      ],
+      "row_orders": [
+        "normal"
+      ]
+    },
+    "global_optimum_proven": false,
+    "objective_order": [
+      "integer_grid_die_area",
+      "active_length_spread",
+      "active_crossing_spread",
+      "active_bend_spread",
+      "total_interconnect_length",
+      "stable_id"
+    ]
+  },
+  "success": true,
+  "summary": {
+    "active_ports": 16,
+    "area_mm2": 27.138518541683997,
+    "fold_bands": 1,
+    "height_mm": 2.344012,
+    "internal_ports": 16,
+    "lane_pitch_um": 60,
+    "mzis": 56,
+    "pad_distribution": "stage",
+    "pad_row_stagger_um": 25,
+    "pad_rows_per_side": 4,
+    "pads": 112,
+    "selected_candidate": "map-007",
+    "stages": 7,
+    "vias": 336,
+    "width_mm": 11.577807
+  },
+  "total_time_s": 0.7736813539959257,
+  "uniformity": {
+    "metrics": {
+      "angle": {
+        "max": 37.69911184307752,
+        "max_witness": [
+          "in:15",
+          "s00_m0007:o0",
+          "s01_m0003:o0",
+          "s02_m0001:o1",
+          "s03_m0001:o1",
+          "s04_m0001:o1",
+          "s05_m0003:o1",
+          "s06_m0007:o1"
+        ],
+        "min": 6.283185307179586,
+        "min_witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0",
+          "s03_m0000:o0",
+          "s04_m0000:o0",
+          "s05_m0000:o0",
+          "s06_m0000:o0"
+        ],
+        "spread": 31.41592653589793
+      },
+      "bends": {
+        "max": 48,
+        "max_witness": [
+          "in:15",
+          "s00_m0007:o0",
+          "s01_m0003:o0",
+          "s02_m0001:o1",
+          "s03_m0001:o1",
+          "s04_m0001:o1",
+          "s05_m0003:o1",
+          "s06_m0007:o1"
+        ],
+        "min": 8,
+        "min_witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0",
+          "s03_m0000:o0",
+          "s04_m0000:o0",
+          "s05_m0000:o0",
+          "s06_m0000:o0"
+        ],
+        "spread": 40
+      },
+      "crossings": {
+        "max": 24,
+        "max_witness": [
+          "in:15",
+          "s00_m0007:o0",
+          "s01_m0003:o0",
+          "s02_m0001:o1",
+          "s03_m0001:o1",
+          "s04_m0001:o1",
+          "s05_m0003:o1",
+          "s06_m0007:o1"
+        ],
+        "min": 4,
+        "min_witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0",
+          "s03_m0000:o0",
+          "s04_m0000:o0",
+          "s05_m0000:o0",
+          "s06_m0000:o0"
+        ],
+        "spread": 20
+      },
+      "length": {
+        "max": 11932.955746800635,
+        "max_witness": [
+          "in:15",
+          "s00_m0007:o0",
+          "s01_m0003:o0",
+          "s02_m0001:o1",
+          "s03_m0001:o1",
+          "s04_m0001:o1",
+          "s05_m0003:o1",
+          "s06_m0007:o1"
+        ],
+        "min": 11470.331791133442,
+        "min_witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0",
+          "s03_m0000:o0",
+          "s04_m0000:o0",
+          "s05_m0000:o0",
+          "s06_m0000:o0"
+        ],
+        "spread": 462.6239556671935
+      }
+    },
+    "scope": "exact extrema over all possible single paths between active interfaces"
+  },
+  "versions": {
+    "gdsfactory": "9.51.0",
+    "kfactory": "3.0.4",
+    "klayout": "0.30.12",
+    "shapely": "2.1.2"
+  }
+}

@@ -177,11 +177,17 @@ def optical_objects(m):
             "meander",
             "fan_lane",
             "turn",
+            "segment",
+            "bend",
+            "crossing",
         ):
             objects.append((name, snap(x), snap(y), angle % 360))
             return
         for r in c["refs"]:
-            require(r["angle"] % 90 == 0, "unexpected group rotation")
+            require(r["angle"] % 90 == 0 or (
+                m["cells"][r["cell"]]["kind"] == "crossing"
+                and r["angle"] in m["cells"][r["cell"]]["metadata"].get("allowed_transforms", [])
+            ), "unexpected group rotation")
             at = point(x, y, angle, [r["x"], r["y"]])
             visit(r["cell"], *at, (angle + r["angle"]) % 360)
 
@@ -223,6 +229,25 @@ def verify_manifest(m):
         "missing, duplicated or bypassed MZI",
     )
     require(len(m["stages"]) == net.depth, "missing stage")
+    if "stage_orders" in m["candidate"]:
+        from .placement import validate_orders
+        orders=m["candidate"]["stage_orders"]
+        validate_orders(net,orders)
+        expected_map={switch_id(s,i):dict(stage=s,row=2*orders[s][i],
+                      pins={f"{side}{pin}":f"{side}{pin}" for side in ("i","o") for pin in (0,1)})
+                      for s in range(net.depth) for i in range(net.p//2)}
+        require(m.get("placement_map")==expected_map,"placement map differs from declared bijection")
+        require(all(i["row"]==expected_map[i["id"]]["row"] and i["pin_flip"]==0 for i in inst.values()),
+                "instance differs from placement map")
+    elif "placement_map" in m:
+        flip=int(m["candidate"]["row_order"]=="reverse")
+        expected_map={switch_id(s,i):dict(stage=s,row=net.p-2-2*i if flip else 2*i,
+                      pins={f"{side}{pin}":f"{side}{pin ^ flip}" for side in ("i","o") for pin in (0,1)})
+                      for s in range(net.depth) for i in range(net.p//2)}
+        require(m["placement_map"]==expected_map,"regular placement map corrupted")
+    if cfg.interstage_routing != "legacy":
+        from .interstage_verify import verify_boundaries
+        verify_boundaries(m, cfg, net)
     if cfg.pad_rows > 1:
         bands = m.get("bands", [])
         require(len(bands) == cfg.fold_bands, "fold band count mismatch")
@@ -345,6 +370,9 @@ def verify_manifest(m):
         "missing or duplicate optical edge",
     )
     used = set()
+    crossing_uses = defaultdict(list)
+    local_links = defaultdict(set)
+    physical_joints = set()
     for route in m["routes"]:
         require(
             route["target"] == expected[route["source"]],
@@ -356,6 +384,10 @@ def verify_manifest(m):
             "route source moved",
         )
         totals = dict(length=0.0, crossings=0, bends=0, angle=0.0)
+        tangent = 0.0
+        recent = []
+        travel = 0.0
+        previous_token = None
         for part in route["pieces"]:
             c = cells[part["cell"]]
             pair = [part["entry"], part["exit"]]
@@ -369,11 +401,30 @@ def verify_manifest(m):
             for key in totals:
                 totals[key] += track[0][key]
             a, b = c["ports"][part["entry"]], c["ports"][part["exit"]]
+            if cfg.interstage_routing != "legacy":
+                incoming = (a[2] + part.get("angle", 0) + 180) % 360
+                require(abs((incoming-tangent+180)%360-180) < 0.1,
+                        f"optical tangent discontinuity: {part['cell']} {incoming} vs {tangent}")
+                tangent = (b[2] + part.get("angle", 0)) % 360
+                if c["kind"] == "crossing":
+                    require(part.get("angle",0) in c["metadata"].get("allowed_transforms",[]),
+                            "crossing direction not permitted")
+                    crossing_uses[(part["cell"],part["x"],part["y"],part.get("angle",0))].append(pair)
             start = point(part["x"], part["y"], part.get("angle", 0), a)
             require(
                 hypot(last[0] - start[0], last[1] - start[1]) <= tol, "optical path gap"
             )
             last = point(part["x"], part["y"], part.get("angle", 0), b)
+            if cfg.interstage_routing != "legacy":
+                token = (part["cell"], snap(part["x"]), snap(part["y"]), part.get("angle",0)%360)
+                if previous_token is not None:
+                    physical_joints.add((previous_token, token))
+                previous_token = token
+                recent = [r for r in recent if travel-r[1] <= 2*(cfg.wg_clearance+cfg.wg_width)]
+                for previous, _, end_at in recent:
+                    local_links[tuple(sorted((previous,token)))].update((tuple(end_at),tuple(start)))
+                travel += track[0]["length"]
+                recent.append((token,travel,last))
             used.add(
                 (
                     part["cell"],
@@ -383,6 +434,8 @@ def verify_manifest(m):
                 )
             )
         end = endpoint(route["target"])
+        if cfg.interstage_routing != "legacy":
+            require(abs((tangent+180)%360-180) < 0.1, "target tangent discontinuity")
         require(
             hypot(last[0] - end[0], last[1] - end[1]) <= tol
             and hypot(last[0] - route["end"][0], last[1] - route["end"][1]) <= tol,
@@ -392,7 +445,18 @@ def verify_manifest(m):
             all(abs(totals[k] - route[k]) < tol for k in totals),
             "incorrect optical metric",
         )
+    for pairs in crossing_uses.values():
+        require(len(pairs) == 2 and {frozenset(p) for p in pairs} ==
+                {frozenset(("w","e")),frozenset(("s","n"))},
+                "crossing must serve exactly two assigned through paths")
+    if cfg.interstage_routing != "legacy":
+        require(len(crossing_uses)==m["crossing_count"] and
+                sum(r["crossings"] for r in m["routes"])==2*len(crossing_uses),
+                "global crossing count corrupted")
     for c in cells.values():
+        if c["kind"] == "segment":
+            from .interstage_verify import verify_segment
+            verify_segment(c, cfg)
         if c["kind"] == "straight":
             length = c["ports"]["e"][0]
             expected_poly = [
@@ -451,6 +515,9 @@ def verify_manifest(m):
                 and track["min_radius"] == a["radius"],
                 "bend centerline metrics corrupted",
             )
+            if cfg.interstage_routing != "legacy" and c["kind"] == "bend":
+                from .interstage_verify import verify_arc_ports
+                verify_arc_ports(c, cfg)
         if c["kind"] == "exchange":
             length = pi * cfg.radius / 2 + (
                 cfg.lane_pitch - 2 * cfg.radius * (1 - 1 / sqrt(2))
@@ -483,6 +550,9 @@ def verify_manifest(m):
                 c["metadata"]["through"] == [["w", "e"], ["s", "n"]],
                 "crossing pairing corrupted",
             )
+            if cfg.interstage_routing != "legacy":
+                from .interstage_verify import verify_crossing
+                verify_crossing(c, cfg)
         if c["kind"] == "mzi":
             require(
                 c["metadata"]["bar"] == [["i0", "o0"], ["i1", "o1"]]
@@ -490,6 +560,11 @@ def verify_manifest(m):
                 "MZI contract corrupted",
             )
     objs, geoms, ports = spatial_objects(m)
+    if physical_joints:
+        shapes = dict(zip(objs,geoms))
+        for a,b in physical_joints:
+            require(a in shapes and b in shapes and shapes[a].distance(shapes[b]) < 1e-8,
+                    "physical optical polygons disconnected at route joint")
     actual = Counter(objs)
     expected_objs = Counter(used)
     expected_objs.update(
@@ -518,6 +593,11 @@ def verify_manifest(m):
             if j <= i:
                 continue
             common = ports[i] & ports[j]
+            if not common and cfg.interstage_routing != "legacy":
+                common = {((a[0]+b[0])/2, (a[1]+b[1])/2)
+                          for a in ports[i] for b in ports[j]
+                          if hypot(a[0]-b[0],a[1]-b[1]) <= tol}
+                common.update(local_links.get(tuple(sorted((objs[i],objs[j]))),set()))
             require(
                 bool(common),
                 f"unintended optical intersection/clearance: {objs[i]}, {objs[j]}",
@@ -529,11 +609,10 @@ def verify_manifest(m):
             exempt = unary_union(
                 [Point(v).buffer(2 * (cfg.wg_clearance + cfg.wg_width)) for v in common]
             )
-            require(
-                g.difference(exempt).distance(geoms[j].difference(exempt))
-                >= cfg.wg_clearance - tol,
-                "clearance violation away from connected endpoint",
-            )
+            left, right = g.difference(exempt), geoms[j].difference(exempt)
+            require(left.is_empty or right.is_empty or
+                    left.distance(right) >= cfg.wg_clearance - tol,
+                    f"clearance violation away from connected endpoint: {objs[i]}, {objs[j]}")
     expected_nets = {
         f"{sid}:{name}" for sid in net.switches for name in cfg.terminal_names
     }
