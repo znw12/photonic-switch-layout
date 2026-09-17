@@ -87,6 +87,8 @@ class Library(PrimitiveLibrary):
                 min_radius=cfg.radius,
             )
         ]
+        if cfg.interstage_routing != "legacy":
+            c.tracks.append({**c.tracks[0], "ports": ["e", "w"]})
         return c
 
     def exchange(self):

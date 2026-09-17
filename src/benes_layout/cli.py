@@ -49,12 +49,16 @@ def main(argv=None):
             p.add_argument("--interstage-routing", choices=("legacy","continuous","compressed"))
             p.add_argument("--shuffle-pitch", type=float)
             p.add_argument("--fold-bands", type=int)
+            p.add_argument("--band-stage-counts", help="comma-separated stage counts, e.g. 6,5,2")
     sub.add_parser("verify").add_argument("directory")
     study = sub.add_parser("interstage-study")
     study.add_argument("--config", default="examples/benes/distributed/pitch60.json")
     study.add_argument("--out", default="output/benes/interstage")
     study.add_argument("--scope", choices=("full","placement","all"), default="all")
     study.add_argument("--reuse", action="store_true", help="independently reverify matching existing bundles")
+    folded = sub.add_parser("three-band-study")
+    folded.add_argument("--config", default="examples/benes/interstage/continuous.json")
+    folded.add_argument("--out", default="output/benes/continuous-three-band")
     comparison = sub.add_parser("compare")
     comparison.add_argument("directories", nargs="+")
     comparison.add_argument("--out", default="output/benes/reshape/comparison")
@@ -78,6 +82,8 @@ def main(argv=None):
                 interstage_routing=getattr(args, "interstage_routing", None),
                 shuffle_pitch=getattr(args, "shuffle_pitch", None),
                 fold_bands=getattr(args, "fold_bands", None),
+                band_stage_counts=(tuple(map(int,args.band_stage_counts.split(',')))
+                                   if getattr(args,"band_stage_counts",None) else None),
             )
             pairs = request_pairs(args.connections, cfg.active_ports)
             if args.command == "solve":
@@ -97,6 +103,10 @@ def main(argv=None):
             from .workflow import verify_bundle
 
             print(json.dumps(verify_bundle(args.directory), indent=2))
+        elif args.command == "three-band-study":
+            from .three_band_study import run_three_band
+            result = run_three_band(Config.load(args.config), args.out)
+            print(json.dumps({"selected": result["smallest_area"], "repeat_passed": result["repeat"]["passed"]}, indent=2))
         elif args.command == "interstage-study":
             from .interstage_study import run_full, run_placement
             cfg=Config.load(args.config)

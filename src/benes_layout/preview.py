@@ -92,12 +92,19 @@ def render(m, path, detail=False):
     for spine in ax.spines.values():
         spine.set_color("#456")
     cfg = m["config"]
+    folded_title = (
+        f"Beneš {cfg['active_ports']}/{cfg['internal_ports']} | "
+        f"{cfg['fold_bands']} bands "
+        f"({'/'.join(str(len(b['stages'])) for b in m['bands'])}) | "
+        f"{cfg.get('interstage_routing', 'legacy')} | R >= {cfg['radius']:g} um"
+        if cfg.get("fold_bands", 1) > 1 else None
+    )
     ax.set_title(
         (
             f"North pads | {cfg['pad_rows']} rows | {cfg['pad_row_stagger']:g} um row stagger"
             + (" | stage 0" if cfg.get("pad_distribution") == "stage" else "")
             if detail == "pads"
-            else f"Beneš {cfg['active_ports']} active / {cfg['internal_ports']} internal | {len(m['stages'])} stages | {len(m['instances'])} MZIs | R >= {cfg['radius']:g} um"
+            else folded_title or f"Beneš {cfg['active_ports']} active / {cfg['internal_ports']} internal | {len(m['stages'])} stages | {len(m['instances'])} MZIs | R >= {cfg['radius']:g} um"
         )
         + (" | detail" if detail else ""),
         color="white",

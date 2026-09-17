@@ -251,6 +251,9 @@ def verify_manifest(m):
     if cfg.pad_rows > 1:
         bands = m.get("bands", [])
         require(len(bands) == cfg.fold_bands, "fold band count mismatch")
+        if cfg.band_stage_counts is not None:
+            require([len(b["stages"]) for b in bands] == list(cfg.band_stage_counts),
+                    "band stage partition differs from configuration")
         require(
             [s for b in bands for s in b["stages"]] == list(range(net.depth)),
             "fold bands must contain consecutive complete stages",
@@ -353,6 +356,15 @@ def verify_manifest(m):
         at = cells[i["cell"]]["ports"][actual]
         return point(i["x"], i["y"], i.get("angle", 0), at)
 
+    def travel_direction(label, source):
+        if label.startswith(("in:", "out:")):
+            return 0.0  # West inward, east outward.
+        sid, pin = label.rsplit(":", 1)
+        i = inst[sid]
+        actual = pin[0] + str(int(pin[1]) ^ i["pin_flip"])
+        outward = cells[i["cell"]]["ports"][actual][2] + i.get("angle", 0)
+        return (outward + (0 if source else 180)) % 360
+
     expected = {}
     for lane in range(net.p):
         expected[f"in:{lane}"] = f"{switch_id(0,lane//2)}:i{lane%2}"
@@ -384,7 +396,7 @@ def verify_manifest(m):
             "route source moved",
         )
         totals = dict(length=0.0, crossings=0, bends=0, angle=0.0)
-        tangent = 0.0
+        tangent = travel_direction(route["source"], True)
         recent = []
         travel = 0.0
         previous_token = None
@@ -435,7 +447,8 @@ def verify_manifest(m):
             )
         end = endpoint(route["target"])
         if cfg.interstage_routing != "legacy":
-            require(abs((tangent+180)%360-180) < 0.1, "target tangent discontinuity")
+            target_tangent = travel_direction(route["target"], False)
+            require(abs((tangent-target_tangent+180)%360-180) < 0.1, "target tangent discontinuity")
         require(
             hypot(last[0] - end[0], last[1] - end[1]) <= tol
             and hypot(last[0] - route["end"][0], last[1] - route["end"][1]) <= tol,

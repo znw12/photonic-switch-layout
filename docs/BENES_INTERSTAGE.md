@@ -12,7 +12,7 @@
 | Scalability | A/B 验证至 100/128 全尺寸；正反模块覆盖 4–128 通道；C 搜索严格限制在 8、16 端口 |
 | Verification | 从基本段验证端口、切向、半径、多边形、间距、两条 crossing 对穿路径；独立还原规范图；GDS 回读及真实金属连通提取；最佳候选重复生成 |
 
-默认仍为 `legacy`，既有配置与 bundle 可回读。新 A/B 模式要求 `pad_distribution="stage"`、`pad_rows=4`、`fold_bands=1`。`shuffle_pitch` 仅能用于 `compressed`，必须是有限、正值、在 1 nm 网格上，并且大于波导宽度与间距之和、不超过接口行距。进一步的弯曲、crossing 和过渡可行性由几何检查决定；参数通过并不保证所有布局都能通过验证。
+默认仍为 `legacy`，既有配置与 bundle 可回读。本节的单带 A/B 模式使用 `pad_distribution="stage"`、`pad_rows=4`、`fold_bands=1`。后续新增的连续斜线三带配置与实测结果见 [三带说明](BENES_CONTINUOUS_THREE_BANDS.md)；compressed 模式仍限定单带。`shuffle_pitch` 仅能用于 `compressed`，必须是有限、正值、在 1 nm 网格上，并且大于波导宽度与间距之和、不超过接口行距。进一步的弯曲、crossing 和过渡可行性由几何检查决定；参数通过并不保证所有布局都能通过验证。
 
 C 不改变逻辑 Network 或求解器：输出显式 `placement_map`，保持开关 ID、外部端口编号和电学 stage 分组。实验配置记录在 bundle 的 `candidate.stage_orders` 中，采用同一确定性相邻交换后端进行恒等/重排对照；不会自动应用于 100 端口。
 

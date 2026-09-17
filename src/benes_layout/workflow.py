@@ -155,6 +155,7 @@ def generate(cfg, out, requests, *, choices=None):
             "pad_distribution": cfg.pad_distribution,
             "lane_pitch_um": cfg.lane_pitch,
             "fold_bands": cfg.fold_bands,
+            "band_stage_counts": [len(b["stages"]) for b in m.get("bands", [{"stages": m["stages"]}])],
             "vias": checks["via_count"],
             "width_mm": m["width"] / 1000,
             "height_mm": m["height"] / 1000,

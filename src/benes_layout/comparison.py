@@ -53,6 +53,7 @@ def compare_bundles(directories, out, baseline=None):
                 / 1000,
                 fanout_bbox_um=report["metrics"]["extents_um"]["fanout"],
                 fold_bands=cfg["fold_bands"],
+                band_stage_counts=summary.get("band_stage_counts",cfg.get("band_stage_counts")),
                 active_ports=summary["active_ports"],
                 internal_ports=summary["internal_ports"],
                 width_mm=summary["width_mm"],
@@ -117,7 +118,7 @@ def compare_bundles(directories, out, baseline=None):
         ax.scatter(r["width_mm"], r["height_mm"], s=70)
         ax.annotate(
             f"{r['interstage_routing']} / q={r['shuffle_pitch_um']}\n"
-            f"{r['pad_rows']} rows / {r['fold_bands']} bands / {r['pad_row_stagger_um']:g} um stagger",
+            f"{r['pad_rows']} rows / {r['fold_bands']} bands / {r['band_stage_counts']}",
             (r["width_mm"], r["height_mm"]),
             xytext=(5, 5 + 14 * label_index),
             textcoords="offset points",

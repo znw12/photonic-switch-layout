@@ -37,6 +37,7 @@ class Config:
     pad_row_stagger: float = 0.0
     pad_row_pitch: float = 100.0
     fold_bands: int = 1
+    band_stage_counts: tuple[int, ...] | None = None
     fold_gap: float = 200.0
     bundle_pitch: float = 6.01
     margin: float = 100.0
@@ -139,10 +140,19 @@ class Config:
             raise ValueError("stage pad distribution requires four rows and one band")
         if self.interstage_routing not in ("legacy", "continuous", "compressed"):
             raise ValueError("invalid interstage_routing")
-        if self.interstage_routing != "legacy" and (
+        folded_continuous = (
+            self.interstage_routing == "continuous"
+            and self.fold_bands == 3
+            and self.pad_rows == 4
+            and self.pad_distribution == "central"
+        )
+        if self.interstage_routing != "legacy" and not folded_continuous and (
             self.pad_distribution != "stage" or self.pad_rows != 4 or self.fold_bands != 1
         ):
-            raise ValueError("new interstage routing requires stage pads, four rows and one band")
+            raise ValueError(
+                "new interstage routing requires single-band stage pads or "
+                "three-band continuous routing with central four-row pads"
+            )
         if self.interstage_routing == "compressed":
             q = self.shuffle_pitch
             if (type(q) not in (int, float) or not math.isfinite(q)
@@ -165,10 +175,12 @@ class Config:
             > 1e-7
         ):
             raise ValueError("pad_row_stagger must lie on the database grid")
-        if self.pad_rows == 4 and self.fold_bands != 1:
-            raise ValueError("four pad rows require a single band")
-        if self.pad_row_stagger and (self.pad_rows != 4 or self.fold_bands != 1):
-            raise ValueError("pad row staggering requires four rows and a single band")
+        if self.pad_rows == 4 and self.fold_bands != 1 and not folded_continuous:
+            raise ValueError("four pad rows require a single band or three-band continuous routing")
+        if self.pad_row_stagger and (
+            self.pad_rows != 4 or (self.fold_bands != 1 and not folded_continuous)
+        ):
+            raise ValueError("pad row staggering requires four rows and a supported band profile")
         if (self.pad_rows - 1) * self.pad_row_stagger >= self.pad_pitch:
             raise ValueError("pad row stagger spans a full column pitch")
         depth = 2 * (p.bit_length() - 1) - 1
@@ -178,8 +190,21 @@ class Config:
             or self.fold_bands % 2 != 1
         ):
             raise ValueError("fold_bands must be odd and no greater than stage depth")
+        if self.band_stage_counts is not None:
+            counts = self.band_stage_counts
+            if (
+                not isinstance(counts, (tuple, list))
+                or len(counts) != self.fold_bands
+                or any(type(v) is not int or v < 1 for v in counts)
+                or sum(counts) != depth
+            ):
+                raise ValueError(
+                    "band_stage_counts must be positive integers, one per band, "
+                    "summing to stage depth"
+                )
+            object.__setattr__(self, "band_stage_counts", tuple(counts))
         if self.fold_bands > 1 and self.pad_rows == 1:
-            raise ValueError("folded layouts require two or three pad rows")
+            raise ValueError("folded layouts require multiple pad rows")
         if self.pad_row_pitch < self.pad_size + self.metal_spacing:
             raise ValueError("pad row pitch violates spacing")
         if self.fold_bands > 1 and (

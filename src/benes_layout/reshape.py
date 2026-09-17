@@ -54,6 +54,8 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
     order = sorted(range(nb), key=lambda b: (abs(b - (nb - 1) / 2), b))
     for b in order[: net.depth % nb]:
         sizes[b] += 1
+    if cfg.band_stage_counts is not None:
+        sizes = list(cfg.band_stage_counts)
     k = max(sizes)
     bands = []
     stages = []

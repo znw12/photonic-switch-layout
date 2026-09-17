@@ -1,0 +1,27 @@
+{
+  "regression_tests_passed": 259,
+  "final_targeted_tests_passed": 51,
+  "partitions": 4,
+  "full_candidates_verified": 8,
+  "repeat_passed": true,
+  "independent_readback": {
+    "cell_references": 24087,
+    "electrical_extraction_passed": true,
+    "gds_cells": 7771,
+    "gds_readback_passed": true,
+    "logical_edges": 1792,
+    "manifest_geometry_passed": true,
+    "metal_regions": {
+      "M1": 3328,
+      "M2": 3328
+    },
+    "mzi_count": 832,
+    "optical_objects": 33544,
+    "spare_terminations": 56,
+    "switch_depth_max": 13,
+    "switch_depth_min": 13,
+    "via_count": 4992
+  },
+  "single_band_compatibility_readback_passed": true,
+  "selected": "output/benes/continuous-three-band/4-5-4"
+}
