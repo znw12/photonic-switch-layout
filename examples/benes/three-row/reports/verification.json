@@ -1,0 +1,64 @@
+{
+  "regression": {
+    "passed": 307,
+    "failed": 0
+  },
+  "planning_candidates": 46,
+  "complete_candidates": [
+    "baseline",
+    "optimized",
+    "separate"
+  ],
+  "repeat": {
+    "independent_readback": {
+      "cell_references": 24993,
+      "electrical_extraction_passed": true,
+      "gds_cells": 6493,
+      "gds_readback_passed": true,
+      "logical_edges": 1792,
+      "manifest_geometry_passed": true,
+      "metal_regions": {
+        "M1": 4992,
+        "M2": 4974
+      },
+      "mzi_count": 832,
+      "optical_objects": 32392,
+      "spare_terminations": 56,
+      "switch_depth_max": 13,
+      "switch_depth_min": 13,
+      "via_count": 8320
+    },
+    "normalized_hash": "6c53dfe17eb8a2da9cb80201d914eeea8ac579ba6f14f24e1b9c4f48d0ab33f6",
+    "passed": true
+  },
+  "two_row_compatibility": {
+    "manifest_geometry_passed": true,
+    "logical_edges": 1792,
+    "optical_objects": 32520,
+    "mzi_count": 832,
+    "spare_terminations": 56,
+    "switch_depth_min": 13,
+    "switch_depth_max": 13,
+    "gds_readback_passed": true,
+    "electrical_extraction_passed": true,
+    "metal_regions": {
+      "M1": 4992,
+      "M2": 4962
+    },
+    "via_count": 8320,
+    "gds_cells": 6492,
+    "cell_references": 25121
+  },
+  "geometry_fields_matched": [
+    "normalized_hash",
+    "summary",
+    "uniformity",
+    "realized",
+    "electrical"
+  ],
+  "byte_identical_files": [
+    "settings.json",
+    "pads.csv",
+    "ports.csv"
+  ]
+}

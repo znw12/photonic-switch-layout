@@ -300,7 +300,7 @@ def generate(cfg, out, requests, *, choices=None):
             )
     render(m, out / "preview.png")
     render(m, out / "detail.png", detail=True)
-    if cfg.pad_rows == 4 or cfg.electrical_routing == 'two-row':
+    if cfg.pad_rows == 4 or cfg.layered_electrical:
         render(m, out / "pads_detail.png", detail="pads")
     report["total_time_s"] = time.perf_counter() - started
     report["process_peak_rss_kib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -335,7 +335,7 @@ def verify_bundle(directory):
     result.update(verify_gds(directory / "layout.gds", m, names))
     if "interstage" in m:
         require(report["interstage"]["boundaries"]==m["interstage"],"interstage report mismatch")
-    if cfg.electrical_routing == 'two-row':
+    if cfg.layered_electrical:
         from .two_row import statistics
         require(report.get('electrical') == statistics(m), 'electrical report mismatch')
     if "pad_banks" in report["metrics"]:

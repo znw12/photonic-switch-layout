@@ -1,0 +1,570 @@
+{
+  "candidates": [
+    {
+      "channel_levels": 94,
+      "parameters": {
+        "electrical_stage_bias": -600,
+        "electrical_width_extra": 0,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 426.70687407894,
+      "planned_height_mm": 11.440380000000001,
+      "planned_width_mm": 37.298313
+    },
+    {
+      "channel_levels": 94,
+      "parameters": {
+        "electrical_stage_bias": -300,
+        "electrical_width_extra": 0,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 426.70687407894,
+      "planned_height_mm": 11.440380000000001,
+      "planned_width_mm": 37.298313
+    },
+    {
+      "channel_levels": 94,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 426.70687407894,
+      "planned_height_mm": 11.440380000000001,
+      "planned_width_mm": 37.298313
+    },
+    {
+      "channel_levels": 94,
+      "parameters": {
+        "electrical_stage_bias": 300,
+        "electrical_width_extra": 0,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 426.70687407894,
+      "planned_height_mm": 11.440380000000001,
+      "planned_width_mm": 37.298313
+    },
+    {
+      "channel_levels": 94,
+      "parameters": {
+        "electrical_stage_bias": 600,
+        "electrical_width_extra": 0,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 426.70687407894,
+      "planned_height_mm": 11.440380000000001,
+      "planned_width_mm": 37.298313
+    },
+    {
+      "channel_levels": 97,
+      "parameters": {
+        "electrical_stage_bias": -600,
+        "electrical_width_extra": 200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 432.14525835069605,
+      "planned_height_mm": 11.524392,
+      "planned_width_mm": 37.498313
+    },
+    {
+      "channel_levels": 97,
+      "parameters": {
+        "electrical_stage_bias": -300,
+        "electrical_width_extra": 200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 432.14525835069605,
+      "planned_height_mm": 11.524392,
+      "planned_width_mm": 37.498313
+    },
+    {
+      "channel_levels": 97,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 432.14525835069605,
+      "planned_height_mm": 11.524392,
+      "planned_width_mm": 37.498313
+    },
+    {
+      "channel_levels": 97,
+      "parameters": {
+        "electrical_stage_bias": 300,
+        "electrical_width_extra": 200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 432.14525835069605,
+      "planned_height_mm": 11.524392,
+      "planned_width_mm": 37.498313
+    },
+    {
+      "channel_levels": 97,
+      "parameters": {
+        "electrical_stage_bias": 600,
+        "electrical_width_extra": 200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 432.14525835069605,
+      "planned_height_mm": 11.524392,
+      "planned_width_mm": 37.498313
+    },
+    {
+      "channel_levels": 100,
+      "parameters": {
+        "electrical_stage_bias": -600,
+        "electrical_width_extra": 400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 437.617247422452,
+      "planned_height_mm": 11.608404,
+      "planned_width_mm": 37.698313
+    },
+    {
+      "channel_levels": 100,
+      "parameters": {
+        "electrical_stage_bias": -300,
+        "electrical_width_extra": 400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 437.617247422452,
+      "planned_height_mm": 11.608404,
+      "planned_width_mm": 37.698313
+    },
+    {
+      "channel_levels": 100,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 437.617247422452,
+      "planned_height_mm": 11.608404,
+      "planned_width_mm": 37.698313
+    },
+    {
+      "channel_levels": 100,
+      "parameters": {
+        "electrical_stage_bias": 300,
+        "electrical_width_extra": 400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 437.617247422452,
+      "planned_height_mm": 11.608404,
+      "planned_width_mm": 37.698313
+    },
+    {
+      "channel_levels": 100,
+      "parameters": {
+        "electrical_stage_bias": 600,
+        "electrical_width_extra": 400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 437.617247422452,
+      "planned_height_mm": 11.608404,
+      "planned_width_mm": 37.698313
+    },
+    {
+      "channel_levels": 106,
+      "parameters": {
+        "electrical_stage_bias": -600,
+        "electrical_width_extra": 800,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 448.662039965964,
+      "planned_height_mm": 11.776428,
+      "planned_width_mm": 38.098313000000005
+    },
+    {
+      "channel_levels": 106,
+      "parameters": {
+        "electrical_stage_bias": -300,
+        "electrical_width_extra": 800,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 448.662039965964,
+      "planned_height_mm": 11.776428,
+      "planned_width_mm": 38.098313000000005
+    },
+    {
+      "channel_levels": 106,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 800,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 448.662039965964,
+      "planned_height_mm": 11.776428,
+      "planned_width_mm": 38.098313000000005
+    },
+    {
+      "channel_levels": 106,
+      "parameters": {
+        "electrical_stage_bias": 300,
+        "electrical_width_extra": 800,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 448.662039965964,
+      "planned_height_mm": 11.776428,
+      "planned_width_mm": 38.098313000000005
+    },
+    {
+      "channel_levels": 106,
+      "parameters": {
+        "electrical_stage_bias": 600,
+        "electrical_width_extra": 800,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 448.662039965964,
+      "planned_height_mm": 11.776428,
+      "planned_width_mm": 38.098313000000005
+    },
+    {
+      "channel_levels": 112,
+      "parameters": {
+        "electrical_stage_bias": -600,
+        "electrical_width_extra": 1200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 459.84125170947607,
+      "planned_height_mm": 11.944452000000002,
+      "planned_width_mm": 38.498313
+    },
+    {
+      "channel_levels": 112,
+      "parameters": {
+        "electrical_stage_bias": -300,
+        "electrical_width_extra": 1200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 459.84125170947607,
+      "planned_height_mm": 11.944452000000002,
+      "planned_width_mm": 38.498313
+    },
+    {
+      "channel_levels": 112,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 1200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 459.84125170947607,
+      "planned_height_mm": 11.944452000000002,
+      "planned_width_mm": 38.498313
+    },
+    {
+      "channel_levels": 112,
+      "parameters": {
+        "electrical_stage_bias": 300,
+        "electrical_width_extra": 1200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 459.84125170947607,
+      "planned_height_mm": 11.944452000000002,
+      "planned_width_mm": 38.498313
+    },
+    {
+      "channel_levels": 112,
+      "parameters": {
+        "electrical_stage_bias": 600,
+        "electrical_width_extra": 1200,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 459.84125170947607,
+      "planned_height_mm": 11.944452000000002,
+      "planned_width_mm": 38.498313
+    },
+    {
+      "channel_levels": 118,
+      "parameters": {
+        "electrical_stage_bias": -600,
+        "electrical_width_extra": 1600,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 471.154882652988,
+      "planned_height_mm": 12.112476000000001,
+      "planned_width_mm": 38.898313
+    },
+    {
+      "channel_levels": 118,
+      "parameters": {
+        "electrical_stage_bias": -300,
+        "electrical_width_extra": 1600,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 471.154882652988,
+      "planned_height_mm": 12.112476000000001,
+      "planned_width_mm": 38.898313
+    },
+    {
+      "channel_levels": 118,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 1600,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 471.154882652988,
+      "planned_height_mm": 12.112476000000001,
+      "planned_width_mm": 38.898313
+    },
+    {
+      "channel_levels": 118,
+      "parameters": {
+        "electrical_stage_bias": 300,
+        "electrical_width_extra": 1600,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 471.154882652988,
+      "planned_height_mm": 12.112476000000001,
+      "planned_width_mm": 38.898313
+    },
+    {
+      "channel_levels": 118,
+      "parameters": {
+        "electrical_stage_bias": 600,
+        "electrical_width_extra": 1600,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 471.154882652988,
+      "planned_height_mm": 12.112476000000001,
+      "planned_width_mm": 38.898313
+    },
+    {
+      "channel_levels": 128,
+      "parameters": {
+        "electrical_stage_bias": -600,
+        "electrical_width_extra": 2400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 491.961979025508,
+      "planned_height_mm": 12.392515999999999,
+      "planned_width_mm": 39.698313
+    },
+    {
+      "channel_levels": 128,
+      "parameters": {
+        "electrical_stage_bias": -300,
+        "electrical_width_extra": 2400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 491.961979025508,
+      "planned_height_mm": 12.392515999999999,
+      "planned_width_mm": 39.698313
+    },
+    {
+      "channel_levels": 128,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 2400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 491.961979025508,
+      "planned_height_mm": 12.392515999999999,
+      "planned_width_mm": 39.698313
+    },
+    {
+      "channel_levels": 128,
+      "parameters": {
+        "electrical_stage_bias": 300,
+        "electrical_width_extra": 2400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 491.961979025508,
+      "planned_height_mm": 12.392515999999999,
+      "planned_width_mm": 39.698313
+    },
+    {
+      "channel_levels": 128,
+      "parameters": {
+        "electrical_stage_bias": 600,
+        "electrical_width_extra": 2400,
+        "margin": 100,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 491.961979025508,
+      "planned_height_mm": 12.392515999999999,
+      "planned_width_mm": 39.698313
+    },
+    {
+      "channel_levels": 94,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 100,
+        "pad_row_pitch": 80
+      },
+      "planned_area_mm2": 423.72300903894006,
+      "planned_height_mm": 11.360380000000001,
+      "planned_width_mm": 37.298313
+    },
+    {
+      "channel_levels": 94,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 100,
+        "pad_row_pitch": 70
+      },
+      "planned_area_mm2": 422.23107651894003,
+      "planned_height_mm": 11.320380000000002,
+      "planned_width_mm": 37.298313
+    },
+    {
+      "channel_levels": 92,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 80,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 418.069371834576,
+      "planned_height_mm": 11.264372,
+      "planned_width_mm": 37.114307999999994
+    },
+    {
+      "channel_levels": 92,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 80,
+        "pad_row_pitch": 80
+      },
+      "planned_area_mm2": 415.10022719457595,
+      "planned_height_mm": 11.184372,
+      "planned_width_mm": 37.114307999999994
+    },
+    {
+      "channel_levels": 92,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 80,
+        "pad_row_pitch": 70
+      },
+      "planned_area_mm2": 413.61565487457597,
+      "planned_height_mm": 11.144371999999999,
+      "planned_width_mm": 37.114307999999994
+    },
+    {
+      "channel_levels": 91,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 60,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 408.774852544752,
+      "planned_height_mm": 11.116368,
+      "planned_width_mm": 36.772339
+    },
+    {
+      "channel_levels": 91,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 60,
+        "pad_row_pitch": 80
+      },
+      "planned_area_mm2": 405.833065424752,
+      "planned_height_mm": 11.036368,
+      "planned_width_mm": 36.772339
+    },
+    {
+      "channel_levels": 91,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 60,
+        "pad_row_pitch": 70
+      },
+      "planned_area_mm2": 404.362171864752,
+      "planned_height_mm": 10.996368,
+      "planned_width_mm": 36.772339
+    },
+    {
+      "channel_levels": 88,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 40,
+        "pad_row_pitch": 100
+      },
+      "planned_area_mm2": 397.147634357292,
+      "planned_height_mm": 10.912355999999999,
+      "planned_width_mm": 36.394307
+    },
+    {
+      "channel_levels": 88,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 40,
+        "pad_row_pitch": 80
+      },
+      "planned_area_mm2": 394.236089797292,
+      "planned_height_mm": 10.832355999999999,
+      "planned_width_mm": 36.394307
+    },
+    {
+      "channel_levels": 88,
+      "parameters": {
+        "electrical_stage_bias": 0,
+        "electrical_width_extra": 0,
+        "margin": 40,
+        "pad_row_pitch": 70
+      },
+      "planned_area_mm2": 392.780317517292,
+      "planned_height_mm": 10.792356,
+      "planned_width_mm": 36.394307
+    }
+  ],
+  "global_optimum_proven": false,
+  "scope": "Planning only; no physical verification implied.",
+  "selected": {
+    "channel_levels": 88,
+    "parameters": {
+      "electrical_stage_bias": 0,
+      "electrical_width_extra": 0,
+      "margin": 40,
+      "pad_row_pitch": 70
+    },
+    "planned_area_mm2": 392.780317517292,
+    "planned_height_mm": 10.792356,
+    "planned_width_mm": 36.394307
+  }
+}

@@ -33,6 +33,7 @@ def plan(cfg, net, blocks, candidate):
     widths = [b.metadata['width'] for b in blocks] + [0.0]
     width = snap(max(span, sum(cfg.mzi_length + 2*keep + (max(w, count*trunk_step) if cfg.share_interstage else w+count*trunk_step) + cfg.margin for w in widths) + 2*cfg.margin))
     origin = snap(-(net.p - 1)*cfg.lane_pitch/2)
+    extra_applied = False
     for _ in range(30):
         slots, bounds = pad_slots(cfg, len(net.switches), width/2, cfg.pad_pitch)
         slots.sort(key=lambda s: s['px'])
@@ -64,10 +65,15 @@ def plan(cfg, net, blocks, candidate):
             limits[s] = snap(lo*cfg.grid)
             cap = limits[s] - cfg.margin*candidate['gap']
         if limits[0] >= cfg.margin:
+            if cfg.electrical_width_extra and not extra_applied:
+                width = snap(width + cfg.electrical_width_extra)
+                extra_applied = True
+                continue
             stages, cursor = [], cfg.margin
             for s in range(net.depth):
                 group = stems[s*count:(s+1)*count]
-                desired = snap((group[0]+group[-1])/2 - cfg.mzi_length - keep - count*trunk_step/2)
+                desired = snap((group[0]+group[-1])/2 - cfg.mzi_length - keep - count*trunk_step/2
+                               + cfg.electrical_stage_bias)
                 stage = stage_at(s,max(cursor,min(desired,limits[s])))
                 stages.append(stage)
                 cursor = snap(stage['occupied_end']+cfg.margin*candidate['gap'])
@@ -101,10 +107,13 @@ def route(lib, m, groups, terminals, optical, step, slots):
     edge = max(abs(optical[1]),abs(optical[3]))
     transfer = snap(edge + cfg.margin + (maximum+2)*step)
     pad_base = snap(transfer + cfg.margin + cfg.pad_size/2)
-    m['electrical_plan'] = dict(mode='two-row', channel_levels=maximum+1,
+    m['electrical_plan'] = dict(mode=cfg.electrical_routing, channel_levels=maximum+1,
         transfer_y=transfer, pad_base_y=pad_base, via_per_net=5,
         shared_interstage=cfg.share_interstage, optical_center_y=0,
         passive_m2_contract='insulated-placeholder-v1')
+    if cfg.electrical_routing == 'three-row':
+        m['electrical_plan']['stage_bias_um'] = cfg.electrical_stage_bias
+        m['electrical_plan']['width_extra_um'] = cfg.electrical_width_extra
     for side, sign in (('south',-1),('north',1)):
         for i,(t,slot,level) in enumerate(zip(banks[side],slots,levels[side])):
             tx, sx = t['tx'], slot['px']
@@ -112,7 +121,8 @@ def route(lib, m, groups, terminals, optical, step, slots):
             py = snap(sign*(pad_base+slot['row']*cfg.pad_row_pitch))
             ly = snap(sign*transfer)
             launch = t['launch_x']
-            cell = lib.cell(f'TWO_NET_{side}_{i}', 'electrical_route')
+            prefix = 'TWO' if cfg.pad_rows == 2 else 'THREE'
+            cell = lib.cell(f'{prefix}_NET_{side}_{i}', 'electrical_route')
             segments = []
             def metal(layer,a,b):
                 if a==b:

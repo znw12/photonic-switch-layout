@@ -27,7 +27,7 @@ from .geometry import arc_polygon, snap, rectangle, point
 def verify_pad_banks(m):
     """Reconstruct explicit staggered pad contracts independently of the router."""
     cfg = Config(**m["config"])
-    two_row = cfg.electrical_routing == 'two-row'
+    two_row = cfg.layered_electrical
     if cfg.pad_rows != 4 and not two_row:
         return
     cells, tol = m["cells"], 2 * cfg.grid
@@ -225,7 +225,7 @@ def spatial_objects(m):
 def verify_manifest(m):
     cfg, cells = Config(**m["config"]), m["cells"]
     verify_pad_banks(m)
-    if cfg.electrical_routing == 'two-row':
+    if cfg.layered_electrical:
         verify_two_row_contract(m, cfg)
     net = Network(cfg)
     tol = cfg.grid * 2
@@ -272,7 +272,7 @@ def verify_manifest(m):
         for b, band in enumerate(bands):
             require(
                 band["y"] == snap(b * ((net.p - 1) * cfg.lane_pitch + cfg.fold_gap)
-                    - ((net.p-1)*cfg.lane_pitch/2 if cfg.electrical_routing=='two-row' else 0)),
+                    - ((net.p-1)*cfg.lane_pitch/2 if cfg.layered_electrical else 0)),
                 "fold band pitch mismatch",
             )
             for s in band["stages"]:
@@ -713,7 +713,7 @@ def verify_manifest(m):
 def verify_two_row_contract(m, cfg):
     """Bind route metadata and five explicit vias to the rendered metal cells."""
     plan = m.get('electrical_plan', {})
-    require(plan.get('mode') == 'two-row' and plan.get('via_per_net') == 5
+    require(plan.get('mode') == cfg.electrical_routing and plan.get('via_per_net') == 5
             and plan.get('optical_center_y') == 0
             and plan.get('shared_interstage') == cfg.share_interstage,
             'two-row electrical contract mismatch')
@@ -888,7 +888,7 @@ def verify_gds(path, m, names):
     for row in window_rows.values():
         row.sort()
     passive = defaultdict(list)
-    if cfg.electrical_routing == 'two-row':
+    if cfg.layered_electrical:
         from .two_row import overpass_records
         require(m.get('passive_overpasses') == overpass_records(m),
                 'passive M2 overpass windows differ from actual routes')
@@ -909,7 +909,7 @@ def verify_gds(path, m, names):
                 kind = m["cells"][name]["kind"]
                 if layer == "M1" and kind == "mzi":
                     continue  # Declared placeholder electrode region.
-                if cfg.electrical_routing == 'two-row' and layer == 'M2':
+                if cfg.layered_electrical and layer == 'M2':
                     require(kind in ('straight','segment','bend','crossing'),
                             'M2 violates unauthorized optical device keepout')
                     require(cfg.share_interstage or kind == 'straight',

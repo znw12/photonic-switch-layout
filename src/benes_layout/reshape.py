@@ -155,7 +155,7 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
             cfg, stages, right, snap(cfg.pad_pitch * candidate["pad"])
         )
         io_left, io_right = snap(-wing), snap(right + wing)
-    two_row = cfg.electrical_routing == "two-row"
+    two_row = cfg.layered_electrical
     if two_row:
         from .two_row import plan
         stages, right, planned_slots, _, step = plan(cfg, net, blocks, candidate)

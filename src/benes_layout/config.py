@@ -46,6 +46,8 @@ class Config:
     insulated_m2_overpasses: bool = True
     electrical_routing: str = "legacy"
     share_interstage: bool = False
+    electrical_stage_bias: float = 0.0
+    electrical_width_extra: float = 0.0
     equalize: bool = False
     max_candidates: int = 3
     gap_factors: tuple[float, ...] = (1.2, 1.0)
@@ -136,18 +138,28 @@ class Config:
             raise ValueError("pad_rows must be 1, 2, 3 or 4")
         if self.pad_distribution not in ("central", "stage"):
             raise ValueError("pad_distribution must be central or stage")
-        if self.electrical_routing not in ("legacy", "two-row"):
+        if self.electrical_routing not in ("legacy", "two-row", "three-row"):
             raise ValueError("invalid electrical_routing")
-        two_row = self.electrical_routing == "two-row"
+        two_row = self.layered_electrical
         if type(self.share_interstage) is not bool or (self.share_interstage and not two_row):
-            raise ValueError("share_interstage requires two-row electrical routing")
+            raise ValueError("share_interstage requires layered electrical routing")
+        bias = self.electrical_stage_bias
+        if (type(bias) not in (int, float) or not math.isfinite(bias)
+            or abs(bias/self.grid-round(bias/self.grid)) > 1e-7
+            or (bias != 0 and not two_row)):
+            raise ValueError("electrical_stage_bias must be finite, on grid and used with layered routing")
+        extra = self.electrical_width_extra
+        if (type(extra) not in (int,float) or not math.isfinite(extra) or extra < 0
+            or abs(extra/self.grid-round(extra/self.grid)) > 1e-7
+            or (extra != 0 and not two_row)):
+            raise ValueError("electrical_width_extra must be finite, nonnegative, on grid and used with layered routing")
         if two_row and not (
-            self.pad_rows == 2 and self.fold_bands == 1
+            self.pad_rows == (2 if self.electrical_routing == 'two-row' else 3) and self.fold_bands == 1
             and self.pad_distribution == "central" and self.interstage_routing == "continuous"
             and self.insulated_m2_overpasses and not self.equalize
             and self.pad_pitch == 100 and tuple(self.pad_factors) == (1.0,)
         ):
-            raise ValueError("two-row electrical routing requires continuous single band, central two rows, insulated M2 and fixed 100 um pad pitch")
+            raise ValueError("layered electrical routing requires matching pad rows, continuous single band, central pads, insulated M2 and fixed 100 um pad pitch")
         if self.pad_distribution == "stage" and (
             self.pad_rows != 4 or self.fold_bands != 1
         ):
@@ -297,6 +309,10 @@ class Config:
 
     def to_dict(self):
         return asdict(self)
+
+    @property
+    def layered_electrical(self):
+        return self.electrical_routing in ('two-row', 'three-row')
 
     @property
     def digest(self):

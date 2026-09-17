@@ -121,7 +121,7 @@ def compare_bundles(directories, out, baseline=None):
         ax.annotate(
             f"{r['interstage_routing']} / q={r['shuffle_pitch_um']}\n"
             f"{r['pad_rows']} rows / {r['fold_bands']} bands / {r['band_stage_counts']}"
-            + (f" / shared={r['share_interstage']}" if r['electrical_routing']=='two-row' else ''),
+            + (f" / shared={r['share_interstage']}" if r['electrical_routing'] in ('two-row','three-row') else ''),
             (r["width_mm"], r["height_mm"]),
             xytext=(5, 5 + 14 * label_index),
             textcoords="offset points",
