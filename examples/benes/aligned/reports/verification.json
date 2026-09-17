@@ -1,0 +1,60 @@
+{
+  "regression": {
+    "passed": 324,
+    "failed": 0
+  },
+  "final_targeted_tests": 17,
+  "complete_candidates": [
+    "pitch-100",
+    "pitch-105",
+    "pitch-110",
+    "pitch-120"
+  ],
+  "selected": "output/benes/aligned/pitch-120",
+  "repeat": {
+    "independent_readback": {
+      "cell_references": 23469,
+      "electrical_extraction_passed": true,
+      "gds_cells": 6493,
+      "gds_readback_passed": true,
+      "logical_edges": 1792,
+      "manifest_geometry_passed": true,
+      "metal_regions": {
+        "M1": 4230,
+        "M2": 4230
+      },
+      "mzi_count": 832,
+      "optical_objects": 32392,
+      "spare_terminations": 56,
+      "switch_depth_max": 13,
+      "switch_depth_min": 13,
+      "via_count": 6796
+    },
+    "normalized_hash": "502184652fed769b415f82962b38ef44acd6ce7495f363d2e220a11bed164a84",
+    "passed": true
+  },
+  "baseline_compatibility": {
+    "manifest_geometry_passed": true,
+    "logical_edges": 1792,
+    "optical_objects": 32392,
+    "mzi_count": 832,
+    "spare_terminations": 56,
+    "switch_depth_min": 13,
+    "switch_depth_max": 13,
+    "gds_readback_passed": true,
+    "electrical_extraction_passed": true,
+    "metal_regions": {
+      "M1": 4992,
+      "M2": 4974
+    },
+    "via_count": 8320,
+    "gds_cells": 6493,
+    "cell_references": 24993
+  },
+  "all_candidates_preserve_baseline_stages_routes_width": true,
+  "byte_identical_repeat_files": [
+    "settings.json",
+    "pads.csv",
+    "ports.csv"
+  ]
+}

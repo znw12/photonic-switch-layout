@@ -1,0 +1,45 @@
+{
+  "candidates": [
+    {
+      "area_mm2": 463.10416347002405,
+      "channel_levels": 157,
+      "direct_nets": 944,
+      "height_mm": 12.724632000000001,
+      "pitch": 100,
+      "turns": 3104,
+      "vias": 6432,
+      "width_mm": 36.394307
+    },
+    {
+      "area_mm2": 421.317530367676,
+      "channel_levels": 116,
+      "direct_nets": 792,
+      "height_mm": 11.576468,
+      "pitch": 105,
+      "turns": 3408,
+      "vias": 6736,
+      "width_mm": 36.394307
+    },
+    {
+      "area_mm2": 410.106482462168,
+      "channel_levels": 105,
+      "direct_nets": 784,
+      "height_mm": 11.268424,
+      "pitch": 110,
+      "turns": 3424,
+      "vias": 6752,
+      "width_mm": 36.394307
+    },
+    {
+      "area_mm2": 391.76113134406404,
+      "channel_levels": 87,
+      "direct_nets": 762,
+      "height_mm": 10.764352,
+      "pitch": 120,
+      "turns": 3468,
+      "vias": 6796,
+      "width_mm": 36.394307
+    }
+  ],
+  "scope": "Planning estimates, not physical verification"
+}

@@ -1,0 +1,66 @@
+{
+  "baseline": {
+    "turns_total": 4992,
+    "turns_per_net_mean": 3.0,
+    "turns_histogram": {
+      "3": 1664
+    },
+    "direct_pad_nets": 0,
+    "vias_total": 8320,
+    "serial_metal_length_um": 9094478.440000001,
+    "same_row_pitch_min_um": 99.99999999999818,
+    "same_row_pitch_max_um": 100.0
+  },
+  "pitch-100": {
+    "turns_total": 3104,
+    "turns_per_net_mean": 1.8653846153846154,
+    "turns_histogram": {
+      "1": 944,
+      "3": 720
+    },
+    "direct_pad_nets": 944,
+    "vias_total": 6432,
+    "serial_metal_length_um": 14985133.188,
+    "same_row_pitch_min_um": 99.99999999999818,
+    "same_row_pitch_max_um": 3647.155999999999
+  },
+  "pitch-105": {
+    "turns_total": 3408,
+    "turns_per_net_mean": 2.048076923076923,
+    "turns_histogram": {
+      "1": 792,
+      "3": 872
+    },
+    "direct_pad_nets": 792,
+    "vias_total": 6736,
+    "serial_metal_length_um": 12665823.484000001,
+    "same_row_pitch_min_um": 104.99999999999909,
+    "same_row_pitch_max_um": 3698.151999999998
+  },
+  "pitch-110": {
+    "turns_total": 3424,
+    "turns_per_net_mean": 2.0576923076923075,
+    "turns_histogram": {
+      "1": 784,
+      "3": 880
+    },
+    "direct_pad_nets": 784,
+    "vias_total": 6752,
+    "serial_metal_length_um": 11343935.924,
+    "same_row_pitch_min_um": 109.99999999999909,
+    "same_row_pitch_max_um": 3698.151999999998
+  },
+  "pitch-120": {
+    "turns_total": 3468,
+    "turns_per_net_mean": 2.0841346153846154,
+    "turns_histogram": {
+      "1": 762,
+      "3": 902
+    },
+    "direct_pad_nets": 762,
+    "vias_total": 6796,
+    "serial_metal_length_um": 9335955.540000001,
+    "same_row_pitch_min_um": 119.99999999999955,
+    "same_row_pitch_max_um": 2138.1519999999946
+  }
+}

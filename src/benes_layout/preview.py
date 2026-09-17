@@ -74,7 +74,8 @@ def render(m, path, detail=False):
                 ax.text(
                     a + 5,
                     e["pad"][1],
-                    f"R{e['pad_row']} +{e['pad_row_offset']:g} um",
+                    (f"R{e['pad_row']}" if m['config'].get('electrical_fanout') == 'aligned'
+                     else f"R{e['pad_row']} +{e['pad_row_offset']:g} um"),
                     color="white",
                     fontsize=9,
                     va="center",
@@ -102,7 +103,9 @@ def render(m, path, detail=False):
     )
     ax.set_title(
         (
-            f"North pads | {cfg['pad_rows']} rows | {cfg['pad_row_stagger']:g} um row stagger"
+            f"North pads | {cfg['pad_rows']} rows | "
+            + (f"nonuniform, pitch >= {cfg['pad_pitch']:g} um" if cfg.get('electrical_fanout') == 'aligned'
+               else f"{cfg['pad_row_stagger']:g} um row stagger")
             + (" | stage 0" if cfg.get("pad_distribution") == "stage" else "")
             if detail == "pads"
             else folded_title or f"Beneš {cfg['active_ports']} active / {cfg['internal_ports']} internal | {len(m['stages'])} stages | {len(m['instances'])} MZIs | R >= {cfg['radius']:g} um"

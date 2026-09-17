@@ -1,0 +1,278 @@
+{
+  "global_optimum_proven": false,
+  "repeat": {
+    "independent_readback": {
+      "cell_references": 23469,
+      "electrical_extraction_passed": true,
+      "gds_cells": 6493,
+      "gds_readback_passed": true,
+      "logical_edges": 1792,
+      "manifest_geometry_passed": true,
+      "metal_regions": {
+        "M1": 4230,
+        "M2": 4230
+      },
+      "mzi_count": 832,
+      "optical_objects": 32392,
+      "spare_terminations": 56,
+      "switch_depth_max": 13,
+      "switch_depth_min": 13,
+      "via_count": 6796
+    },
+    "normalized_hash": "502184652fed769b415f82962b38ef44acd6ce7495f363d2e220a11bed164a84",
+    "passed": true
+  },
+  "results": [
+    {
+      "active_ports": 100,
+      "area_mm2": 463.104163470024,
+      "band_stage_counts": [
+        13
+      ],
+      "bend_max": 24,
+      "bend_min": 0,
+      "bundle": "output/benes/aligned/pitch-100",
+      "crossing_max": 240,
+      "crossing_min": 0,
+      "crossings": 7680,
+      "electrical_routing": "three-row",
+      "fanout_bbox_um": [
+        0.0,
+        -6322.316,
+        36314.307,
+        6322.316
+      ],
+      "fold_bands": 1,
+      "height_mm": 12.724632,
+      "internal_ports": 128,
+      "interstage_routing": "continuous",
+      "lane_pitch_um": 60,
+      "length_max_mm": 42.17837282106857,
+      "length_min_mm": 36.234307,
+      "maximum_dimension_mm": 36.394307,
+      "normalized_hash": "be3c01e87d1545450ccd2623aacf0226bed55317c95411a2d4078c24b5998a40",
+      "objective": [
+        463104163470024,
+        5944.065821068572,
+        240,
+        24,
+        3353523.3216474247,
+        "candidate-000"
+      ],
+      "pad_bank_width_mm": 36.277438000000004,
+      "pad_distribution": "central",
+      "pad_row_stagger_um": 25,
+      "pad_rows": 3,
+      "pad_width_lower_bound_mm": 27.76,
+      "pareto_width_area": false,
+      "share_interstage": true,
+      "shuffle_pitch_um": null,
+      "status": "verified",
+      "width_mm": 36.394307,
+      "width_target_met": false
+    },
+    {
+      "active_ports": 100,
+      "area_mm2": 421.31753036767594,
+      "band_stage_counts": [
+        13
+      ],
+      "bend_max": 24,
+      "bend_min": 0,
+      "bundle": "output/benes/aligned/pitch-105",
+      "crossing_max": 240,
+      "crossing_min": 0,
+      "crossings": 7680,
+      "electrical_routing": "three-row",
+      "fanout_bbox_um": [
+        0.0,
+        -5748.234,
+        36314.307,
+        5748.234
+      ],
+      "fold_bands": 1,
+      "height_mm": 11.576468,
+      "internal_ports": 128,
+      "interstage_routing": "continuous",
+      "lane_pitch_um": 60,
+      "length_max_mm": 42.17837282106857,
+      "length_min_mm": 36.234307,
+      "maximum_dimension_mm": 36.394307,
+      "normalized_hash": "e656602f14780722fbbda31b19a1d50667d88286dd4653e3b7e0c8e5df532911",
+      "objective": [
+        421317530367676,
+        5944.065821068572,
+        240,
+        24,
+        3353523.3216474247,
+        "candidate-000"
+      ],
+      "pad_bank_width_mm": 36.277438000000004,
+      "pad_distribution": "central",
+      "pad_row_stagger_um": 25,
+      "pad_rows": 3,
+      "pad_width_lower_bound_mm": 29.145,
+      "pareto_width_area": false,
+      "share_interstage": true,
+      "shuffle_pitch_um": null,
+      "status": "verified",
+      "width_mm": 36.394307,
+      "width_target_met": false
+    },
+    {
+      "active_ports": 100,
+      "area_mm2": 410.106482462168,
+      "band_stage_counts": [
+        13
+      ],
+      "bend_max": 24,
+      "bend_min": 0,
+      "bundle": "output/benes/aligned/pitch-110",
+      "crossing_max": 240,
+      "crossing_min": 0,
+      "crossings": 7680,
+      "electrical_routing": "three-row",
+      "fanout_bbox_um": [
+        0.0,
+        -5594.212,
+        36314.307,
+        5594.212
+      ],
+      "fold_bands": 1,
+      "height_mm": 11.268424000000001,
+      "internal_ports": 128,
+      "interstage_routing": "continuous",
+      "lane_pitch_um": 60,
+      "length_max_mm": 42.17837282106857,
+      "length_min_mm": 36.234307,
+      "maximum_dimension_mm": 36.394307,
+      "normalized_hash": "7799cc5fac65b387c559467d90bf54e75bf766fb6828dedaa5d0c3dc2c4786b2",
+      "objective": [
+        410106482462168,
+        5944.065821068572,
+        240,
+        24,
+        3353523.3216474247,
+        "candidate-000"
+      ],
+      "pad_bank_width_mm": 36.265436,
+      "pad_distribution": "central",
+      "pad_row_stagger_um": 25,
+      "pad_rows": 3,
+      "pad_width_lower_bound_mm": 30.53,
+      "pareto_width_area": false,
+      "share_interstage": true,
+      "shuffle_pitch_um": null,
+      "status": "verified",
+      "width_mm": 36.394307,
+      "width_target_met": false
+    },
+    {
+      "active_ports": 100,
+      "area_mm2": 391.761131344064,
+      "band_stage_counts": [
+        13
+      ],
+      "bend_max": 24,
+      "bend_min": 0,
+      "bundle": "output/benes/aligned/pitch-120",
+      "crossing_max": 240,
+      "crossing_min": 0,
+      "crossings": 7680,
+      "electrical_routing": "three-row",
+      "fanout_bbox_um": [
+        0.0,
+        -5342.176,
+        36314.307,
+        5342.176
+      ],
+      "fold_bands": 1,
+      "height_mm": 10.764352,
+      "internal_ports": 128,
+      "interstage_routing": "continuous",
+      "lane_pitch_um": 60,
+      "length_max_mm": 42.17837282106857,
+      "length_min_mm": 36.234307,
+      "maximum_dimension_mm": 36.394307,
+      "normalized_hash": "502184652fed769b415f82962b38ef44acd6ce7495f363d2e220a11bed164a84",
+      "objective": [
+        391761131344064,
+        5944.065821068572,
+        240,
+        24,
+        3353523.3216474247,
+        "candidate-000"
+      ],
+      "pad_bank_width_mm": 36.265436,
+      "pad_distribution": "central",
+      "pad_row_stagger_um": 25,
+      "pad_rows": 3,
+      "pad_width_lower_bound_mm": 33.3,
+      "pareto_width_area": true,
+      "share_interstage": true,
+      "shuffle_pitch_um": null,
+      "status": "verified",
+      "width_mm": 36.394307,
+      "width_target_met": false
+    }
+  ],
+  "routing": {
+    "pitch-100": {
+      "direct_pad_nets": 944,
+      "same_row_pitch_max_um": 3647.155999999999,
+      "same_row_pitch_min_um": 99.99999999999818,
+      "serial_metal_length_um": 14985133.188,
+      "turns_histogram": {
+        "1": 944,
+        "3": 720
+      },
+      "turns_per_net_mean": 1.8653846153846154,
+      "turns_total": 3104,
+      "vias_total": 6432
+    },
+    "pitch-105": {
+      "direct_pad_nets": 792,
+      "same_row_pitch_max_um": 3698.151999999998,
+      "same_row_pitch_min_um": 104.99999999999909,
+      "serial_metal_length_um": 12665823.484000001,
+      "turns_histogram": {
+        "1": 792,
+        "3": 872
+      },
+      "turns_per_net_mean": 2.048076923076923,
+      "turns_total": 3408,
+      "vias_total": 6736
+    },
+    "pitch-110": {
+      "direct_pad_nets": 784,
+      "same_row_pitch_max_um": 3698.151999999998,
+      "same_row_pitch_min_um": 109.99999999999909,
+      "serial_metal_length_um": 11343935.924,
+      "turns_histogram": {
+        "1": 784,
+        "3": 880
+      },
+      "turns_per_net_mean": 2.0576923076923075,
+      "turns_total": 3424,
+      "vias_total": 6752
+    },
+    "pitch-120": {
+      "direct_pad_nets": 762,
+      "same_row_pitch_max_um": 2138.1519999999946,
+      "same_row_pitch_min_um": 119.99999999999955,
+      "serial_metal_length_um": 9335955.540000001,
+      "turns_histogram": {
+        "1": 762,
+        "3": 902
+      },
+      "turns_per_net_mean": 2.0841346153846154,
+      "turns_total": 3468,
+      "vias_total": 6796
+    }
+  },
+  "scope": "Measured generation reports; rerun benes-layout verify on a bundle for fresh physical readback.",
+  "smallest_area": "output/benes/aligned/pitch-120",
+  "smallest_maximum_dimension": "output/benes/aligned/pitch-100",
+  "smallest_width": "output/benes/aligned/pitch-100",
+  "target_width_mm": 20
+}

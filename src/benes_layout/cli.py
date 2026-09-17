@@ -49,6 +49,7 @@ def main(argv=None):
             p.add_argument("--interstage-routing", choices=("legacy","continuous","compressed"))
             p.add_argument("--shuffle-pitch", type=float)
             p.add_argument("--electrical-routing", choices=("legacy", "two-row", "three-row"))
+            p.add_argument('--electrical-fanout', choices=('channel', 'aligned'))
             p.add_argument("--electrical-stage-bias", type=float)
             p.add_argument("--electrical-width-extra", type=float)
             p.add_argument("--share-interstage", action=argparse.BooleanOptionalAction, default=None)
@@ -67,6 +68,10 @@ def main(argv=None):
     three_rows.add_argument('--config',default='examples/benes/two-row/shared.json')
     three_rows.add_argument('--out',default='output/benes/three-row')
     three_rows.add_argument('--reuse',action='store_true',help='reuse matching successful generation reports; repeat and independently verify the best')
+    aligned = sub.add_parser('aligned-study')
+    aligned.add_argument('--config', default='examples/benes/three-row/optimized.json')
+    aligned.add_argument('--out', default='output/benes/aligned')
+    aligned.add_argument('--reuse', action='store_true')
     comparison = sub.add_parser("compare")
     comparison.add_argument("directories", nargs="+")
     comparison.add_argument("--out", default="output/benes/reshape/comparison")
@@ -90,6 +95,7 @@ def main(argv=None):
                 interstage_routing=getattr(args, "interstage_routing", None),
                 shuffle_pitch=getattr(args, "shuffle_pitch", None),
                 electrical_routing=getattr(args,"electrical_routing",None),
+                electrical_fanout=getattr(args,'electrical_fanout',None),
                 electrical_stage_bias=getattr(args,'electrical_stage_bias',None),
                 electrical_width_extra=getattr(args,'electrical_width_extra',None),
                 share_interstage=getattr(args,"share_interstage",None),
@@ -122,6 +128,10 @@ def main(argv=None):
         elif args.command == 'three-row-study':
             from .three_row_study import run
             result=run(Config.load(args.config),args.out,args.reuse)
+            print(json.dumps({'selected':result['smallest_area'],'repeat_passed':result['repeat']['passed']},indent=2))
+        elif args.command == 'aligned-study':
+            from .aligned_study import run
+            result = run(Config.load(args.config), args.out, args.reuse)
             print(json.dumps({'selected':result['smallest_area'],'repeat_passed':result['repeat']['passed']},indent=2))
         elif args.command == "interstage-study":
             from .interstage_study import run_full, run_placement

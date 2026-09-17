@@ -45,6 +45,7 @@ class Config:
     termination_length: float = 40.0
     insulated_m2_overpasses: bool = True
     electrical_routing: str = "legacy"
+    electrical_fanout: str = "channel"
     share_interstage: bool = False
     electrical_stage_bias: float = 0.0
     electrical_width_extra: float = 0.0
@@ -141,6 +142,10 @@ class Config:
         if self.electrical_routing not in ("legacy", "two-row", "three-row"):
             raise ValueError("invalid electrical_routing")
         two_row = self.layered_electrical
+        if self.electrical_fanout not in ('channel', 'aligned'):
+            raise ValueError('invalid electrical_fanout')
+        if self.electrical_fanout == 'aligned' and self.electrical_routing != 'three-row':
+            raise ValueError('aligned fanout requires three-row electrical routing')
         if type(self.share_interstage) is not bool or (self.share_interstage and not two_row):
             raise ValueError("share_interstage requires layered electrical routing")
         bias = self.electrical_stage_bias
@@ -157,9 +162,10 @@ class Config:
             self.pad_rows == (2 if self.electrical_routing == 'two-row' else 3) and self.fold_bands == 1
             and self.pad_distribution == "central" and self.interstage_routing == "continuous"
             and self.insulated_m2_overpasses and not self.equalize
-            and self.pad_pitch == 100 and tuple(self.pad_factors) == (1.0,)
+            and (self.pad_pitch >= 100 if self.electrical_fanout == 'aligned' else self.pad_pitch == 100)
+            and tuple(self.pad_factors) == (1.0,)
         ):
-            raise ValueError("layered electrical routing requires matching pad rows, continuous single band, central pads, insulated M2 and fixed 100 um pad pitch")
+            raise ValueError("layered electrical routing requires matching pad rows, continuous single band, central pads, insulated M2 and 100 um pad pitch (minimum for aligned fanout)")
         if self.pad_distribution == "stage" and (
             self.pad_rows != 4 or self.fold_bands != 1
         ):

@@ -28,6 +28,7 @@ def verify_pad_banks(m):
     """Reconstruct explicit staggered pad contracts independently of the router."""
     cfg = Config(**m["config"])
     two_row = cfg.layered_electrical
+    aligned = cfg.electrical_fanout == 'aligned'
     if cfg.pad_rows != 4 and not two_row:
         return
     cells, tol = m["cells"], 2 * cfg.grid
@@ -55,6 +56,16 @@ def verify_pad_banks(m):
     for side, sign in (("north", 1), ("south", -1)):
         bank = [e for e in m["electrical"] if e["side"] == side]
         require(len(bank) == count, "pad bank coverage mismatch")
+        if aligned:
+            for row in range(cfg.pad_rows):
+                members = sorted((e for e in bank if e['pad_row'] == row), key=lambda e:e['pad'][0])
+                require([e['pad_column'] for e in members] == list(range(len(members))),
+                        'aligned pad column order mismatch')
+                require(all(b['pad'][0]-a['pad'][0] >= cfg.pad_pitch-tol
+                            for a,b in zip(members, members[1:])), 'aligned pad pitch too small')
+            require(all(m['extents']['core'][0] <= e['pad'][0]-half+tol
+                        and e['pad'][0]+half <= m['extents']['core'][2]+tol for e in bank),
+                    'aligned pads exceed fixed optical width')
         if distributed:
             require(
                 all(
@@ -102,17 +113,18 @@ def verify_pad_banks(m):
             origin = origins[e.get("pad_group", 0)]
             row, col = e["pad_row"], e["pad_column"]
             require(
-                abs(e["pad_row_offset"] - row * cfg.pad_row_stagger) < tol,
+                abs(e["pad_row_offset"] - (0 if aligned else row * cfg.pad_row_stagger)) < tol,
                 "pad row offset metadata mismatch",
             )
             require(
-                abs(e["pad"][0] - (origin[0] + col * pitch + row * cfg.pad_row_stagger))
-                < tol
+                (aligned or abs(e["pad"][0] - (origin[0] + col * pitch + row * cfg.pad_row_stagger))
+                < tol)
                 and abs(e["pad"][1] - (origin[1] + sign * row * cfg.pad_row_pitch))
                 < tol,
                 "pad stagger or row placement mismatch",
             )
-            require(len(e["vias"]) == (5 if two_row else 3), "pad net via count mismatch")
+            direct = aligned and e['tx'] == e['pad'][0]
+            require(len(e["vias"]) == (3 if direct or not two_row else 5), "pad net via count mismatch")
             require(
                 box(
                     e["pad"][0] - half,
@@ -711,9 +723,12 @@ def verify_manifest(m):
 
 
 def verify_two_row_contract(m, cfg):
-    """Bind route metadata and five explicit vias to the rendered metal cells."""
+    """Bind route metadata and explicit vias to the rendered metal cells."""
     plan = m.get('electrical_plan', {})
-    require(plan.get('mode') == cfg.electrical_routing and plan.get('via_per_net') == 5
+    aligned = cfg.electrical_fanout == 'aligned'
+    require(plan.get('mode') == cfg.electrical_routing
+            and plan.get('via_per_net') == (None if aligned else 5)
+            and (not aligned or plan.get('fanout') == 'aligned')
             and plan.get('optical_center_y') == 0
             and plan.get('shared_interstage') == cfg.share_interstage,
             'two-row electrical contract mismatch')
@@ -723,13 +738,19 @@ def verify_two_row_contract(m, cfg):
         sx,py = e['pad']
         tx,fy,launch = e['tx'],e['fanout_y'],e['launch_x']
         ly = snap(sign*plan['transfer_y'])
+        direct = aligned and tx == sx
+        if aligned:
+            require(type(e.get('direct_pad')) is bool and e['direct_pad'] == direct,
+                    'aligned direct pad flag mismatch')
         expected = [('M1',[e['x'],e['y']],[launch,e['y']]),
                     ('M2',[launch,e['y']],[tx,e['y']]),
                     ('M2',[tx,e['y']],[tx,fy]),
                     ('M1',[tx,fy],[sx,fy]),
                     ('M2',[sx,fy],[sx,ly]),
                     ('M1',[sx,ly],[sx,py])]
-        if abs(tx-sx) < cfg.via_size+2*cfg.via_enclosure+cfg.metal_spacing:
+        if direct:
+            expected = expected[:2] + [('M2',[tx,e['y']],[tx,ly]), ('M1',[sx,ly],[sx,py])]
+        elif abs(tx-sx) < cfg.via_size+2*cfg.via_enclosure+cfg.metal_spacing:
             expected.insert(4, ('M2',[tx,fy],[sx,fy]))
         expected = [dict(layer=l,start=a,end=b) for l,a,b in expected if a!=b]
         require(e['segments']==expected,'two-row electrical path metadata mismatch')
@@ -741,7 +762,8 @@ def verify_two_row_contract(m, cfg):
                 min(a[0],b[0])-w,min(a[1],b[1])-w,max(a[0],b[0])+w,max(a[1],b[1])+w)]))
         cell=m['cells'][e['cell']]
         require(cell['polygons']==polygons,'two-row electrical polygon/path mismatch')
-        vias = [[launch,e['y']],[tx,fy],[sx,fy],[sx,ly],[sx,py]]
+        vias = ([[launch,e['y']],[tx,ly],[sx,py]] if direct else
+                [[launch,e['y']],[tx,fy],[sx,fy],[sx,ly],[sx,py]])
         require(e['vias']==vias,'two-row via positions mismatch')
         require(Counter((r['cell'],r['x'],r['y'],r['angle']) for r in cell['refs'])
                 == Counter(('VIA',*p,0) for p in vias),'two-row via hierarchy mismatch')

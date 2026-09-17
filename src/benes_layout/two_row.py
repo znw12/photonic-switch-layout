@@ -23,6 +23,10 @@ def rails(start, count, step, stems, clearance):
 
 
 def plan(cfg, net, blocks, candidate):
+    if cfg.electrical_fanout == 'aligned':
+        # Preserve the established optical placement; pad_pitch only changes the new bank.
+        from dataclasses import replace
+        return plan(replace(cfg, electrical_fanout='channel', pad_pitch=100), net, blocks, candidate)
     landing = cfg.via_size + 2 * cfg.via_enclosure
     step = snap((landing + cfg.metal_spacing + 2 * cfg.grid) * candidate['corridor'])
     trunk_step = snap(((landing + cfg.metal_width) / 2 + cfg.metal_spacing + 2 * cfg.grid) * candidate['corridor'])
@@ -101,6 +105,9 @@ def channel_levels(sources, destinations, clearance):
 
 def route(lib, m, groups, terminals, optical, step, slots):
     cfg = lib.cfg
+    if cfg.electrical_fanout == 'aligned':
+        from .aligned_fanout import route as aligned_route
+        return aligned_route(lib, m, groups, terminals, optical, step)
     banks = {side: sorted((t for t in terminals if t['side']==side),key=lambda t:t['tx']) for side in ('south','north')}
     levels = {side:channel_levels([t['tx'] for t in bank],[s['px'] for s in slots],step) for side,bank in banks.items()}
     maximum = max(max(v) for v in levels.values())
@@ -186,10 +193,14 @@ def overpass_records(m):
 
 def statistics(m):
     """Report measured routing extents separately from the pad-limited die."""
-    return {
+    result = {
         **m['electrical_plan'],
         'passive_overpass_windows': len(m['passive_overpasses']),
         'fabric_span_um': m['stages'][-1]['occupied_end']-m['stages'][0]['x'],
         'shared_width_um': sum(max(0,min(s['route_end'],s['trunk_xs'][-1])-s['escape_end']) for s in m['stages']),
         'metal_length_um': sum(abs(s['end'][0]-s['start'][0])+abs(s['end'][1]-s['start'][1]) for e in m['electrical'] for s in e['segments']),
     }
+    if m['config'].get('electrical_fanout') == 'aligned':
+        from .aligned_fanout import routing_metrics
+        result.update(routing_metrics(m))
+    return result
