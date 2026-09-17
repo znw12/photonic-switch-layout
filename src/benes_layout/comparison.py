@@ -39,6 +39,8 @@ def compare_bundles(directories, out, baseline=None):
                 pad_distribution=cfg.get("pad_distribution", "central"),
                 lane_pitch_um=cfg["lane_pitch"],
                 interstage_routing=cfg.get("interstage_routing", "legacy"),
+                electrical_routing=cfg.get('electrical_routing','legacy'),
+                share_interstage=cfg.get('share_interstage',False),
                 shuffle_pitch_um=cfg.get("shuffle_pitch"),
                 objective=next(c["objective"] for c in report["candidates"] if c["id"]==summary["selected_candidate"]),
                 pad_row_stagger_um=cfg.get("pad_row_stagger", 0),
@@ -118,7 +120,8 @@ def compare_bundles(directories, out, baseline=None):
         ax.scatter(r["width_mm"], r["height_mm"], s=70)
         ax.annotate(
             f"{r['interstage_routing']} / q={r['shuffle_pitch_um']}\n"
-            f"{r['pad_rows']} rows / {r['fold_bands']} bands / {r['band_stage_counts']}",
+            f"{r['pad_rows']} rows / {r['fold_bands']} bands / {r['band_stage_counts']}"
+            + (f" / shared={r['share_interstage']}" if r['electrical_routing']=='two-row' else ''),
             (r["width_mm"], r["height_mm"]),
             xytext=(5, 5 + 14 * label_index),
             textcoords="offset points",

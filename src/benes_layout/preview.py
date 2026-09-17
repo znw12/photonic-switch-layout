@@ -83,8 +83,9 @@ def render(m, path, detail=False):
         s = m["stages"][0]
         a = s["x"] - 50
         c = min(s["end"], s["escape_end"] + 4 * m["config"]["lane_pitch"])
-        b = -50
-        d = min(d, 6 * m["config"]["lane_pitch"])
+        origin = m.get('bands',[{'y':0}])[0]['y']
+        b = origin - 50
+        d = min(d, origin + 6 * m["config"]["lane_pitch"])
     ax.set(xlim=(a, c), ylim=(b, d), aspect="equal", xlabel="x (um)", ylabel="y (um)")
     ax.tick_params(colors="#afc2d3")
     ax.xaxis.label.set_color("#afc2d3")

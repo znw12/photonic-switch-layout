@@ -4,7 +4,9 @@
 
 新版的运行方法、尺寸与验证结果见 [Beneš 使用与设计说明](docs/BENES.md)。以下保留原 Waksman 版本的说明。
 
-最新 Beneš 单条带布局采用连续斜线置换、局部 40 μm 光学间距和按级分组的四排错位 pad，完整尺寸约 **40.086 × 10.464 mm**，见 [级间置换优化结果与运行方法](docs/BENES_INTERSTAGE.md)。MZI 接口行距仍为 60 μm；此前 **45.486 × 10.464 mm** 的默认布局继续保留，见 [紧凑版基线](docs/BENES_DISTRIBUTED_PADS.md)。
+本次新增单带连续斜线、南北各两排 pad 的电学布局，同排中心距固定 100 μm、排间错位 25 μm，整体以 y=0 居中。共享置换区的完整尺寸为 **41.785 × 10.288 mm**，较原四排 continuous 版面积减少 **1.50%**；见 [两排电学布局与验证](docs/BENES_TWO_ROW_ELECTRICAL.md)。
+
+此前的局部 40 μm 光学间距、按级分组四排 pad 布局约为 **40.086 × 10.464 mm**，见 [级间置换优化结果与运行方法](docs/BENES_INTERSTAGE.md)。MZI 接口行距仍为 60 μm；**45.486 × 10.464 mm** 的默认布局继续保留，见 [紧凑版基线](docs/BENES_DISTRIBUTED_PADS.md)。
 
 连续斜线也支持三带折叠，保留西侧输入、东侧输出及南北四排错位 pad。完整尺寸约 **31.507 × 28.737 mm**；左右尺寸缩短，但总面积增加，见 [三带结果与运行方法](docs/BENES_CONTINUOUS_THREE_BANDS.md)。
 

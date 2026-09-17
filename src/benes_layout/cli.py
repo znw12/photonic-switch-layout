@@ -48,6 +48,8 @@ def main(argv=None):
             p.add_argument("--lane-pitch", type=float)
             p.add_argument("--interstage-routing", choices=("legacy","continuous","compressed"))
             p.add_argument("--shuffle-pitch", type=float)
+            p.add_argument("--electrical-routing", choices=("legacy", "two-row"))
+            p.add_argument("--share-interstage", action=argparse.BooleanOptionalAction, default=None)
             p.add_argument("--fold-bands", type=int)
             p.add_argument("--band-stage-counts", help="comma-separated stage counts, e.g. 6,5,2")
     sub.add_parser("verify").add_argument("directory")
@@ -81,6 +83,8 @@ def main(argv=None):
                 lane_pitch=getattr(args, "lane_pitch", None),
                 interstage_routing=getattr(args, "interstage_routing", None),
                 shuffle_pitch=getattr(args, "shuffle_pitch", None),
+                electrical_routing=getattr(args,"electrical_routing",None),
+                share_interstage=getattr(args,"share_interstage",None),
                 fold_bands=getattr(args, "fold_bands", None),
                 band_stage_counts=(tuple(map(int,args.band_stage_counts.split(',')))
                                    if getattr(args,"band_stage_counts",None) else None),

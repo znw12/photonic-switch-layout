@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "original": "output/benes/two-row/shared",
+  "repeat": "output/benes/two-row/repeat-best",
+  "normalized_hash": "c2263638886a5813d59b30c2bf64acbc6877edbe721db6a4745fa8d966a83564",
+  "matching_fields": [
+    "normalized_hash",
+    "summary",
+    "uniformity",
+    "realized",
+    "electrical"
+  ],
+  "byte_equal_files": [
+    "settings.json",
+    "ports.csv",
+    "pads.csv"
+  ]
+}

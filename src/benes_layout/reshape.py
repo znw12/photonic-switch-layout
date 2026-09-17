@@ -155,6 +155,13 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
             cfg, stages, right, snap(cfg.pad_pitch * candidate["pad"])
         )
         io_left, io_right = snap(-wing), snap(right + wing)
+    two_row = cfg.electrical_routing == "two-row"
+    if two_row:
+        from .two_row import plan
+        stages, right, planned_slots, _, step = plan(cfg, net, blocks, candidate)
+        bands = [dict(band=0, y=stages[0]['y'], stages=list(range(net.depth)))]
+        extra = cfg.termination_length if net.p > cfg.active_ports else 0.0
+        io_left, io_right = extra, right-extra
     m = dict(
         config=cfg.to_dict(),
         candidate=candidate,
@@ -218,12 +225,15 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
         terms.sort(key=lambda t: (t["y"], t["net"]))
         for side, bank in (("south", terms[:count]), ("north", terms[count:])):
             # Increasing y order ensures terminal horizontal M1 runs cannot meet vias.
+            if two_row and side == "north":
+                bank = list(reversed(bank))
             for i, t in enumerate(bank):
                 terminals.append(
                     {
                         **t,
                         "side": side,
                         "tx": s["trunk_xs"][i],
+                        **({"launch_x": s["launch_x"]} if two_row else {}),
                         **({"stage": s["stage"]} if planned_slots is not None else {}),
                     }
                 )
@@ -270,7 +280,7 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
         placed(parent, route, lib.straight(abs(b[0] - a[0])), *a, angle=angle)
 
     for lane in range(p):
-        y = physical(lane) * pitch
+        y = bands[0]['y'] + physical(lane) * pitch
         route = new_route(
             f"in:{lane}", f"{switch_id(0,lane//2)}:i{lane%2}", [io_left, y]
         )
@@ -355,7 +365,7 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
         for lane in range(p):
             at = [
                 io_left if side == "west" else io_right,
-                (0 if side == "west" else bands[-1]["y"]) + physical(lane) * pitch,
+                (bands[0]['y'] if side == "west" else bands[-1]["y"]) + physical(lane) * pitch,
             ]
             m["interfaces"].append(
                 dict(side=side, internal=lane, active=active.get(lane), position=at)
@@ -381,16 +391,20 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
                 )
     extra = cfg.termination_length if p > cfg.active_ports else 0
     edge = (cfg.mzi_height - pitch) / 2
-    optical = [io_left - extra, -edge, io_right + extra, bands[-1]["y"] + h + edge]
-    pads = route_pads(
-        lib,
-        m,
-        groups,
-        terminals,
-        step=step,
-        optical_bounds=optical,
-        planned_slots=planned_slots,
-    )
+    optical = [io_left - extra, bands[0]['y'] - edge, io_right + extra, bands[-1]["y"] + h + edge]
+    if two_row:
+        from .two_row import route
+        pads = route(lib, m, groups, terminals, optical, step, planned_slots)
+    else:
+        pads = route_pads(
+            lib,
+            m,
+            groups,
+            terminals,
+            step=step,
+            optical_bounds=optical,
+            planned_slots=planned_slots,
+        )
     m["die_bbox"] = [
         snap(min(optical[0], pads[0]) - cfg.margin),
         snap(pads[1] - cfg.margin),
@@ -406,7 +420,7 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
         terminations=(
             [
                 io_left - cfg.termination_length,
-                0,
+                bands[0]['y'],
                 io_right + cfg.termination_length,
                 bands[-1]["y"] + h,
             ]
@@ -441,4 +455,7 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
     visit(top.name)
     lib.cells = {k: v for k, v in lib.cells.items() if k in reachable}
     m["cells"] = lib.export()
+    if two_row:
+        from .two_row import overpass_records
+        m['passive_overpasses'] = overpass_records(m)
     return lib, m

@@ -44,6 +44,8 @@ class Config:
     crossing_half_length: float = 10.0
     termination_length: float = 40.0
     insulated_m2_overpasses: bool = True
+    electrical_routing: str = "legacy"
+    share_interstage: bool = False
     equalize: bool = False
     max_candidates: int = 3
     gap_factors: tuple[float, ...] = (1.2, 1.0)
@@ -134,6 +136,18 @@ class Config:
             raise ValueError("pad_rows must be 1, 2, 3 or 4")
         if self.pad_distribution not in ("central", "stage"):
             raise ValueError("pad_distribution must be central or stage")
+        if self.electrical_routing not in ("legacy", "two-row"):
+            raise ValueError("invalid electrical_routing")
+        two_row = self.electrical_routing == "two-row"
+        if type(self.share_interstage) is not bool or (self.share_interstage and not two_row):
+            raise ValueError("share_interstage requires two-row electrical routing")
+        if two_row and not (
+            self.pad_rows == 2 and self.fold_bands == 1
+            and self.pad_distribution == "central" and self.interstage_routing == "continuous"
+            and self.insulated_m2_overpasses and not self.equalize
+            and self.pad_pitch == 100 and tuple(self.pad_factors) == (1.0,)
+        ):
+            raise ValueError("two-row electrical routing requires continuous single band, central two rows, insulated M2 and fixed 100 um pad pitch")
         if self.pad_distribution == "stage" and (
             self.pad_rows != 4 or self.fold_bands != 1
         ):
@@ -146,7 +160,7 @@ class Config:
             and self.pad_rows == 4
             and self.pad_distribution == "central"
         )
-        if self.interstage_routing != "legacy" and not folded_continuous and (
+        if self.interstage_routing != "legacy" and not folded_continuous and not two_row and (
             self.pad_distribution != "stage" or self.pad_rows != 4 or self.fold_bands != 1
         ):
             raise ValueError(
@@ -177,7 +191,7 @@ class Config:
             raise ValueError("pad_row_stagger must lie on the database grid")
         if self.pad_rows == 4 and self.fold_bands != 1 and not folded_continuous:
             raise ValueError("four pad rows require a single band or three-band continuous routing")
-        if self.pad_row_stagger and (
+        if self.pad_row_stagger and not two_row and (
             self.pad_rows != 4 or (self.fold_bands != 1 and not folded_continuous)
         ):
             raise ValueError("pad row staggering requires four rows and a supported band profile")

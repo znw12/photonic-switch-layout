@@ -14,6 +14,8 @@
 
 默认仍为 `legacy`，既有配置与 bundle 可回读。本节的单带 A/B 模式使用 `pad_distribution="stage"`、`pad_rows=4`、`fold_bands=1`。后续新增的连续斜线三带配置与实测结果见 [三带说明](BENES_CONTINUOUS_THREE_BANDS.md)；compressed 模式仍限定单带。`shuffle_pitch` 仅能用于 `compressed`，必须是有限、正值、在 1 nm 网格上，并且大于波导宽度与间距之和、不超过接口行距。进一步的弯曲、crossing 和过渡可行性由几何检查决定；参数通过并不保证所有布局都能通过验证。
 
+后续单带 continuous 还支持独立的 `electrical_routing="two-row"` 配置：两排 100 μm 中心距 pad、居中电学布局和 M2 共享置换区，见 [两排电学布局](BENES_TWO_ROW_ELECTRICAL.md)。该配置不改变本节 A/B 四排对照结果。
+
 C 不改变逻辑 Network 或求解器：输出显式 `placement_map`，保持开关 ID、外部端口编号和电学 stage 分组。实验配置记录在 bundle 的 `candidate.stage_orders` 中，采用同一确定性相邻交换后端进行恒等/重排对照；不会自动应用于 100 端口。
 
 ## 测量结果

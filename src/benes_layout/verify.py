@@ -25,9 +25,10 @@ from .geometry import arc_polygon, snap, rectangle, point
 
 
 def verify_pad_banks(m):
-    """Reconstruct the four-row placement contract independently of the router."""
+    """Reconstruct explicit staggered pad contracts independently of the router."""
     cfg = Config(**m["config"])
-    if cfg.pad_rows != 4:
+    two_row = cfg.electrical_routing == 'two-row'
+    if cfg.pad_rows != 4 and not two_row:
         return
     cells, tol = m["cells"], 2 * cfg.grid
     net = Network(cfg)
@@ -65,7 +66,7 @@ def verify_pad_banks(m):
             )
         slots = [(e.get("pad_group", 0), e["pad_column"], e["pad_row"]) for e in bank]
         expected_slots = {
-            (s, i // 4, i % 4)
+            (s, i // cfg.pad_rows, i % cfg.pad_rows)
             for s in range(net.depth if distributed else 1)
             for i in range(net.p // 2 if distributed else count)
         }
@@ -111,7 +112,7 @@ def verify_pad_banks(m):
                 < tol,
                 "pad stagger or row placement mismatch",
             )
-            require(len(e["vias"]) == 3, "four-row net requires three vias")
+            require(len(e["vias"]) == (5 if two_row else 3), "pad net via count mismatch")
             require(
                 box(
                     e["pad"][0] - half,
@@ -161,6 +162,14 @@ def verify_pad_banks(m):
         all(abs(a - b) < tol for a, b in zip(combined, m["extents"]["pads"])),
         "reported pad extent mismatch",
     )
+    if two_row:
+        north = {(e['pad_column'],e['pad_row']):e['pad'] for e in m['electrical'] if e['side']=='north'}
+        for e in m['electrical']:
+            if e['side']=='south':
+                a = north[e['pad_column'],e['pad_row']]
+                require(abs(a[0]-e['pad'][0])<tol and abs(a[1]+e['pad'][1])<tol,
+                        'two-row pad banks not centered about y=0')
+        require(abs(m['die_bbox'][1]+m['die_bbox'][3])<tol, 'two-row die not centered')
 
 
 def optical_objects(m):
@@ -216,6 +225,8 @@ def spatial_objects(m):
 def verify_manifest(m):
     cfg, cells = Config(**m["config"]), m["cells"]
     verify_pad_banks(m)
+    if cfg.electrical_routing == 'two-row':
+        verify_two_row_contract(m, cfg)
     net = Network(cfg)
     tol = cfg.grid * 2
     require(
@@ -260,7 +271,8 @@ def verify_manifest(m):
         )
         for b, band in enumerate(bands):
             require(
-                band["y"] == snap(b * ((net.p - 1) * cfg.lane_pitch + cfg.fold_gap)),
+                band["y"] == snap(b * ((net.p - 1) * cfg.lane_pitch + cfg.fold_gap)
+                    - ((net.p-1)*cfg.lane_pitch/2 if cfg.electrical_routing=='two-row' else 0)),
                 "fold band pitch mismatch",
             )
             for s in band["stages"]:
@@ -672,7 +684,7 @@ def verify_manifest(m):
                 min(rows) - cfg.pad_size / 2
                 > (net.p - 1) * cfg.lane_pitch + m.get("bands", [{"y": 0}])[-1]["y"]
                 if side == "north"
-                else max(rows) + cfg.pad_size / 2 < 0
+                else max(rows) + cfg.pad_size / 2 < m.get('bands',[{'y':0}])[0]['y']
             ),
             "pad bank lies on incorrect chip side",
         )
@@ -696,6 +708,43 @@ def verify_manifest(m):
         "switch_depth_min": net.depth,
         "switch_depth_max": net.depth,
     }
+
+
+def verify_two_row_contract(m, cfg):
+    """Bind route metadata and five explicit vias to the rendered metal cells."""
+    plan = m.get('electrical_plan', {})
+    require(plan.get('mode') == 'two-row' and plan.get('via_per_net') == 5
+            and plan.get('optical_center_y') == 0
+            and plan.get('shared_interstage') == cfg.share_interstage,
+            'two-row electrical contract mismatch')
+    for e in m['electrical']:
+        sign = 1 if e['side']=='north' else -1
+        require(sign*e['y'] > 0, 'electrical source assigned to opposite bank')
+        sx,py = e['pad']
+        tx,fy,launch = e['tx'],e['fanout_y'],e['launch_x']
+        ly = snap(sign*plan['transfer_y'])
+        expected = [('M1',[e['x'],e['y']],[launch,e['y']]),
+                    ('M2',[launch,e['y']],[tx,e['y']]),
+                    ('M2',[tx,e['y']],[tx,fy]),
+                    ('M1',[tx,fy],[sx,fy]),
+                    ('M2',[sx,fy],[sx,ly]),
+                    ('M1',[sx,ly],[sx,py])]
+        if abs(tx-sx) < cfg.via_size+2*cfg.via_enclosure+cfg.metal_spacing:
+            expected.insert(4, ('M2',[tx,fy],[sx,fy]))
+        expected = [dict(layer=l,start=a,end=b) for l,a,b in expected if a!=b]
+        require(e['segments']==expected,'two-row electrical path metadata mismatch')
+        polygons = []
+        w = cfg.metal_width/2
+        for seg in expected:
+            a,b=seg['start'],seg['end']
+            polygons.append(dict(layer=seg['layer'],points=[[snap(v) for v in p] for p in rectangle(
+                min(a[0],b[0])-w,min(a[1],b[1])-w,max(a[0],b[0])+w,max(a[1],b[1])+w)]))
+        cell=m['cells'][e['cell']]
+        require(cell['polygons']==polygons,'two-row electrical polygon/path mismatch')
+        vias = [[launch,e['y']],[tx,fy],[sx,fy],[sx,ly],[sx,py]]
+        require(e['vias']==vias,'two-row via positions mismatch')
+        require(Counter((r['cell'],r['x'],r['y'],r['angle']) for r in cell['refs'])
+                == Counter(('VIA',*p,0) for p in vias),'two-row via hierarchy mismatch')
 
 
 def verify_gds(path, m, names):
@@ -838,6 +887,15 @@ def verify_gds(path, m, names):
         window_rows[y].append(x)
     for row in window_rows.values():
         row.sort()
+    passive = defaultdict(list)
+    if cfg.electrical_routing == 'two-row':
+        from .two_row import overpass_records
+        require(m.get('passive_overpasses') == overpass_records(m),
+                'passive M2 overpass windows differ from actual routes')
+        require(m.get('electrical_plan',{}).get('passive_m2_contract') == 'insulated-placeholder-v1',
+                'missing passive M2 insulation contract')
+        for record in m['passive_overpasses']:
+            passive[tuple(record['optical'])].append(box(*record['bbox']))
     for layer in ("M1", "M2", "VIA"):
         distance = (
             cfg.optical_metal_clearance
@@ -851,6 +909,16 @@ def verify_gds(path, m, names):
                 kind = m["cells"][name]["kind"]
                 if layer == "M1" and kind == "mzi":
                     continue  # Declared placeholder electrode region.
+                if cfg.electrical_routing == 'two-row' and layer == 'M2':
+                    require(kind in ('straight','segment','bend','crossing'),
+                            'M2 violates unauthorized optical device keepout')
+                    require(cfg.share_interstage or kind == 'straight',
+                            'M2 enters permutation without sharing enabled')
+                    conflict = metal.intersection(wgs[j].buffer(distance))
+                    permitted = unary_union(passive[(name,x,y,angle)])
+                    require(conflict.difference(permitted.buffer(dbu*2)).area < dbu*dbu,
+                            'unapproved passive M2 optical overpass')
+                    continue
                 require(
                     layer == "M2" and kind == "straight",
                     f"{layer} violates optical {kind} keepout",

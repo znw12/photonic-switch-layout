@@ -1,0 +1,48 @@
+{
+  "full_regression_passed": 284,
+  "final_targeted_passed": 47,
+  "full_candidates_verified": 2,
+  "selected": "output/benes/two-row/shared",
+  "repeat": {
+    "passed": true,
+    "original": "output/benes/two-row/shared",
+    "repeat": "output/benes/two-row/repeat-best",
+    "normalized_hash": "c2263638886a5813d59b30c2bf64acbc6877edbe721db6a4745fa8d966a83564",
+    "matching_fields": [
+      "normalized_hash",
+      "summary",
+      "uniformity",
+      "realized",
+      "electrical"
+    ],
+    "byte_equal_files": [
+      "settings.json",
+      "ports.csv",
+      "pads.csv"
+    ]
+  },
+  "independent_readback": {
+    "manifest_geometry_passed": true,
+    "logical_edges": 1792,
+    "optical_objects": 32520,
+    "mzi_count": 832,
+    "spare_terminations": 56,
+    "switch_depth_min": 13,
+    "switch_depth_max": 13,
+    "gds_readback_passed": true,
+    "electrical_extraction_passed": true,
+    "metal_regions": {
+      "M1": 4992,
+      "M2": 4962
+    },
+    "via_count": 8320,
+    "gds_cells": 6492,
+    "cell_references": 25121
+  },
+  "legacy_single_band_readback_passed": true,
+  "width_mm": 41.785,
+  "height_mm": 10.288244,
+  "area_mm2": 429.89427554,
+  "area_reduction_from_four_row_continuous_percent": 1.5015125217772818,
+  "placeholder_passive_m2_contract": true
+}

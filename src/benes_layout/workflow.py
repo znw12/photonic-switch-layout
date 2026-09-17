@@ -233,6 +233,9 @@ def generate(cfg, out, requests, *, choices=None):
                                     boundaries=m["interstage"],
                                     compressed_boundaries=[b["stage"] for b in m["interstage"] if b["mode"]=="compressed"],
                                     all_uncompressed=not any(b["mode"]=="compressed" for b in m["interstage"]))
+    if 'electrical_plan' in m:
+        from .two_row import statistics
+        report['electrical'] = statistics(m)
     for filename, value in (
         ("config.json", cfg.to_dict()),
         ("manifest.json", m),
@@ -297,7 +300,7 @@ def generate(cfg, out, requests, *, choices=None):
             )
     render(m, out / "preview.png")
     render(m, out / "detail.png", detail=True)
-    if cfg.pad_rows == 4:
+    if cfg.pad_rows == 4 or cfg.electrical_routing == 'two-row':
         render(m, out / "pads_detail.png", detail="pads")
     report["total_time_s"] = time.perf_counter() - started
     report["process_peak_rss_kib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
@@ -332,6 +335,9 @@ def verify_bundle(directory):
     result.update(verify_gds(directory / "layout.gds", m, names))
     if "interstage" in m:
         require(report["interstage"]["boundaries"]==m["interstage"],"interstage report mismatch")
+    if cfg.electrical_routing == 'two-row':
+        from .two_row import statistics
+        require(report.get('electrical') == statistics(m), 'electrical report mismatch')
     if "pad_banks" in report["metrics"]:
         require(
             pad_banks(m) == report["metrics"]["pad_banks"], "pad bank report mismatch"
