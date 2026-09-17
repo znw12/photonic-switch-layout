@@ -152,6 +152,8 @@ def generate(cfg, out, requests):
             "pads": len(m["electrical"]),
             "pad_rows_per_side": cfg.pad_rows,
             "pad_row_stagger_um": cfg.pad_row_stagger,
+            "pad_distribution": cfg.pad_distribution,
+            "lane_pitch_um": cfg.lane_pitch,
             "fold_bands": cfg.fold_bands,
             "vias": checks["via_count"],
             "width_mm": m["width"] / 1000,
@@ -255,6 +257,7 @@ def generate(cfg, out, requests):
                 "row",
                 "column",
                 "row_offset_um",
+                "pad_group",
             ]
         )
         for e in m["electrical"]:
@@ -269,6 +272,7 @@ def generate(cfg, out, requests):
                     e.get("pad_row", 0),
                     e.get("pad_column", columns[e["side"]][e["pad"][0]]),
                     e.get("pad_row_offset", 0),
+                    e.get("pad_group", ""),
                 ]
             )
     with (out / "ports.csv").open("w", newline="") as f:

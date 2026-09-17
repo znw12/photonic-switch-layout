@@ -44,6 +44,8 @@ def main(argv=None):
             p.add_argument("--candidates", type=int)
             p.add_argument("--pad-rows", type=int)
             p.add_argument("--pad-row-stagger", type=float)
+            p.add_argument("--pad-distribution", choices=("central", "stage"))
+            p.add_argument("--lane-pitch", type=float)
             p.add_argument("--fold-bands", type=int)
     sub.add_parser("verify").add_argument("directory")
     comparison = sub.add_parser("compare")
@@ -64,6 +66,8 @@ def main(argv=None):
                 max_candidates=getattr(args, "candidates", None),
                 pad_rows=getattr(args, "pad_rows", None),
                 pad_row_stagger=getattr(args, "pad_row_stagger", None),
+                pad_distribution=getattr(args, "pad_distribution", None),
+                lane_pitch=getattr(args, "lane_pitch", None),
                 fold_bands=getattr(args, "fold_bands", None),
             )
             pairs = request_pairs(args.connections, cfg.active_ports)

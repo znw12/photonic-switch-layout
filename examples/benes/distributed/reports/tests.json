@@ -1,0 +1,7 @@
+{
+  "command": "MPLCONFIGDIR=/tmp/benes-mpl .venv/bin/pytest -q",
+  "passed": 186,
+  "duration_seconds": 40.48,
+  "new_distributed_tests": 22,
+  "openspec_strict_validation": "passed"
+}

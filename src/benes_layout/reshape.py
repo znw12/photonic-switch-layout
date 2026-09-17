@@ -4,7 +4,7 @@ from math import ceil
 from .geometry import Library, snap, rectangle, validate_components, point
 from .network import Network, switch_id
 from .folds import fan_lane, return_turn
-from .pad_routing import route_pads, pad_slots
+from .pad_routing import route_pads, pad_slots, stage_pad_slots
 
 
 def build_reshaped(cfg, candidate=None, component_factory=None):
@@ -138,6 +138,12 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
             for i in range(count)
         ]
         s["end"] = right if not reverse else 0.0
+    planned_slots, pad_groups = None, None
+    if cfg.pad_distribution == "stage":
+        planned_slots, pad_groups = stage_pad_slots(
+            cfg, stages, right, snap(cfg.pad_pitch * candidate["pad"])
+        )
+        io_left, io_right = snap(-wing), snap(right + wing)
     m = dict(
         config=cfg.to_dict(),
         candidate=candidate,
@@ -154,6 +160,8 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
         crossing_count=0,
         floorplan="reshaped",
     )
+    if pad_groups is not None:
+        m["pad_groups"] = pad_groups
     terminals = []
     reverse_rows = candidate["row_order"] == "reverse"
 
@@ -196,7 +204,14 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
         for side, bank in (("south", terms[:count]), ("north", terms[count:])):
             # Increasing y order ensures terminal horizontal M1 runs cannot meet vias.
             for i, t in enumerate(bank):
-                terminals.append({**t, "side": side, "tx": s["trunk_xs"][i]})
+                terminals.append(
+                    {
+                        **t,
+                        "side": side,
+                        "tx": s["trunk_xs"][i],
+                        **({"stage": s["stage"]} if planned_slots is not None else {}),
+                    }
+                )
 
     def new_route(source, target, start):
         route = dict(
@@ -351,7 +366,15 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
     extra = cfg.termination_length if p > cfg.active_ports else 0
     edge = (cfg.mzi_height - pitch) / 2
     optical = [io_left - extra, -edge, io_right + extra, bands[-1]["y"] + h + edge]
-    pads = route_pads(lib, m, groups, terminals, step=step, optical_bounds=optical)
+    pads = route_pads(
+        lib,
+        m,
+        groups,
+        terminals,
+        step=step,
+        optical_bounds=optical,
+        planned_slots=planned_slots,
+    )
     m["die_bbox"] = [
         snap(min(optical[0], pads[0]) - cfg.margin),
         snap(pads[1] - cfg.margin),

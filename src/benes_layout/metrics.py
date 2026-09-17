@@ -30,6 +30,29 @@ def pad_banks(m):
                 sum(e.get("pad_row", 0) == r for e in bank) for r in range(cfg.pad_rows)
             ],
         )
+        if cfg.pad_distribution == "stage":
+            result[side]["fanout_levels"] = len({e["fanout_y"] for e in bank})
+            groups = []
+            for stage in range(len(m["stages"])):
+                members = [e for e in bank if e["pad_group"] == stage]
+                xs, ys = zip(*(e["pad"] for e in members))
+                groups.append(
+                    dict(
+                        stage=stage,
+                        bbox_um=[
+                            snap(min(xs) - half),
+                            snap(min(ys) - half),
+                            snap(max(xs) + half),
+                            snap(max(ys) + half),
+                        ],
+                        pad_count=len(members),
+                        row_counts=[
+                            sum(e["pad_row"] == r for e in members)
+                            for r in range(cfg.pad_rows)
+                        ],
+                    )
+                )
+            result[side]["groups"] = groups
     return result
 
 

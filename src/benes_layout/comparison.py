@@ -36,6 +36,8 @@ def compare_bundles(directories, out, baseline=None):
                 bundle=str(path),
                 status="verified",
                 pad_rows=cfg["pad_rows"],
+                pad_distribution=cfg.get("pad_distribution", "central"),
+                lane_pitch_um=cfg["lane_pitch"],
                 pad_row_stagger_um=cfg.get("pad_row_stagger", 0),
                 pad_bank_width_mm=report["metrics"]
                 .get("pad_banks", {})
@@ -109,6 +111,7 @@ def compare_bundles(directories, out, baseline=None):
         label_counts[location] = label_index + 1
         ax.scatter(r["width_mm"], r["height_mm"], s=70)
         ax.annotate(
+            f"{r['pad_distribution']} / {r['lane_pitch_um']:g} um lanes\n"
             f"{r['pad_rows']} rows / {r['fold_bands']} bands / {r['pad_row_stagger_um']:g} um stagger",
             (r["width_mm"], r["height_mm"]),
             xytext=(5, 5 + 14 * label_index),

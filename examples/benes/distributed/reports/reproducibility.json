@@ -1,0 +1,14 @@
+{
+  "normalized_hash_equal": true,
+  "normalized_hash": "4cd95d9e21d5ec68285f1bf1d022d730d229dff7ccaba56d052ca2b5315fb474",
+  "summary_equal": true,
+  "uniformity_equal": true,
+  "realized_equal": true,
+  "generation_checks_passed": true,
+  "layout.gds_equal": true,
+  "manifest.json_equal": true,
+  "pads.csv_equal": true,
+  "settings.json_equal": true,
+  "ports.csv_equal": true,
+  "gds_sha256": "4f4108d4b8c1b3b24542f3b6a032581882c1fb5d90dda32d285c107b21ef6417"
+}

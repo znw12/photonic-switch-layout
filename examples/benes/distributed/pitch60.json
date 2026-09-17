@@ -1,0 +1,19 @@
+{
+  "active_ports": 100,
+  "internal_ports": 128,
+  "pad_rows": 4,
+  "fold_bands": 1,
+  "pad_row_stagger": 25,
+  "max_candidates": 1,
+  "gap_factors": [
+    1.0
+  ],
+  "corridor_factors": [
+    1.0
+  ],
+  "row_orders": [
+    "normal"
+  ],
+  "pad_distribution": "stage",
+  "lane_pitch": 60
+}

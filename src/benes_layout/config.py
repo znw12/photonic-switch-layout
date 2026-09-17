@@ -31,6 +31,7 @@ class Config:
     pad_size: float = 60.0
     pad_pitch: float = 100.0
     pad_rows: int = 1
+    pad_distribution: str = "central"
     pad_row_stagger: float = 0.0
     pad_row_pitch: float = 100.0
     fold_bands: int = 1
@@ -128,6 +129,12 @@ class Config:
             raise ValueError("pad geometry violates metal spacing/enclosure")
         if type(self.pad_rows) is not int or self.pad_rows not in (1, 2, 3, 4):
             raise ValueError("pad_rows must be 1, 2, 3 or 4")
+        if self.pad_distribution not in ("central", "stage"):
+            raise ValueError("pad_distribution must be central or stage")
+        if self.pad_distribution == "stage" and (
+            self.pad_rows != 4 or self.fold_bands != 1
+        ):
+            raise ValueError("stage pad distribution requires four rows and one band")
         if (
             type(self.pad_row_stagger) not in (int, float)
             or not math.isfinite(self.pad_row_stagger)

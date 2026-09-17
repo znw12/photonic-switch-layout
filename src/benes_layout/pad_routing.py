@@ -26,6 +26,27 @@ def pad_slots(cfg, total, center, pad_pitch):
     return slots, bounds
 
 
+def stage_pad_slots(cfg, stages, core_right, pad_pitch):
+    """Place each local bank over its stage's trunks, within the optical width."""
+    slots, groups = [], []
+    for stage in stages:
+        total = len(stage["trunk_xs"])
+        _, centered = pad_slots(cfg, total, 0, pad_pitch)
+        half = (centered[1] - centered[0]) / 2
+        if 2 * half > core_right:
+            raise ValueError("stage pad group is wider than the optical core")
+        center = min(
+            core_right - half,
+            max(half, (min(stage["trunk_xs"]) + max(stage["trunk_xs"])) / 2),
+        )
+        local, bounds = pad_slots(cfg, total, center, pad_pitch)
+        if groups and bounds[0] - groups[-1]["x_bounds"][1] < cfg.metal_spacing:
+            raise ValueError("stage pad groups cannot satisfy metal spacing")
+        groups.append(dict(stage=stage["stage"], x_bounds=bounds, pads_per_side=total))
+        slots.extend({**s, "group": stage["stage"]} for s in local)
+    return slots, groups
+
+
 def fanout_levels(sources, destinations, clearance, stem_clearance=None):
     """Schedule horizontal M1 runs below every foreign M1 stem they cross.
 
@@ -66,7 +87,7 @@ def fanout_levels(sources, destinations, clearance, stem_clearance=None):
     return levels
 
 
-def route_pads(lib, m, groups, terminals, optical_bounds, step):
+def route_pads(lib, m, groups, terminals, optical_bounds, step, planned_slots=None):
     cfg = lib.cfg
     left, bottom, right, top = optical_bounds
     total = len(terminals) // 2
@@ -74,7 +95,14 @@ def route_pads(lib, m, groups, terminals, optical_bounds, step):
     pad_pitch = snap(cfg.pad_pitch * m["candidate"]["pad"])
     pad_span = (columns - 1) * pad_pitch + cfg.pad_size
     center = (left + right) / 2
-    slots, pad_bounds = pad_slots(cfg, total, center, pad_pitch)
+    if planned_slots is None:
+        slots, pad_bounds = pad_slots(cfg, total, center, pad_pitch)
+    else:
+        slots = [dict(s) for s in planned_slots]
+        pad_bounds = [
+            snap(min(s["px"] for s in slots) - cfg.pad_size / 2),
+            snap(max(s["px"] for s in slots) + cfg.pad_size / 2),
+        ]
     for slot in slots:
         dx = (
             0
@@ -105,6 +133,8 @@ def route_pads(lib, m, groups, terminals, optical_bounds, step):
             edge + sign * (2 * cfg.margin + max(levels) * step + cfg.pad_size / 2)
         )
         for i, (t, slot, level) in enumerate(zip(bank, slots, levels)):
+            if "group" in slot and t["stage"] != slot["group"]:
+                raise ValueError("stage pad assignment crosses group boundary")
             fy = snap(edge + sign * (cfg.margin + level * step))
             py = snap(pad_base + sign * slot["row"] * cfg.pad_row_pitch)
             tx, sx, px = t["tx"], slot["sx"], slot["px"]
@@ -146,6 +176,7 @@ def route_pads(lib, m, groups, terminals, optical_bounds, step):
                     "pad": [px, py],
                     "pad_row": slot["row"],
                     "pad_column": slot["column"],
+                    **({"pad_group": slot["group"]} if "group" in slot else {}),
                     **({"pad_row_offset": slot["offset"]} if cfg.pad_rows == 4 else {}),
                     "vias": vias,
                     "fanout_y": fy,

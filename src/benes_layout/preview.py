@@ -61,7 +61,11 @@ def render(m, path, detail=False):
     a, b, c, d = m["die_bbox"]
     if detail == "pads":
         pads = [
-            e for e in m["electrical"] if e["side"] == "north" and e["pad_column"] < 5
+            e
+            for e in m["electrical"]
+            if e["side"] == "north"
+            and e["pad_column"] < 5
+            and e.get("pad_group", 0) == 0
         ]
         a, c = min(e["pad"][0] for e in pads) - 140, max(e["pad"][0] for e in pads) + 70
         b, d = min(e["pad"][1] for e in pads) - 100, max(e["pad"][1] for e in pads) + 70
@@ -91,6 +95,7 @@ def render(m, path, detail=False):
     ax.set_title(
         (
             f"North pads | {cfg['pad_rows']} rows | {cfg['pad_row_stagger']:g} um row stagger"
+            + (" | stage 0" if cfg.get("pad_distribution") == "stage" else "")
             if detail == "pads"
             else f"Beneš {cfg['active_ports']} active / {cfg['internal_ports']} internal | {len(m['stages'])} stages | {len(m['instances'])} MZIs | R >= {cfg['radius']:g} um"
         )

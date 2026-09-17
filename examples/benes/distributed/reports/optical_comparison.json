@@ -1,0 +1,35 @@
+{
+  "central80_vs_stage80": {
+    "network": true,
+    "instances": true,
+    "routes": true,
+    "interfaces": true,
+    "terminations": true,
+    "stages": true,
+    "bands": true,
+    "optical_cell_names": true,
+    "optical_cells": true
+  },
+  "stage80_vs_stage60": {
+    "network": true,
+    "crossing_count": true,
+    "bands": true,
+    "switch_ids_and_stages": true,
+    "same_mzi_length_height_radius": true
+  },
+  "fanout_levels": {
+    "central80": {
+      "north": 448,
+      "south": 448
+    },
+    "stage80": {
+      "north": 54,
+      "south": 54
+    },
+    "stage60": {
+      "north": 54,
+      "south": 54
+    }
+  },
+  "optical_cells_compared": 56
+}

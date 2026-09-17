@@ -30,7 +30,12 @@ def verify_pad_banks(m):
     if cfg.pad_rows != 4:
         return
     cells, tol = m["cells"], 2 * cfg.grid
-    count = len(Network(cfg).switches)
+    net = Network(cfg)
+    count = len(net.switches)
+    distributed = cfg.pad_distribution == "stage"
+    stage_by_instance = {
+        switch_id(s, i): s for s in range(net.depth) for i in range(net.p // 2)
+    }
     pitch = snap(cfg.pad_pitch * m["candidate"]["pad"])
     half = cfg.pad_size / 2
     require(
@@ -49,16 +54,51 @@ def verify_pad_banks(m):
     for side, sign in (("north", 1), ("south", -1)):
         bank = [e for e in m["electrical"] if e["side"] == side]
         require(len(bank) == count, "pad bank coverage mismatch")
-        slots = [(e["pad_column"], e["pad_row"]) for e in bank]
+        if distributed:
+            require(
+                all(
+                    e.get("pad_group") == stage_by_instance.get(e["instance"])
+                    and e.get("stage") == e.get("pad_group")
+                    for e in bank
+                ),
+                "pad group does not match source stage",
+            )
+        slots = [(e.get("pad_group", 0), e["pad_column"], e["pad_row"]) for e in bank]
+        expected_slots = {
+            (s, i // 4, i % 4)
+            for s in range(net.depth if distributed else 1)
+            for i in range(net.p // 2 if distributed else count)
+        }
         require(
-            len(set(slots)) == count
-            and set(slots) == {(i // 4, i % 4) for i in range(count)},
+            len(set(slots)) == count and set(slots) == expected_slots,
             "duplicate or missing pad slot",
         )
-        origin = next(
-            e["pad"] for e in bank if (e["pad_column"], e["pad_row"]) == (0, 0)
-        )
+        origins = {
+            e.get("pad_group", 0): e["pad"]
+            for e in bank
+            if (e["pad_column"], e["pad_row"]) == (0, 0)
+        }
+        require(len({v[1] for v in origins.values()}) == 1, "pad groups misalign rows")
+        if distributed:
+            actual_groups = []
+            for s in range(net.depth):
+                members = [e for e in bank if e["pad_group"] == s]
+                bounds = [
+                    snap(min(e["pad"][0] for e in members) - half),
+                    snap(max(e["pad"][0] for e in members) + half),
+                ]
+                require(
+                    not actual_groups
+                    or bounds[0] - actual_groups[-1]["x_bounds"][1]
+                    >= cfg.metal_spacing - tol,
+                    "stage pad groups overlap or violate spacing",
+                )
+                actual_groups.append(
+                    dict(stage=s, x_bounds=bounds, pads_per_side=len(members))
+                )
+            require(actual_groups == m.get("pad_groups"), "pad group extent mismatch")
         for e in bank:
+            origin = origins[e.get("pad_group", 0)]
             row, col = e["pad_row"], e["pad_column"]
             require(
                 abs(e["pad_row_offset"] - row * cfg.pad_row_stagger) < tol,
@@ -508,7 +548,14 @@ def verify_manifest(m):
         )
         require(len(group) == len(net.switches), "unbalanced pad banks")
         rows = sorted({e["pad"][1] for e in group})
-        require(len(rows) == min(cfg.pad_rows, len(group)), "incorrect pad row count")
+        require(
+            len(rows)
+            == min(
+                cfg.pad_rows,
+                net.p // 2 if cfg.pad_distribution == "stage" else len(group),
+            ),
+            "incorrect pad row count",
+        )
         require(
             all(b - a >= cfg.pad_row_pitch - tol for a, b in zip(rows, rows[1:])),
             "pad row spacing violation",
@@ -517,7 +564,13 @@ def verify_manifest(m):
             row = [e for e in group if e["pad"][1] == y]
             require(
                 all(
-                    b["pad"][0] - a["pad"][0] >= cfg.pad_pitch - tol
+                    b["pad"][0] - a["pad"][0]
+                    >= (
+                        cfg.pad_size + cfg.metal_spacing
+                        if cfg.pad_distribution == "stage"
+                        else cfg.pad_pitch
+                    )
+                    - tol
                     for a, b in zip(row, row[1:])
                 ),
                 "pad pitch violation",
