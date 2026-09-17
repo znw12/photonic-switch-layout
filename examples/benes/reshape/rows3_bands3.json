@@ -1,0 +1,15 @@
+{
+  "active_ports": 100,
+  "pad_rows": 3,
+  "fold_bands": 3,
+  "max_candidates": 1,
+  "gap_factors": [
+    1.0
+  ],
+  "corridor_factors": [
+    1.0
+  ],
+  "row_orders": [
+    "normal"
+  ]
+}

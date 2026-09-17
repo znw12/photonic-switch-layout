@@ -1,0 +1,16 @@
+{
+  "checks": [
+    "canonical graph",
+    "rotated optical endpoints",
+    "optical spacing and radius",
+    "GDS polygon and hierarchy readback",
+    "electrical extraction and via enclosure",
+    "metal width and spacing",
+    "negative geometry and routing tests"
+  ],
+  "command": "MPLCONFIGDIR=/tmp/benes-mpl .venv/bin/pytest -q",
+  "elapsed_s": 35.92,
+  "full_100_port_bundles": 6,
+  "passed": 135,
+  "summary": "135 passed in 35.92s"
+}

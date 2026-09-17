@@ -1,0 +1,18 @@
+{
+  "bundles": [
+    "output/benes/reshape/rows3_bands3",
+    "output/benes/reshape/repro_rows3_bands3"
+  ],
+  "checks": {
+    "gds_byte_identical": true,
+    "normalized_hash": true,
+    "realized": true,
+    "summary": true,
+    "uniformity": true
+  },
+  "gds_sha256": [
+    "cd9614ad7c59e22f0cc557de037758beea0eac007b7db95c76948765fd9bafe5",
+    "cd9614ad7c59e22f0cc557de037758beea0eac007b7db95c76948765fd9bafe5"
+  ],
+  "normalized_hash": "ca4656adfc072cad1eff512340da3b62fdb88d0fd896f45183c2aca42335fd19"
+}

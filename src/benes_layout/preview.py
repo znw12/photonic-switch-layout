@@ -39,7 +39,12 @@ def render(m, path, detail=False):
             )
 
     visit(m["top"])
-    fig, ax = plt.subplots(figsize=(18, 5), layout="constrained")
+    size = (
+        (12, min(16, max(4, 12 * m["height"] / m["width"])))
+        if m.get("bands") and not detail
+        else (18, 5)
+    )
+    fig, ax = plt.subplots(figsize=size, layout="constrained")
     fig.patch.set_facecolor("#101923")
     ax.set_facecolor("#101923")
     for layer, color in colors.items():
@@ -72,11 +77,8 @@ def render(m, path, detail=False):
         loc="left",
         pad=15,
     )
-    fig.text(
-        0.99,
-        0.01,
+    fig.supxlabel(
         "WG: teal    M1: amber    M2/pads: blue    VIA: cream    PLACEHOLDER TECHNOLOGY",
-        ha="right",
         color="#afc2d3",
         fontsize=9,
     )

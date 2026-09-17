@@ -253,3 +253,10 @@ def validate_components(lib):
             0 if side == "west" else 180,
         ]:
             raise ValueError("termination contract requires an oriented optical port")
+
+
+def point(x, y, angle, at):
+    """Exact orthogonal transform without accumulating trigonometric drift."""
+    a, b = at[:2]
+    a, b = {0: (a, b), 90: (-b, a), 180: (-a, -b), 270: (b, -a)}[angle % 360]
+    return [snap(x + a), snap(y + b)]

@@ -42,7 +42,13 @@ def main(argv=None):
         )
         if command == "generate":
             p.add_argument("--candidates", type=int)
+            p.add_argument("--pad-rows", type=int)
+            p.add_argument("--fold-bands", type=int)
     sub.add_parser("verify").add_argument("directory")
+    comparison = sub.add_parser("compare")
+    comparison.add_argument("directories", nargs="+")
+    comparison.add_argument("--out", default="output/benes/reshape/comparison")
+    comparison.add_argument("--baseline")
     b = sub.add_parser("benchmark")
     b.add_argument("--sizes", default="16,128,256,1024")
     b.add_argument("--out", default="output/benes/scaling.json")
@@ -55,6 +61,8 @@ def main(argv=None):
                 active_ports=args.n,
                 internal_ports=args.internal,
                 max_candidates=getattr(args, "candidates", None),
+                pad_rows=getattr(args, "pad_rows", None),
+                fold_bands=getattr(args, "fold_bands", None),
             )
             pairs = request_pairs(args.connections, cfg.active_ports)
             if args.command == "solve":
@@ -74,6 +82,16 @@ def main(argv=None):
             from .workflow import verify_bundle
 
             print(json.dumps(verify_bundle(args.directory), indent=2))
+        elif args.command == "compare":
+            from .comparison import compare_bundles
+
+            result = compare_bundles(args.directories, args.out, args.baseline)
+            print(
+                json.dumps(
+                    {k: v for k, v in result.items() if k.startswith("smallest_")},
+                    indent=2,
+                )
+            )
         else:
             from .workflow import benchmark
 

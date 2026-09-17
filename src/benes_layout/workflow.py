@@ -2,6 +2,7 @@
 
 from itertools import product
 import csv
+from math import ceil
 import importlib.metadata
 import json
 from pathlib import Path
@@ -148,6 +149,8 @@ def generate(cfg, out, requests):
             "stages": net.depth,
             "mzis": len(net.switches),
             "pads": len(m["electrical"]),
+            "pad_rows_per_side": cfg.pad_rows,
+            "fold_bands": cfg.fold_bands,
             "vias": checks["via_count"],
             "width_mm": m["width"] / 1000,
             "height_mm": m["height"] / 1000,
@@ -189,8 +192,13 @@ def generate(cfg, out, requests):
         "metrics": {
             "die_bbox_um": m["die_bbox"],
             "extents_um": m["extents"],
-            "pad_bank_width_lower_bound_um": (len(net.switches) - 1) * cfg.pad_pitch
+            "pad_bank_width_lower_bound_um": (
+                ceil(len(net.switches) / cfg.pad_rows) - 1
+            )
+            * cfg.pad_pitch
             + cfg.pad_size,
+            "width_target_um": 20000,
+            "width_target_met": m["width"] <= 20000,
             "crossings": m["crossing_count"],
             "gds_bytes": (out / "layout.gds").stat().st_size,
             "unrouted_optical": 0,
@@ -210,6 +218,7 @@ def generate(cfg, out, requests):
             "Single-connection operation requires unrequested inputs to be dark.",
             "Rearrangeable operation may interrupt existing connections; no hitless guarantee.",
             "Two dedicated pads per MZI; returns remain separate.",
+            "Multirow pads use insulated M1 stems beneath M2 pads; packaging access is not qualified.",
         ],
     }
     for filename, value in (

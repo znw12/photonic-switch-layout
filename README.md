@@ -116,3 +116,5 @@ Python API 的 `build_layout(config, mzi_factory=...)` 接受自定义器件工�
 - `verify.py`：几何核对、GDS 回读和电学提取。
 - `cli.py`：候选搜索、命令行、输出与规模指标。
 - `preview.py`：实际几何的离线渲染。
+
+Beneš 多排 pad 与折叠布局：见 [实验说明](docs/BENES_RESHAPE.md)，支持南北各 2/3 排 pad，附六种 100 端口布局的尺寸及验证比较。

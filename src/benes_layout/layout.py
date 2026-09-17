@@ -11,6 +11,10 @@ from .network import Network, switch_id
 
 
 def build_layout(cfg: Config, candidate=None, component_factory=None):
+    if cfg.pad_rows > 1:
+        from .reshape import build_reshaped
+
+        return build_reshaped(cfg, candidate, component_factory)
     candidate = candidate or dict(
         id="compact", gap=1.0, row_order="normal", pad=1.0, corridor=1.0
     )

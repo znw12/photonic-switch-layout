@@ -30,6 +30,11 @@ class Config:
     optical_metal_clearance: float = 10.0
     pad_size: float = 60.0
     pad_pitch: float = 100.0
+    pad_rows: int = 1
+    pad_row_pitch: float = 100.0
+    fold_bands: int = 1
+    fold_gap: float = 200.0
+    bundle_pitch: float = 6.01
     margin: float = 100.0
     crossing_half_length: float = 10.0
     termination_length: float = 40.0
@@ -93,6 +98,9 @@ class Config:
             "optical_metal_clearance",
             "pad_size",
             "pad_pitch",
+            "pad_row_pitch",
+            "fold_gap",
+            "bundle_pitch",
             "margin",
             "crossing_half_length",
             "termination_length",
@@ -117,6 +125,30 @@ class Config:
             self.metal_width, self.via_size + 2 * self.via_enclosure
         ):
             raise ValueError("pad geometry violates metal spacing/enclosure")
+        if type(self.pad_rows) is not int or self.pad_rows not in (1, 2, 3):
+            raise ValueError("pad_rows must be 1, 2 or 3")
+        depth = 2 * (p.bit_length() - 1) - 1
+        if (
+            type(self.fold_bands) is not int
+            or not 1 <= self.fold_bands <= depth
+            or self.fold_bands % 2 != 1
+        ):
+            raise ValueError("fold_bands must be odd and no greater than stage depth")
+        if self.fold_bands > 1 and self.pad_rows == 1:
+            raise ValueError("folded layouts require two or three pad rows")
+        if self.pad_row_pitch < self.pad_size + self.metal_spacing:
+            raise ValueError("pad row pitch violates spacing")
+        if self.fold_bands > 1 and (
+            self.fold_gap
+            < max(
+                2 * self.radius,
+                self.mzi_height - self.lane_pitch + 2 * self.optical_metal_clearance,
+            )
+            or not self.wg_width + self.wg_clearance + 2 * self.grid
+            <= self.bundle_pitch
+            <= self.lane_pitch - 2 * self.radius
+        ):
+            raise ValueError("fold gap or bundle pitch cannot fit radius/clearance")
         if self.margin < self.pad_size / 2 + self.optical_metal_clearance:
             raise ValueError("margin cannot fit pad/optical clearance")
         object.__setattr__(self, "terminal_names", tuple(self.terminal_names))

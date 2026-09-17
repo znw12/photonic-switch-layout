@@ -5,7 +5,7 @@ from bisect import bisect_left, bisect_right
 from math import hypot, pi, sqrt
 
 from shapely.geometry import Point, Polygon, box
-from shapely.affinity import translate
+from shapely.affinity import translate, rotate
 from shapely.strtree import STRtree
 from shapely.ops import unary_union
 
@@ -21,21 +21,30 @@ from waksman_layout.verify import (
 )
 from .config import Config
 from .network import Network, switch_id
-from .geometry import arc_polygon, snap, rectangle
+from .geometry import arc_polygon, snap, rectangle, point
 
 
 def optical_objects(m):
     """Flatten only to optical black boxes, preserving explicit crossing cells."""
     objects = []
 
-    def visit(name, x=0, y=0):
+    def visit(name, x=0, y=0, angle=0):
         c = m["cells"][name]
-        if c["kind"] in ("straight", "exchange", "mzi", "termination", "meander"):
-            objects.append((name, snap(x), snap(y)))
+        if c["kind"] in (
+            "straight",
+            "exchange",
+            "mzi",
+            "termination",
+            "meander",
+            "fan_lane",
+            "turn",
+        ):
+            objects.append((name, snap(x), snap(y), angle % 360))
             return
         for r in c["refs"]:
-            require(r["angle"] == 0, "unexpected group rotation")
-            visit(r["cell"], x + r["x"], y + r["y"])
+            require(r["angle"] % 90 == 0, "unexpected group rotation")
+            at = point(x, y, angle, [r["x"], r["y"]])
+            visit(r["cell"], *at, (angle + r["angle"]) % 360)
 
     visit(m["top"])
     return objects
@@ -46,12 +55,12 @@ def spatial_objects(m):
     objs = optical_objects(m)
     geoms, ports = [], []
     cfg = Config(**m["config"])
-    for name, x, y in objs:
+    for name, x, y, angle in objs:
         c = m["cells"][name]
-        geoms.append(translate(shape(name, "WG"), x, y))
+        geoms.append(translate(rotate(shape(name, "WG"), angle, origin=(0, 0)), x, y))
         ports.append(
             {
-                (snap(x + v[0]), snap(y + v[1]))
+                tuple(point(x, y, angle, v))
                 for key, v in c["ports"].items()
                 if key not in cfg.terminal_names
             }
@@ -74,6 +83,24 @@ def verify_manifest(m):
         "missing, duplicated or bypassed MZI",
     )
     require(len(m["stages"]) == net.depth, "missing stage")
+    if cfg.pad_rows > 1:
+        bands = m.get("bands", [])
+        require(len(bands) == cfg.fold_bands, "fold band count mismatch")
+        require(
+            [s for b in bands for s in b["stages"]] == list(range(net.depth)),
+            "fold bands must contain consecutive complete stages",
+        )
+        for b, band in enumerate(bands):
+            require(
+                band["y"] == snap(b * ((net.p - 1) * cfg.lane_pitch + cfg.fold_gap)),
+                "fold band pitch mismatch",
+            )
+            for s in band["stages"]:
+                require(
+                    m["stages"][s]["band"] == b
+                    and m["stages"][s]["angle"] == 180 * (b % 2),
+                    "fold stage transform mismatch",
+                )
     for s in range(net.depth):
         stage = [i for i in inst.values() if i["stage"] == s]
         require(
@@ -83,11 +110,22 @@ def verify_manifest(m):
         )
         for i in stage:
             require(
+                i.get("angle", 0) in cells[i["cell"]]["metadata"]["allowed_transforms"],
+                "MZI transform not permitted by component",
+            )
+            require(
                 net.switches[i["id"]]["stage"] == s and i["pin_flip"] in (0, 1),
                 "logical-to-physical stage/pin map corrupted",
             )
             require(
-                i["x"] == m["stages"][s]["x"] and i["y"] == i["row"] * cfg.lane_pitch,
+                [i["x"], i["y"]]
+                == point(
+                    m["stages"][s]["x"],
+                    m["stages"][s].get("origin_y", 0),
+                    m["stages"][s].get("angle", 0),
+                    [0, i["row"] * cfg.lane_pitch],
+                )
+                and i.get("angle", 0) == m["stages"][s].get("angle", 0),
                 "instance disagrees with regular placement",
             )
     interface = {(v["side"], v["internal"]): v for v in m["interfaces"]}
@@ -102,6 +140,17 @@ def verify_manifest(m):
                 interface[side, lane]["active"] == expected,
                 "active/spare mapping mismatch",
             )
+            if cfg.pad_rows > 1:
+                extra = cfg.termination_length if net.p > cfg.active_ports else 0
+                x = (
+                    m["die_bbox"][0] + cfg.margin + extra
+                    if side == "west"
+                    else m["die_bbox"][2] - cfg.margin - extra
+                )
+                require(
+                    abs(interface[side, lane]["position"][0] - x) < tol,
+                    "optical interface recessed behind die envelope",
+                )
     expected_top_ports = {
         f"{'in' if side=='west' else 'out'}_{v['active']}": [
             *v["position"],
@@ -137,7 +186,7 @@ def verify_manifest(m):
         i = inst[sid]
         actual = pin[0] + str(int(pin[1]) ^ i["pin_flip"])
         at = cells[i["cell"]]["ports"][actual]
-        return [snap(i["x"] + at[0]), snap(i["y"] + at[1])]
+        return point(i["x"], i["y"], i.get("angle", 0), at)
 
     expected = {}
     for lane in range(net.p):
@@ -180,12 +229,19 @@ def verify_manifest(m):
             for key in totals:
                 totals[key] += track[0][key]
             a, b = c["ports"][part["entry"]], c["ports"][part["exit"]]
-            start = [part["x"] + a[0], part["y"] + a[1]]
+            start = point(part["x"], part["y"], part.get("angle", 0), a)
             require(
                 hypot(last[0] - start[0], last[1] - start[1]) <= tol, "optical path gap"
             )
-            last = [part["x"] + b[0], part["y"] + b[1]]
-            used.add((part["cell"], snap(part["x"]), snap(part["y"])))
+            last = point(part["x"], part["y"], part.get("angle", 0), b)
+            used.add(
+                (
+                    part["cell"],
+                    snap(part["x"]),
+                    snap(part["y"]),
+                    part.get("angle", 0) % 360,
+                )
+            )
         end = endpoint(route["target"])
         require(
             hypot(last[0] - end[0], last[1] - end[1]) <= tol
@@ -226,7 +282,7 @@ def verify_manifest(m):
                 ],
                 "straight centerline metrics corrupted",
             )
-        if c["kind"] == "bend":
+        if c["kind"] in ("bend", "turn"):
             a = c["metadata"]["arc"]
             require(a["radius"] >= cfg.radius, "bend radius too small")
             polys = [p for p in c["polygons"] if p["layer"] == "WG"]
@@ -268,12 +324,19 @@ def verify_manifest(m):
                     and t["min_radius"] == cfg.radius,
                     "exchange centerline metrics corrupted",
                 )
-        if c["kind"] == "meander":
+        if c["kind"] in ("meander", "fan_lane"):
             for key in ("length", "crossings", "bends", "angle"):
                 value = sum(cells[r["cell"]]["tracks"][0][key] for r in c["refs"])
                 require(
                     abs(value - c["tracks"][0][key]) < tol,
                     "meander centerline metrics corrupted",
+                )
+            if c["kind"] == "fan_lane":
+                require(
+                    len(c["tracks"]) == 2
+                    and c["tracks"][0]["ports"] == ["w", "e"]
+                    and c["tracks"][1] == {**c["tracks"][0], "ports": ["e", "w"]},
+                    "fan reverse transfer corrupted",
                 )
         if c["kind"] == "crossing":
             require(
@@ -289,8 +352,10 @@ def verify_manifest(m):
     objs, geoms, ports = spatial_objects(m)
     actual = Counter(objs)
     expected_objs = Counter(used)
-    expected_objs.update((i["cell"], i["x"], i["y"]) for i in inst.values())
-    expected_objs.update((t["cell"], t["x"], t["y"]) for t in term.values())
+    expected_objs.update(
+        (i["cell"], i["x"], i["y"], i.get("angle", 0)) for i in inst.values()
+    )
+    expected_objs.update((t["cell"], t["x"], t["y"], 0) for t in term.values())
     require(
         actual == expected_objs,
         "optical hierarchy differs from connected route/component inventory",
@@ -342,22 +407,27 @@ def verify_manifest(m):
             (e for e in m["electrical"] if e["side"] == side), key=lambda e: e["pad"][0]
         )
         require(len(group) == len(net.switches), "unbalanced pad banks")
+        rows = sorted({e["pad"][1] for e in group})
+        require(len(rows) == min(cfg.pad_rows, len(group)), "incorrect pad row count")
         require(
-            len({e["pad"][1] for e in group}) == 1,
-            "pads must form a single row per bank",
+            all(b - a >= cfg.pad_row_pitch - tol for a, b in zip(rows, rows[1:])),
+            "pad row spacing violation",
         )
-        require(
-            all(
-                b["pad"][0] - a["pad"][0] >= cfg.pad_pitch - tol
-                for a, b in zip(group, group[1:])
-            ),
-            "pad pitch violation",
-        )
+        for y in rows:
+            row = [e for e in group if e["pad"][1] == y]
+            require(
+                all(
+                    b["pad"][0] - a["pad"][0] >= cfg.pad_pitch - tol
+                    for a, b in zip(row, row[1:])
+                ),
+                "pad pitch violation",
+            )
         require(
             (
-                group[0]["pad"][1] - cfg.pad_size / 2 > (net.p - 1) * cfg.lane_pitch
+                min(rows) - cfg.pad_size / 2
+                > (net.p - 1) * cfg.lane_pitch + m.get("bands", [{"y": 0}])[-1]["y"]
                 if side == "north"
-                else group[0]["pad"][1] + cfg.pad_size / 2 < 0
+                else max(rows) + cfg.pad_size / 2 < 0
             ),
             "pad bank lies on incorrect chip side",
         )
@@ -369,7 +439,7 @@ def verify_manifest(m):
         i = inst[e["instance"]]
         at = cells[i["cell"]]["ports"][e["terminal"]]
         require(
-            abs(e["x"] - i["x"] - at[0]) < tol and abs(e["y"] - i["y"] - at[1]) < tol,
+            [e["x"], e["y"]] == point(i["x"], i["y"], i.get("angle", 0), at),
             "electrical source not at MZI terminal",
         )
     return {
@@ -531,7 +601,7 @@ def verify_gds(path, m, names):
         for metal in parts[layer]:
             for j in optical_tree.query(metal, predicate="dwithin", distance=distance):
                 j = int(j)
-                name, x, y = objs[j]
+                name, x, y, angle = objs[j]
                 kind = m["cells"][name]["kind"]
                 if layer == "M1" and kind == "mzi":
                     continue  # Declared placeholder electrode region.
