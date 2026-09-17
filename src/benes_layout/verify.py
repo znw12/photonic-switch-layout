@@ -24,6 +24,105 @@ from .network import Network, switch_id
 from .geometry import arc_polygon, snap, rectangle, point
 
 
+def verify_pad_banks(m):
+    """Reconstruct the four-row placement contract independently of the router."""
+    cfg = Config(**m["config"])
+    if cfg.pad_rows != 4:
+        return
+    cells, tol = m["cells"], 2 * cfg.grid
+    count = len(Network(cfg).switches)
+    pitch = snap(cfg.pad_pitch * m["candidate"]["pad"])
+    half = cfg.pad_size / 2
+    require(
+        cells["PAD"]["polygons"]
+        == [
+            dict(
+                layer="M2",
+                points=[
+                    [snap(x), snap(y)] for x, y in rectangle(-half, -half, half, half)
+                ],
+            )
+        ],
+        "pad polygon differs from configured square",
+    )
+    all_bounds = []
+    for side, sign in (("north", 1), ("south", -1)):
+        bank = [e for e in m["electrical"] if e["side"] == side]
+        require(len(bank) == count, "pad bank coverage mismatch")
+        slots = [(e["pad_column"], e["pad_row"]) for e in bank]
+        require(
+            len(set(slots)) == count
+            and set(slots) == {(i // 4, i % 4) for i in range(count)},
+            "duplicate or missing pad slot",
+        )
+        origin = next(
+            e["pad"] for e in bank if (e["pad_column"], e["pad_row"]) == (0, 0)
+        )
+        for e in bank:
+            row, col = e["pad_row"], e["pad_column"]
+            require(
+                abs(e["pad_row_offset"] - row * cfg.pad_row_stagger) < tol,
+                "pad row offset metadata mismatch",
+            )
+            require(
+                abs(e["pad"][0] - (origin[0] + col * pitch + row * cfg.pad_row_stagger))
+                < tol
+                and abs(e["pad"][1] - (origin[1] + sign * row * cfg.pad_row_pitch))
+                < tol,
+                "pad stagger or row placement mismatch",
+            )
+            require(len(e["vias"]) == 3, "four-row net requires three vias")
+            require(
+                box(
+                    e["pad"][0] - half,
+                    e["pad"][1] - half,
+                    e["pad"][0] + half,
+                    e["pad"][1] + half,
+                )
+                .buffer(tol)
+                .covers(
+                    Point(e["vias"][-1]).buffer(
+                        cfg.via_size / 2 + cfg.via_enclosure, cap_style=3
+                    )
+                ),
+                "pad via landing outside assigned pad",
+            )
+        group = side.upper() + "_PADS"
+        require(cells[group]["polygons"] == [], "unexpected pad group polygons")
+        actual = Counter(
+            (r["cell"], r["x"], r["y"], r["angle"], r["id"])
+            for r in cells[group]["refs"]
+        )
+        expected = Counter(("PAD", *e["pad"], 0, e["net"]) for e in bank)
+        require(actual == expected, "pad hierarchy differs from assigned slots")
+        roots = [r for r in cells[m["top"]]["refs"] if r["cell"] == group]
+        require(
+            len(roots) == 1
+            and [roots[0]["x"], roots[0]["y"], roots[0]["angle"]] == [0, 0, 0],
+            "pad bank root transform mismatch",
+        )
+        bounds = [
+            min(e["pad"][0] for e in bank) - half,
+            min(e["pad"][1] for e in bank) - half,
+            max(e["pad"][0] for e in bank) + half,
+            max(e["pad"][1] for e in bank) + half,
+        ]
+        require(
+            box(*m["die_bbox"]).buffer(tol).covers(box(*bounds)), "pad bank outside die"
+        )
+        all_bounds.append(bounds)
+    combined = [
+        min(b[0] for b in all_bounds),
+        min(b[1] for b in all_bounds),
+        max(b[2] for b in all_bounds),
+        max(b[3] for b in all_bounds),
+    ]
+    require(
+        all(abs(a - b) < tol for a, b in zip(combined, m["extents"]["pads"])),
+        "reported pad extent mismatch",
+    )
+
+
 def optical_objects(m):
     """Flatten only to optical black boxes, preserving explicit crossing cells."""
     objects = []
@@ -70,6 +169,7 @@ def spatial_objects(m):
 
 def verify_manifest(m):
     cfg, cells = Config(**m["config"]), m["cells"]
+    verify_pad_banks(m)
     net = Network(cfg)
     tol = cfg.grid * 2
     require(
@@ -457,6 +557,7 @@ def verify_gds(path, m, names):
     import klayout.db as kdb
 
     cfg = Config(**m["config"])
+    verify_pad_banks(m)
     ly = kdb.Layout()
     ly.read(str(path))
     dbu = ly.dbu

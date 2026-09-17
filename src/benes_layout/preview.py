@@ -44,6 +44,8 @@ def render(m, path, detail=False):
         if m.get("bands") and not detail
         else (18, 5)
     )
+    if detail == "pads":
+        size = (11, 7)
     fig, ax = plt.subplots(figsize=size, layout="constrained")
     fig.patch.set_facecolor("#101923")
     ax.set_facecolor("#101923")
@@ -57,7 +59,23 @@ def render(m, path, detail=False):
             )
         )
     a, b, c, d = m["die_bbox"]
-    if detail:
+    if detail == "pads":
+        pads = [
+            e for e in m["electrical"] if e["side"] == "north" and e["pad_column"] < 5
+        ]
+        a, c = min(e["pad"][0] for e in pads) - 140, max(e["pad"][0] for e in pads) + 70
+        b, d = min(e["pad"][1] for e in pads) - 100, max(e["pad"][1] for e in pads) + 70
+        for e in pads:
+            if e["pad_column"] == 0:
+                ax.text(
+                    a + 5,
+                    e["pad"][1],
+                    f"R{e['pad_row']} +{e['pad_row_offset']:g} um",
+                    color="white",
+                    fontsize=9,
+                    va="center",
+                )
+    elif detail:
         s = m["stages"][0]
         a = s["x"] - 50
         c = min(s["end"], s["escape_end"] + 4 * m["config"]["lane_pitch"])
@@ -71,7 +89,11 @@ def render(m, path, detail=False):
         spine.set_color("#456")
     cfg = m["config"]
     ax.set_title(
-        f"Beneš {cfg['active_ports']} active / {cfg['internal_ports']} internal | {len(m['stages'])} stages | {len(m['instances'])} MZIs | R >= {cfg['radius']:g} um"
+        (
+            f"North pads | {cfg['pad_rows']} rows | {cfg['pad_row_stagger']:g} um row stagger"
+            if detail == "pads"
+            else f"Beneš {cfg['active_ports']} active / {cfg['internal_ports']} internal | {len(m['stages'])} stages | {len(m['instances'])} MZIs | R >= {cfg['radius']:g} um"
+        )
         + (" | detail" if detail else ""),
         color="white",
         loc="left",

@@ -4,7 +4,7 @@ from math import ceil
 from .geometry import Library, snap, rectangle, validate_components, point
 from .network import Network, switch_id
 from .folds import fan_lane, return_turn
-from .pad_routing import route_pads
+from .pad_routing import route_pads, pad_slots
 
 
 def build_reshaped(cfg, candidate=None, component_factory=None):
@@ -115,6 +115,13 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
     ) + cfg.pad_size
     io_left = snap(min(-wing, right / 2 - pad_span / 2))
     io_right = snap(max(right + wing, right / 2 + pad_span / 2))
+    if cfg.pad_rows == 4:
+        _, bounds = pad_slots(
+            cfg, len(net.switches), right / 2, snap(cfg.pad_pitch * candidate["pad"])
+        )
+        io_left, io_right = snap(min(-wing, bounds[0])), snap(
+            max(right + wing, bounds[1])
+        )
     for s in stages:
         col = s["column"]
         reverse = s["angle"] == 180

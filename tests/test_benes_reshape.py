@@ -19,7 +19,7 @@ from benes_layout.cli import main
     "override",
     [
         dict(pad_rows=0),
-        dict(pad_rows=4),
+        dict(pad_rows=5),
         dict(pad_rows=True),
         dict(fold_bands=2),
         dict(fold_bands=15),
@@ -161,5 +161,5 @@ def test_cli_bundle(tmp_path):
     assert result["results"][0]["pad_rows"] == 3
     assert result["results"][0]["pareto_width_area"]
     assert (
-        main(["generate", "--pad-rows", "4", "--out", str(tmp_path / "invalid")]) == 2
+        main(["generate", "--pad-rows", "5", "--out", str(tmp_path / "invalid")]) == 2
     )

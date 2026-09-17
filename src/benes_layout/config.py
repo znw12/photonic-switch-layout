@@ -31,6 +31,7 @@ class Config:
     pad_size: float = 60.0
     pad_pitch: float = 100.0
     pad_rows: int = 1
+    pad_row_stagger: float = 0.0
     pad_row_pitch: float = 100.0
     fold_bands: int = 1
     fold_gap: float = 200.0
@@ -125,8 +126,28 @@ class Config:
             self.metal_width, self.via_size + 2 * self.via_enclosure
         ):
             raise ValueError("pad geometry violates metal spacing/enclosure")
-        if type(self.pad_rows) is not int or self.pad_rows not in (1, 2, 3):
-            raise ValueError("pad_rows must be 1, 2 or 3")
+        if type(self.pad_rows) is not int or self.pad_rows not in (1, 2, 3, 4):
+            raise ValueError("pad_rows must be 1, 2, 3 or 4")
+        if (
+            type(self.pad_row_stagger) not in (int, float)
+            or not math.isfinite(self.pad_row_stagger)
+            or self.pad_row_stagger < 0
+        ):
+            raise ValueError("pad_row_stagger must be finite and nonnegative")
+        if (
+            abs(
+                self.pad_row_stagger / self.grid
+                - round(self.pad_row_stagger / self.grid)
+            )
+            > 1e-7
+        ):
+            raise ValueError("pad_row_stagger must lie on the database grid")
+        if self.pad_rows == 4 and self.fold_bands != 1:
+            raise ValueError("four pad rows require a single band")
+        if self.pad_row_stagger and (self.pad_rows != 4 or self.fold_bands != 1):
+            raise ValueError("pad row staggering requires four rows and a single band")
+        if (self.pad_rows - 1) * self.pad_row_stagger >= self.pad_pitch:
+            raise ValueError("pad row stagger spans a full column pitch")
         depth = 2 * (p.bit_length() - 1) - 1
         if (
             type(self.fold_bands) is not int

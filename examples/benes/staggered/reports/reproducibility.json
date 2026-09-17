@@ -1,0 +1,19 @@
+{
+  "bundles": [
+    "output/benes/staggered/offset25",
+    "output/benes/staggered/repro25"
+  ],
+  "checks": {
+    "gds_byte_identical": true,
+    "normalized_hash": true,
+    "pad_csv_identical": true,
+    "realized": true,
+    "summary": true,
+    "uniformity": true
+  },
+  "gds_sha256": [
+    "be32b5d895ce85fcd6578f1bb84ad97f102aac834a34064d34fe87b8848f1c6f",
+    "be32b5d895ce85fcd6578f1bb84ad97f102aac834a34064d34fe87b8848f1c6f"
+  ],
+  "normalized_hash": "60df3173e9622b0d429578b6aac2c4daf2464f5433ab662b78f8fb0a30c6240d"
+}

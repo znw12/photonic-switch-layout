@@ -1,0 +1,38 @@
+{
+  "results": [
+    {
+      "checks": {
+        "cells": true,
+        "die_bbox": true,
+        "electrical": true,
+        "instances": true,
+        "interfaces": true,
+        "routes": true
+      },
+      "profile": "rows2_bands1"
+    },
+    {
+      "checks": {
+        "cells": true,
+        "die_bbox": true,
+        "electrical": true,
+        "instances": true,
+        "interfaces": true,
+        "routes": true
+      },
+      "profile": "rows3_bands1"
+    },
+    {
+      "checks": {
+        "cells": true,
+        "die_bbox": true,
+        "electrical": true,
+        "instances": true,
+        "interfaces": true,
+        "routes": true
+      },
+      "profile": "rows3_bands3"
+    }
+  ],
+  "scope": "Exact serialized rebuild comparison against previous 100-port manifests; config adds a default field, physical cells and mappings must match."
+}

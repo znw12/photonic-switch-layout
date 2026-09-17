@@ -1,0 +1,6 @@
+{
+  "command": "MPLCONFIGDIR=/tmp/benes-mpl .venv/bin/pytest -q",
+  "elapsed_s": 36.86,
+  "passed": 164,
+  "summary": "164 passed in 36.86s"
+}

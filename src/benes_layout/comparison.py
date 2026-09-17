@@ -36,6 +36,17 @@ def compare_bundles(directories, out, baseline=None):
                 bundle=str(path),
                 status="verified",
                 pad_rows=cfg["pad_rows"],
+                pad_row_stagger_um=cfg.get("pad_row_stagger", 0),
+                pad_bank_width_mm=report["metrics"]
+                .get("pad_banks", {})
+                .get("north", {})
+                .get(
+                    "width_um",
+                    report["metrics"]["extents_um"]["pads"][2]
+                    - report["metrics"]["extents_um"]["pads"][0],
+                )
+                / 1000,
+                fanout_bbox_um=report["metrics"]["extents_um"]["fanout"],
                 fold_bands=cfg["fold_bands"],
                 active_ports=summary["active_ports"],
                 internal_ports=summary["internal_ports"],
@@ -91,12 +102,16 @@ def compare_bundles(directories, out, baseline=None):
     from matplotlib import pyplot as plt
 
     fig, ax = plt.subplots(figsize=(8, 6), layout="constrained")
+    label_counts = {}
     for r in valid:
+        location = (r["width_mm"], r["height_mm"])
+        label_index = label_counts.get(location, 0)
+        label_counts[location] = label_index + 1
         ax.scatter(r["width_mm"], r["height_mm"], s=70)
         ax.annotate(
-            f"{r['pad_rows']} pad rows / {r['fold_bands']} bands",
+            f"{r['pad_rows']} rows / {r['fold_bands']} bands / {r['pad_row_stagger_um']:g} um stagger",
             (r["width_mm"], r["height_mm"]),
-            xytext=(5, 5),
+            xytext=(5, 5 + 14 * label_index),
             textcoords="offset points",
             fontsize=8,
         )

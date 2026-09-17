@@ -51,7 +51,7 @@ def candidates(cfg):
 def generate(cfg, out, requests):
     from .layout import build_layout
     from .verify import verify_manifest, verify_gds, normalized_hash
-    from .metrics import uniformity, realized, objective
+    from .metrics import uniformity, realized, objective, pad_banks
     from .equalize import apply_equalization
     from .preview import render
 
@@ -65,6 +65,7 @@ def generate(cfg, out, requests):
         "layout.gds",
         "preview.png",
         "detail.png",
+        "pads_detail.png",
         "manifest.json",
         "settings.json",
         "cell_names.json",
@@ -150,6 +151,7 @@ def generate(cfg, out, requests):
             "mzis": len(net.switches),
             "pads": len(m["electrical"]),
             "pad_rows_per_side": cfg.pad_rows,
+            "pad_row_stagger_um": cfg.pad_row_stagger,
             "fold_bands": cfg.fold_bands,
             "vias": checks["via_count"],
             "width_mm": m["width"] / 1000,
@@ -192,6 +194,7 @@ def generate(cfg, out, requests):
         "metrics": {
             "die_bbox_um": m["die_bbox"],
             "extents_um": m["extents"],
+            "pad_banks": pad_banks(m),
             "pad_bank_width_lower_bound_um": (
                 ceil(len(net.switches) / cfg.pad_rows) - 1
             )
@@ -231,8 +234,28 @@ def generate(cfg, out, requests):
         save(out / filename, value)
     with (out / "pads.csv").open("w", newline="") as f:
         w = csv.writer(f)
+        columns = {
+            side: {
+                x: i
+                for i, x in enumerate(
+                    sorted({e["pad"][0] for e in m["electrical"] if e["side"] == side})
+                )
+            }
+            for side in ("north", "south")
+        }
         w.writerow(
-            ["net", "mzi", "terminal", "side", "x_um", "y_um", "via_positions_um"]
+            [
+                "net",
+                "mzi",
+                "terminal",
+                "side",
+                "x_um",
+                "y_um",
+                "via_positions_um",
+                "row",
+                "column",
+                "row_offset_um",
+            ]
         )
         for e in m["electrical"]:
             w.writerow(
@@ -243,6 +266,9 @@ def generate(cfg, out, requests):
                     e["side"],
                     *e["pad"],
                     json.dumps(e["vias"]),
+                    e.get("pad_row", 0),
+                    e.get("pad_column", columns[e["side"]][e["pad"][0]]),
+                    e.get("pad_row_offset", 0),
                 ]
             )
     with (out / "ports.csv").open("w", newline="") as f:
@@ -260,6 +286,8 @@ def generate(cfg, out, requests):
             )
     render(m, out / "preview.png")
     render(m, out / "detail.png", detail=True)
+    if cfg.pad_rows == 4:
+        render(m, out / "pads_detail.png", detail="pads")
     report["total_time_s"] = time.perf_counter() - started
     report["process_peak_rss_kib"] = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     save(out / "report.json", report)
@@ -268,7 +296,7 @@ def generate(cfg, out, requests):
 
 def verify_bundle(directory):
     from .verify import verify_manifest, verify_gds, normalized_hash, require
-    from .metrics import uniformity, realized
+    from .metrics import uniformity, realized, pad_banks
 
     directory = Path(directory)
 
@@ -291,6 +319,10 @@ def verify_bundle(directory):
     Network(cfg).verify(settings)
     result = verify_manifest(m)
     result.update(verify_gds(directory / "layout.gds", m, names))
+    if "pad_banks" in report["metrics"]:
+        require(
+            pad_banks(m) == report["metrics"]["pad_banks"], "pad bank report mismatch"
+        )
     require(
         normalized_hash(m) == report["normalized_hash"],
         "manifest hash differs from report",

@@ -118,3 +118,5 @@ Python API 的 `build_layout(config, mzi_factory=...)` 接受自定义器件工�
 - `preview.py`：实际几何的离线渲染。
 
 Beneš 多排 pad 与折叠布局：见 [实验说明](docs/BENES_RESHAPE.md)，支持南北各 2/3 排 pad，附六种 100 端口布局的尺寸及验证比较。
+
+单条带、南北各四排错位 pad：见 [实现与测量结果](docs/BENES_STAGGERED_PADS.md)，相邻排错开 25 μm，附完整 100 端口验证。

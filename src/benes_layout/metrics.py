@@ -5,6 +5,33 @@ from statistics import mean, pstdev
 
 from .config import Config
 from .network import Network
+from .geometry import snap
+
+
+def pad_banks(m):
+    cfg = Config(**m["config"])
+    result = {}
+    for side in ("north", "south"):
+        bank = [e for e in m["electrical"] if e["side"] == side]
+        xs, ys = zip(*(e["pad"] for e in bank))
+        half = cfg.pad_size / 2
+        bounds = [
+            snap(min(xs) - half),
+            snap(min(ys) - half),
+            snap(max(xs) + half),
+            snap(max(ys) + half),
+        ]
+        result[side] = dict(
+            bbox_um=bounds,
+            width_um=snap(bounds[2] - bounds[0]),
+            height_um=snap(bounds[3] - bounds[1]),
+            pad_count=len(bank),
+            row_counts=[
+                sum(e.get("pad_row", 0) == r for e in bank) for r in range(cfg.pad_rows)
+            ],
+        )
+    return result
+
 
 KEYS = ("length", "crossings", "bends", "angle")
 
