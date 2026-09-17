@@ -1,0 +1,606 @@
+{
+  "assumptions": [
+    "Placeholder TFLN, crossing, termination and stack; no foundry or optical performance signoff.",
+    "Constant MZI count does not imply equal optical loss, state response, or group delay.",
+    "MZI geometric propagation length is an ideal black-box model; phase/coupler delay is unmodeled.",
+    "Insulated M2 over straight waveguides only in declared windows; no vias in these windows.",
+    "Single-connection operation requires unrequested inputs to be dark.",
+    "Rearrangeable operation may interrupt existing connections; no hitless guarantee.",
+    "Two dedicated pads per MZI; returns remain separate."
+  ],
+  "baseline_comparison": {
+    "area_reduction_percent": 15.773996770990061,
+    "baseline": "candidate-000",
+    "baseline_area_um2": 4604347.617008,
+    "improvement_found": true,
+    "selected": "candidate-001",
+    "selected_area_um2": 3878057.972576
+  },
+  "candidates": [
+    {
+      "area_um2": 4604347.617008,
+      "baseline": true,
+      "corridor": 1.2,
+      "equalization": {
+        "enabled": false
+      },
+      "gap": 1.2,
+      "height_um": 988.004,
+      "id": "candidate-000",
+      "objective": [
+        4604347617008,
+        62.83093806164288,
+        2,
+        4,
+        5966.669876123287,
+        "candidate-000"
+      ],
+      "pad": 1.0,
+      "row_order": "normal",
+      "status": "verified",
+      "timings_s": {
+        "build": 0.0035520139972504694,
+        "export": 2.0145213389987475,
+        "geometry": 0.016235638002399355,
+        "readback": 0.014415189001738327,
+        "total": 2.049049268996896
+      },
+      "uniformity": {
+        "metrics": {
+          "angle": {
+            "max": 3.141592653589793,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 0.0,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 3.141592653589793
+          },
+          "bends": {
+            "max": 4,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 0,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 4
+          },
+          "crossings": {
+            "max": 2,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 0,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 2
+          },
+          "length": {
+            "max": 4523.082938061643,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 4460.252,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 62.83093806164288
+          }
+        },
+        "scope": "exact extrema over all possible single paths between active interfaces"
+      },
+      "width_um": 4660.252
+    },
+    {
+      "area_um2": 3878057.972576,
+      "baseline": false,
+      "corridor": 1.0,
+      "equalization": {
+        "enabled": false
+      },
+      "gap": 1.0,
+      "height_um": 988.004,
+      "id": "candidate-001",
+      "objective": [
+        3878057972576,
+        62.83093806164379,
+        2,
+        4,
+        3026.237876123287,
+        "candidate-001"
+      ],
+      "pad": 1.0,
+      "row_order": "normal",
+      "status": "verified",
+      "timings_s": {
+        "build": 0.0022920730007172097,
+        "export": 0.012933779999002581,
+        "geometry": 0.013034370000241324,
+        "readback": 0.013007851001020754,
+        "total": 0.04163133700058097
+      },
+      "uniformity": {
+        "metrics": {
+          "angle": {
+            "max": 3.141592653589793,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 0.0,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 3.141592653589793
+          },
+          "bends": {
+            "max": 4,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 0,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 4
+          },
+          "crossings": {
+            "max": 2,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 0,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 2
+          },
+          "length": {
+            "max": 3787.9749380616436,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 3725.144,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 62.83093806164379
+          }
+        },
+        "scope": "exact extrema over all possible single paths between active interfaces"
+      },
+      "width_um": 3925.144
+    },
+    {
+      "area_um2": 3878057.972576,
+      "baseline": false,
+      "corridor": 1.0,
+      "equalization": {
+        "enabled": false
+      },
+      "gap": 1.0,
+      "height_um": 988.004,
+      "id": "candidate-002",
+      "objective": [
+        3878057972576,
+        62.83093806164379,
+        2,
+        4,
+        3026.237876123287,
+        "candidate-002"
+      ],
+      "pad": 1.0,
+      "row_order": "reverse",
+      "status": "verified",
+      "timings_s": {
+        "build": 0.002274182999826735,
+        "export": 0.014511733999825083,
+        "geometry": 0.013226486000348814,
+        "readback": 0.01282144000288099,
+        "total": 0.04312551600014558
+      },
+      "uniformity": {
+        "metrics": {
+          "angle": {
+            "max": 3.141592653589793,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 0.0,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 3.141592653589793
+          },
+          "bends": {
+            "max": 4,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 0,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 4
+          },
+          "crossings": {
+            "max": 2,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 0,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 2
+          },
+          "length": {
+            "max": 3787.9749380616436,
+            "max_witness": [
+              "in:3",
+              "s00_m0001:o0",
+              "s01_m0000:o1",
+              "s02_m0001:o1"
+            ],
+            "min": 3725.144,
+            "min_witness": [
+              "in:0",
+              "s00_m0000:o0",
+              "s01_m0000:o0",
+              "s02_m0000:o0"
+            ],
+            "spread": 62.83093806164379
+          }
+        },
+        "scope": "exact extrema over all possible single paths between active interfaces"
+      },
+      "width_um": 3925.144
+    }
+  ],
+  "checks": {
+    "cell_references": 123,
+    "electrical_extraction_passed": true,
+    "gds_cells": 42,
+    "gds_readback_passed": true,
+    "logical_edges": 16,
+    "manifest_geometry_passed": true,
+    "metal_regions": {
+      "M1": 24,
+      "M2": 24
+    },
+    "mzi_count": 6,
+    "optical_objects": 40,
+    "spare_terminations": 0,
+    "switch_depth_max": 3,
+    "switch_depth_min": 3,
+    "via_count": 36
+  },
+  "equalization": {
+    "enabled": false
+  },
+  "memory_method": "Linux ru_maxrss; process lifetime high-water resident memory, includes prior candidates and native libraries",
+  "metrics": {
+    "crossings": 2,
+    "die_bbox_um": [
+      -100.0,
+      -374.002,
+      3825.144,
+      614.002
+    ],
+    "extents_um": {
+      "core": [
+        100.0,
+        -10.0,
+        3581.142,
+        250.0
+      ],
+      "fanout": [
+        100.0,
+        -114.002,
+        3725.144,
+        354.002
+      ],
+      "pads": [
+        100.0,
+        -274.002,
+        2741.142,
+        514.002
+      ],
+      "terminations": null
+    },
+    "gds_bytes": 25494,
+    "pad_bank_width_lower_bound_um": 560.0,
+    "unrouted_electrical": 0,
+    "unrouted_optical": 0
+  },
+  "normalized_hash": "73d444c19275d627ceca4c192a8a8272fdbcf7f38eebf202db316834b578c82d",
+  "process_peak_rss_kib": 289776,
+  "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:09:02) [GCC 11.2.0]",
+  "realized": {
+    "paths": [
+      {
+        "angle": 0.0,
+        "bends": 0,
+        "crossings": 0,
+        "input": 0,
+        "length": 3725.144,
+        "output": 0,
+        "switches": 3,
+        "witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0"
+        ]
+      },
+      {
+        "angle": 3.141592653589793,
+        "bends": 4,
+        "crossings": 2,
+        "input": 1,
+        "length": 3787.9749380616436,
+        "output": 1,
+        "switches": 3,
+        "witness": [
+          "in:1",
+          "s00_m0000:o1",
+          "s01_m0001:o0",
+          "s02_m0000:o1"
+        ]
+      },
+      {
+        "angle": 3.141592653589793,
+        "bends": 4,
+        "crossings": 2,
+        "input": 2,
+        "length": 3787.9749380616436,
+        "output": 2,
+        "switches": 3,
+        "witness": [
+          "in:2",
+          "s00_m0001:o0",
+          "s01_m0000:o1",
+          "s02_m0001:o0"
+        ]
+      },
+      {
+        "angle": 0.0,
+        "bends": 0,
+        "crossings": 0,
+        "input": 3,
+        "length": 3725.144,
+        "output": 3,
+        "switches": 3,
+        "witness": [
+          "in:3",
+          "s00_m0001:o1",
+          "s01_m0001:o1",
+          "s02_m0001:o1"
+        ]
+      }
+    ],
+    "scope": "paths realized by the specified switch settings only",
+    "statistics": {
+      "angle": {
+        "max": 3.141592653589793,
+        "mean": 1.5707963267948966,
+        "min": 0.0,
+        "spread": 3.141592653589793,
+        "stddev": 1.5707963267948966
+      },
+      "bends": {
+        "max": 4,
+        "mean": 2,
+        "min": 0,
+        "spread": 4,
+        "stddev": 2.0
+      },
+      "crossings": {
+        "max": 2,
+        "mean": 1,
+        "min": 0,
+        "spread": 2,
+        "stddev": 1.0
+      },
+      "length": {
+        "max": 3787.9749380616436,
+        "mean": 3756.5594690308217,
+        "min": 3725.144,
+        "spread": 62.83093806164379,
+        "stddev": 31.415469030821896
+      }
+    }
+  },
+  "search": {
+    "bounds": {
+      "corridor_factors": [
+        1.0,
+        1.2
+      ],
+      "gap_factors": [
+        1.2,
+        1.0
+      ],
+      "max_candidates": 3,
+      "pad_factors": [
+        1.0
+      ],
+      "row_orders": [
+        "normal",
+        "reverse"
+      ]
+    },
+    "global_optimum_proven": false,
+    "objective_order": [
+      "integer_grid_die_area",
+      "active_length_spread",
+      "active_crossing_spread",
+      "active_bend_spread",
+      "total_interconnect_length",
+      "stable_id"
+    ]
+  },
+  "success": true,
+  "summary": {
+    "active_ports": 4,
+    "area_mm2": 3.878057972576,
+    "height_mm": 0.988004,
+    "internal_ports": 4,
+    "mzis": 6,
+    "pads": 12,
+    "selected_candidate": "candidate-001",
+    "stages": 3,
+    "vias": 36,
+    "width_mm": 3.925144
+  },
+  "total_time_s": 2.409424792000209,
+  "uniformity": {
+    "metrics": {
+      "angle": {
+        "max": 3.141592653589793,
+        "max_witness": [
+          "in:3",
+          "s00_m0001:o0",
+          "s01_m0000:o1",
+          "s02_m0001:o1"
+        ],
+        "min": 0.0,
+        "min_witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0"
+        ],
+        "spread": 3.141592653589793
+      },
+      "bends": {
+        "max": 4,
+        "max_witness": [
+          "in:3",
+          "s00_m0001:o0",
+          "s01_m0000:o1",
+          "s02_m0001:o1"
+        ],
+        "min": 0,
+        "min_witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0"
+        ],
+        "spread": 4
+      },
+      "crossings": {
+        "max": 2,
+        "max_witness": [
+          "in:3",
+          "s00_m0001:o0",
+          "s01_m0000:o1",
+          "s02_m0001:o1"
+        ],
+        "min": 0,
+        "min_witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0"
+        ],
+        "spread": 2
+      },
+      "length": {
+        "max": 3787.9749380616436,
+        "max_witness": [
+          "in:3",
+          "s00_m0001:o0",
+          "s01_m0000:o1",
+          "s02_m0001:o1"
+        ],
+        "min": 3725.144,
+        "min_witness": [
+          "in:0",
+          "s00_m0000:o0",
+          "s01_m0000:o0",
+          "s02_m0000:o0"
+        ],
+        "spread": 62.83093806164379
+      }
+    },
+    "scope": "exact extrema over all possible single paths between active interfaces"
+  },
+  "versions": {
+    "gdsfactory": "9.51.0",
+    "kfactory": "3.0.4",
+    "klayout": "0.30.12",
+    "shapely": "2.1.2"
+  }
+}

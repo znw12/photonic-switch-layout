@@ -1,0 +1,18 @@
+{
+  "active_100_single_pairs": 10000,
+  "duration_s": 15.25447649600028,
+  "exhaustive_permutations": {
+    "2": 2,
+    "4": 24,
+    "8": 40320
+  },
+  "full_permutations": {
+    "100": 202,
+    "128": 230
+  },
+  "padded_5_of_8_permutations": 120,
+  "random_permutations_per_full_size": 100,
+  "scope": "independent graph traversal of solver output; physical geometry checked separately",
+  "seed": 17,
+  "success": true
+}

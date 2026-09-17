@@ -1,0 +1,11 @@
+{
+  "benes_tests": 54,
+  "command": "MPLCONFIGDIR=/tmp/benes-mpl .venv/bin/python -m pytest -q --junitxml=output/benes/tests.xml",
+  "duration_s": 31.877,
+  "errors": 0,
+  "failures": 0,
+  "retained_waksman_tests": 57,
+  "skipped": 0,
+  "success": true,
+  "tests": 111
+}

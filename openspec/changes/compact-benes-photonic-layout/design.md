@@ -2,7 +2,7 @@
 
 The repository contains a working gdsfactory Waksman generator, a pinned Python environment, independent connectivity/geometry checks, and N=4/16/100 examples. Its 100-port fabric has 573 MZIs and possible single-connection depths from 4 to 13. The new version addresses switch-depth uniformity with a complete standard Beneš topology and a separately developed placement/routing engine.
 
-The accepted priority is **physical feasibility and complete Beneš topology as hard constraints, then minimum complete-chip area, then physical path uniformity**. Equal switch depth is mandatory; equal geometric length, crossing count, or optical loss is not. This document specifies future implementation; it does not claim that the proposed router has already been validated.
+The accepted priority is **physical feasibility and complete Beneš topology as hard constraints, then minimum complete-chip area, then physical path uniformity**. Equal switch depth is mandatory; equal geometric length, crossing count, or optical loss is not. The decisions below define the implementation; measured acceptance evidence is recorded at the end of this document.
 
 ## Goals / Non-Goals
 
@@ -108,3 +108,13 @@ Introduce the new package and CLI additively, establish topology/solver correctn
 ## Open Questions
 
 Real MZI geometry, electrical drive structure, passive crossing loss, termination performance, metal stack, and foundry rules remain unavailable. They are deferred technology inputs with explicit placeholders, not blockers to this demonstrator. Replacing them requires regeneration and verification; the current plan does not promise that placeholder dimensions or performance assumptions will survive that replacement.
+
+## Implementation Evidence
+
+The independent `benes-layout` implementation is complete. Its repeated shuffle blocks use a closed-form triangular exchange schedule; no Waksman topology or router is called. Compact M2 escape trunks expand through M1 tracks outside the optical array and then M2 pad stems, using three vias per terminal-pad net. This realizes the two-metal plan without making the full optical corridor use pad pitch.
+
+Default 100/128 output has 13 complete stages, 832 MZIs, 1,664 pads, 4,992 vias, 56 spare terminations, and 7,680 passive crossings. The selected die is 87.560030 by 12.644252 mm, 17.15% less area than the conservative Beneš baseline under identical device/package constraints. The search does not prove global optimality. Exact active-path length extrema are 87.280030 to 94.819743 mm; fixed depth does not establish equal length or loss.
+
+Complete 4/4, 5/8, 16/16, and 100/128 examples pass geometry and independent GDS/conductor readback. Two full 100/128 generation runs reproduce normalized geometry, settings, interface maps, selection, and path metrics. The final suite has 111 passing tests, including retained Waksman regressions. Reproducible configurations and reports are in `examples/benes/`; operating instructions and limitations are in `docs/BENES.md`.
+
+Optional equalization acts on the requested switch configuration's output adapters while preserving die bounds. It reports remaining mismatch when the available interior is insufficient and does not claim equalization of every possible reconfiguration.

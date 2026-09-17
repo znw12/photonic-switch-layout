@@ -1,0 +1,25 @@
+{
+  "checks": {
+    "cell_names.json": true,
+    "config.json": true,
+    "global_metrics": true,
+    "manifest.json": true,
+    "network.json": true,
+    "normalized_geometry": true,
+    "pads.csv": true,
+    "ports.csv": true,
+    "realized_paths": true,
+    "selected_candidate": true,
+    "settings.json": true
+  },
+  "excluded": "wall time, process peak RSS, and binary GDS timestamp metadata",
+  "normalized_hash": "9c02510a8acbf9a411ffe6758ab7dd877e1117503063c7b420c64cc8a88747d3",
+  "scope": "two complete 100-active / 128-internal three-candidate runs",
+  "success": true,
+  "versions": {
+    "gdsfactory": "9.51.0",
+    "kfactory": "3.0.4",
+    "klayout": "0.30.12",
+    "shapely": "2.1.2"
+  }
+}

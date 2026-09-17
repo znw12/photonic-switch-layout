@@ -1,0 +1,47 @@
+{
+  "memory_method": "tracemalloc per size for Python allocations; Linux ru_maxrss for process lifetime peak including native memory",
+  "results": [
+    {
+      "build_s": 0.000425947000621818,
+      "internal_ports": 16,
+      "process_peak_rss_kib": 20568,
+      "python_peak_bytes": 32888,
+      "solve_s": 0.0003440949985815678,
+      "stages": 7,
+      "switches": 56,
+      "verify_s": 0.0003017169983650092
+    },
+    {
+      "build_s": 0.002491328999894904,
+      "internal_ports": 128,
+      "process_peak_rss_kib": 21592,
+      "python_peak_bytes": 452472,
+      "solve_s": 0.003812111001025187,
+      "stages": 13,
+      "switches": 832,
+      "verify_s": 0.0032546629990974907
+    },
+    {
+      "build_s": 0.00526131199876545,
+      "internal_ports": 256,
+      "process_peak_rss_kib": 22744,
+      "python_peak_bytes": 941152,
+      "solve_s": 0.007258721001562662,
+      "stages": 15,
+      "switches": 1920,
+      "verify_s": 0.007622217999596614
+    },
+    {
+      "build_s": 0.04892447800011723,
+      "internal_ports": 1024,
+      "process_peak_rss_kib": 34904,
+      "python_peak_bytes": 5403796,
+      "solve_s": 0.051375140999880387,
+      "stages": 19,
+      "switches": 9728,
+      "verify_s": 0.048869226997339865
+    }
+  ],
+  "scope": "topology/solver only; not physical routing",
+  "seed": 17
+}

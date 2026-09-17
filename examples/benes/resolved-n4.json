@@ -1,0 +1,95 @@
+{
+  "active_ports": 4,
+  "chord_error": 0.002,
+  "corridor_factors": [
+    1.0,
+    1.2
+  ],
+  "crossing_half_length": 10.0,
+  "equalize": false,
+  "gap_factors": [
+    1.2,
+    1.0
+  ],
+  "grid": 0.001,
+  "input_map": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "insulated_m2_overpasses": true,
+  "internal_ports": 4,
+  "lane_pitch": 80.0,
+  "layers": {
+    "DEVICE": [
+      92,
+      0
+    ],
+    "LABEL": [
+      91,
+      0
+    ],
+    "M1": [
+      10,
+      0
+    ],
+    "M2": [
+      11,
+      0
+    ],
+    "OUTLINE": [
+      90,
+      0
+    ],
+    "VIA": [
+      12,
+      0
+    ],
+    "WG": [
+      1,
+      0
+    ],
+    "WINDOW": [
+      93,
+      0
+    ]
+  },
+  "margin": 100.0,
+  "max_candidates": 3,
+  "metal_spacing": 5.0,
+  "metal_width": 5.0,
+  "mzi_height": 100.0,
+  "mzi_length": 1000.0,
+  "optical_metal_clearance": 10.0,
+  "output_map": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "pad_factors": [
+    1.0
+  ],
+  "pad_pitch": 100.0,
+  "pad_size": 60.0,
+  "radius": 20.0,
+  "row_orders": [
+    "normal",
+    "reverse"
+  ],
+  "seed": 17,
+  "terminal_names": [
+    "return",
+    "control"
+  ],
+  "terminal_offsets": [
+    20.0,
+    40.0
+  ],
+  "termination_length": 40.0,
+  "via_enclosure": 2.0,
+  "via_size": 5.0,
+  "wg_clearance": 5.0,
+  "wg_width": 1.0
+}

@@ -1,4 +1,8 @@
-# Parametric Waksman photonic layout
+# Parametric photonic switching layouts
+
+项目现在提供两个独立生成器：`waksman-layout` 保留精确 N 端口网络；`benes-layout` 使用完整、等开关级数的 Beneš 内核。Beneš 默认外部 100×100、内部 128×128，采用 **整片面积优先、路径均匀性其次** 的优化顺序。
+
+新版的运行方法、尺寸与验证结果见 [Beneš 使用与设计说明](docs/BENES.md)。以下保留原 Waksman 版本的说明。
 
 一个可运行的任意 N 端口光子交换矩阵版图生成器。默认精确生成 100×100 Waksman：573 个占位 2×2 TFLN MZI，保留同时 100 条一对一连接能力，支持先只启用一条连接。
 
