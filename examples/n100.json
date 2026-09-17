@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "n": 100,
+  "radius": 20.0,
+  "lane_pitch": 80.0,
+  "mzi_length": 1000.0,
+  "mzi_height": 100.0,
+  "terminal_names": ["return", "control"],
+  "terminal_offsets": [20.0, 40.0],
+  "pad_size": 60.0,
+  "pad_pitch": 100.0,
+  "pad_assignment": "nearest",
+  "insulated_m2_overpasses": true,
+  "max_candidates": 2,
+  "pitch_factors": [1.2, 1.0],
+  "seed": 17
+}

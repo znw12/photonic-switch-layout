@@ -1,0 +1,42 @@
+{
+  "results": [
+    {
+      "build_s": 0.0001394160008203471,
+      "columns": 7,
+      "n": 16,
+      "process_peak_rss_kib": 20616,
+      "solve_s": 0.00016240399963862728,
+      "switches": 49,
+      "verify_s": 9.277400022256188e-05
+    },
+    {
+      "build_s": 0.00224473199887143,
+      "columns": 13,
+      "n": 100,
+      "process_peak_rss_kib": 21128,
+      "solve_s": 0.00042110300091735553,
+      "switches": 573,
+      "verify_s": 0.000660960000459454
+    },
+    {
+      "build_s": 0.002257329000713071,
+      "columns": 15,
+      "n": 256,
+      "process_peak_rss_kib": 22536,
+      "solve_s": 0.001139590000093449,
+      "switches": 1793,
+      "verify_s": 0.0020449349995033117
+    },
+    {
+      "build_s": 0.010976589999700082,
+      "columns": 19,
+      "n": 1024,
+      "process_peak_rss_kib": 31368,
+      "solve_s": 0.0077441989997169,
+      "switches": 9217,
+      "verify_s": 0.013577912000982906
+    }
+  ],
+  "scope": "topology/solver only; no geometry claim",
+  "seed": 17
+}

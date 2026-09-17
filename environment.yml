@@ -1,0 +1,9 @@
+name: waksman-layout
+channels:
+  - conda-forge
+dependencies:
+  - python=3.13.5
+  - pip=25.1.1
+  - pip:
+      - -r requirements.lock
+      - -e .

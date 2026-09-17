@@ -1,0 +1,17 @@
+[
+  {
+    "n": 4,
+    "normalized_hash": "99bf10e670a32f6bf0419c902b6d80205ec0262cdfff2cb6fe437f5137de7ce6",
+    "repeat_matches": true
+  },
+  {
+    "n": 16,
+    "normalized_hash": "a7a59d5ad802ca0aa155a61406dd4d09198fe27f6fbdb2ac7c4291bf10dca9f3",
+    "repeat_matches": true
+  },
+  {
+    "n": 100,
+    "normalized_hash": "fe6ffc63bb8f3e1dc90117d2d1ff98ed5bed77c657c10276f5ed6afbcbfebc07",
+    "repeat_matches": true
+  }
+]

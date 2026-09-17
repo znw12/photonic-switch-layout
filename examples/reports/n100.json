@@ -1,0 +1,106 @@
+{
+  "assumptions": [
+    "Illustrative TFLN cells and technology; no foundry/optical/RF qualification.",
+    "M2 is insulated over straight waveguides in registered windows; no vias there.",
+    "Single-connection operation assumes other inputs are dark.",
+    "Waksman reconfiguration may rearrange and interrupt existing connections.",
+    "Dedicated terminal pads; no implicit shared return."
+  ],
+  "candidates": [
+    {
+      "die_area_um2": 826457563.5200001,
+      "die_height_um": 8240.0,
+      "die_width_um": 100298.248,
+      "factor": 1.2,
+      "index": 0,
+      "pad_assignment": "nearest",
+      "status": "verified",
+      "timings_s": {
+        "build": 0.10956604700004391,
+        "export": 1.4672757350017491,
+        "geometry": 1.428807850999874,
+        "readback": 21.10152041499896,
+        "total": 24.107170048000626
+      },
+      "total_interconnect_length_um": 9147946.301914753,
+      "worst_path_crossings": 184,
+      "worst_path_length_um": 105878.69430167123,
+      "worst_path_mzis": 13
+    },
+    {
+      "die_area_um2": 734169563.5200001,
+      "die_height_um": 8240.0,
+      "die_width_um": 89098.248,
+      "factor": 1.0,
+      "index": 1,
+      "pad_assignment": "split",
+      "status": "verified",
+      "timings_s": {
+        "build": 0.16329848100031086,
+        "export": 0.2822773509997205,
+        "geometry": 1.3193126280002616,
+        "readback": 24.91566551899996,
+        "total": 26.68055397900025
+      },
+      "total_interconnect_length_um": 8027946.301914755,
+      "worst_path_crossings": 184,
+      "worst_path_length_um": 94678.69430167122,
+      "worst_path_mzis": 13
+    }
+  ],
+  "checks": {
+    "electrical_extraction_passed": true,
+    "electrical_nets": 1146,
+    "gds_cells": 1293,
+    "gds_readback_passed": true,
+    "logical_edges": 1246,
+    "manifest_geometry_passed": true,
+    "metal_regions": {
+      "M1": 1146,
+      "M2": 1146
+    },
+    "mzi_count": 573,
+    "optical_objects": 16905,
+    "via_count": 1146
+  },
+  "global_area_optimum_proven": false,
+  "metrics": {
+    "core_bbox_um": [
+      0,
+      -10.0,
+      88898.248,
+      7930.0
+    ],
+    "crossing_count": 4522,
+    "die_bbox_um": [
+      -100.0,
+      -160.0,
+      88998.248,
+      8080.0
+    ],
+    "gds_bytes": 1329248,
+    "pad_bank_width_lower_bound_um": 57260.0,
+    "pad_count": 1146,
+    "swap_columns": 192,
+    "total_interconnect_length_um": 8027946.301914755,
+    "unrouted_electrical": 0,
+    "unrouted_optical": 0,
+    "worst_path_crossings": 184,
+    "worst_path_length_um": 94678.69430167122,
+    "worst_path_mzis": 13
+  },
+  "n": 100,
+  "normalized_hash": "fe6ffc63bb8f3e1dc90117d2d1ff98ed5bed77c657c10276f5ed6afbcbfebc07",
+  "physical_performance_assessed": false,
+  "process_peak_rss_kib": 1089736,
+  "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:09:02) [GCC 11.2.0]",
+  "selected_candidate": 1,
+  "success": true,
+  "total_time_s": 53.00814116199945,
+  "versions": {
+    "gdsfactory": "9.51.0",
+    "kfactory": "3.0.4",
+    "klayout": "0.30.12",
+    "shapely": "2.1.2"
+  }
+}

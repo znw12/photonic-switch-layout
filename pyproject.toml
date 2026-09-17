@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=75"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "waksman-layout"
+version = "0.1.0"
+description = "Parametric hierarchical photonic Waksman layout demonstrator"
+requires-python = ">=3.11"
+dependencies = ["gdsfactory>=9,<10", "shapely>=2,<3"]
+
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
+[project.scripts]
+waksman-layout = "waksman_layout.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
