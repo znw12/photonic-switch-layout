@@ -28,3 +28,10 @@
 #### Scenario: Verification and repeat
 - **WHEN** 破坏内部弯曲、间隙、地连接或信号隔离，或重复生成合法布局
 - **THEN** 缺陷被检测，合法重复生成的规范化几何、端口和设置一致，完整 GDS 独立回读通过。
+
+### Requirement: Continuous M2 electrical interface
+新生成的 GSG 单元 SHALL 明确声明 G/S 为 M2 端口，并连续连接至外围 M2 干线，不得保留接口往返 M1 的冗余 via。器件内 SHALL 保留两个 G 桥 via 和一个 S 拾取 via。旧 M1 接口产物 SHALL 可按原几何合约回读。
+
+#### Scenario: Reduced vias with verified continuity
+- **WHEN** 生成 832 MZI 对齐扇出矩阵
+- **THEN** 相比原接口减少 3328 个 via，器件总长、680 μm 主电极、光学网络和 pad 布局不变；端口层不匹配或 M2 接口断开被拒绝，全片仍提取出 1 个 GND 与 832 个独立 S。

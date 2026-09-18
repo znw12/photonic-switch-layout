@@ -39,7 +39,8 @@ def test_gsg_device_radius_and_ports(radius):
     if radius==20:
         assert (start,end)==(160,840)
         assert result['active_length_um']==680
-    assert result['internal_vias_per_device']==5
+    assert result['internal_vias_per_device']==3
+    assert result['electrical_port_layer']=='M2'
     assert not result['coupler_calibrated']
 
 
@@ -52,9 +53,10 @@ def test_gsg_electrode_bend_clearance(active_x):
         verify_device(lib.export(),cfg)
 
 
-@pytest.mark.parametrize('n,reverse',[(1,False),(4,False),(5,True),(16,False)])
-def test_gsg_physical_matrix(tmp_path,n,reverse):
-    cfg=profile(n)
+@pytest.mark.parametrize('n,reverse,fanout',[(1,False,'aligned'),(4,False,'aligned'),
+    (5,True,'aligned'),(16,False,'aligned'),(4,False,'channel')])
+def test_gsg_physical_matrix(tmp_path,n,reverse,fanout):
+    cfg=profile(n,electrical_fanout=fanout,pad_pitch=120 if fanout=='aligned' else 100)
     lib,m=build_layout(cfg,dict(id='test',gap=1,pad=1,corridor=1,row_order='reverse' if reverse else 'normal'))
     verify_manifest(m)
     p=tmp_path/'matrix.gds';names=lib.write_gds(m['top'],p)
@@ -62,12 +64,18 @@ def test_gsg_physical_matrix(tmp_path,n,reverse):
     count=len(m['instances'])
     assert checks['shared_ground_nets']==1 and checks['independent_signals']==count
     assert checks['electrical_nets']==count+1
-    assert checks['via_count']==sum(len(e['vias']) for e in m['electrical'])+6*count
+    assert checks['via_count']==sum(len(e['vias']) for e in m['electrical'])+4*count
+    for e in m['electrical']:
+        assert e['source_layer']=='M2'
+        assert e['segments'][0]==dict(layer='M2',start=[e['x'],e['y']],end=[e['tx'],e['y']])
+        assert [e['launch_x'],e['y']] not in e['vias']
+        assert len(e['vias'])==(2 if e.get('direct_pad') else 4)
     assert {e['electrical_net'] for e in m['electrical'] if e['terminal']=='G'}=={'GND'}
     assert len({e['electrical_net'] for e in m['electrical'] if e['terminal']=='S'})==count
 
 
-@pytest.mark.parametrize('defect',['radius','dc_gap','waveguide_break','local_metal','internal_via','ground_label','bus'])
+@pytest.mark.parametrize('defect',['radius','dc_gap','waveguide_break','local_metal','internal_via',
+    'ground_label','bus','source_layer','device_layer'])
 def test_gsg_manifest_faults(defect):
     lib,m=build_layout(profile())
     c=lib.cells['MZI']
@@ -79,12 +87,15 @@ def test_gsg_manifest_faults(defect):
     elif defect=='local_metal':lib.poly(c,'M2',rectangle(690,9,750,31))
     elif defect=='internal_via':c.refs.pop()
     elif defect=='ground_label':m['electrical'][0]['electrical_net']='GND' if m['electrical'][0]['terminal']=='S' else 'wrong'
+    elif defect=='source_layer':m['electrical'][0]['source_layer']='M1'
+    elif defect=='device_layer':c.metadata['electrical_port_layers']['S']='M1'
     else:lib.cells['COMMON_GROUND'].polygons.pop()
     m['cells']=lib.export()
     with pytest.raises(VerificationError):verify_manifest(m)
 
 
-@pytest.mark.parametrize('defect',['ground_signal_short','signal_signal_short','ground_open','internal_ground_open'])
+@pytest.mark.parametrize('defect',['ground_signal_short','signal_signal_short','ground_open',
+    'internal_ground_open','m2_interface_open'])
 def test_gsg_physical_faults(tmp_path,defect):
     lib,m=build_layout(profile())
     if defect=='ground_signal_short':
@@ -100,11 +111,20 @@ def test_gsg_physical_faults(tmp_path,defect):
         lib.poly(lib.cells['COMMON_GROUND'],'M2',rectangle(x0-2.5,y1-2.5,x1+2.5,y1+2.5))
     elif defect=='ground_open':
         lib.cells['COMMON_GROUND'].polygons.pop()  # Disconnect north and south buses.
+    elif defect=='m2_interface_open':
+        e=next(e for e in m['electrical'] if e['terminal']=='S')
+        poly=lib.cells[e['cell']].polygons[0]
+        # Keep the geometry and manifest mutually consistent, but break the
+        # actual M2 contact at the device boundary; the extractor must catch it.
+        cut=e['x']+10
+        for at in poly['points']:
+            if at[0]<cut:at[0]=cut
     else:
         c=lib.cells['MZI']
         c.refs=[r for r in c.refs if not (r['cell']=='VIA' and r['y']==50)]
     m['cells']=lib.export();p=tmp_path/'bad.gds';names=lib.write_gds(m['top'],p)
-    with pytest.raises(VerificationError):verify_gds(p,m,names)
+    with pytest.raises(VerificationError,match='electrical open' if defect=='m2_interface_open' else None):
+        verify_gds(p,m,names)
 
 
 def test_gsg_bundle_and_standalone(tmp_path):

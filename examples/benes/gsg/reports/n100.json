@@ -41,11 +41,11 @@
       "row_order": "normal",
       "status": "verified",
       "timings_s": {
-        "build": 6.602636298001016,
-        "export": 3.655169546000252,
-        "geometry": 15.541273123999417,
-        "readback": 155.22126785799992,
-        "total": 181.0477288059992
+        "build": 5.90908681899964,
+        "export": 3.0293418930014013,
+        "geometry": 12.905107924998447,
+        "readback": 121.07826652600124,
+        "total": 142.9459579329996
       },
       "uniformity": {
         "metrics": {
@@ -204,7 +204,7 @@
     }
   ],
   "checks": {
-    "cell_references": 24308,
+    "cell_references": 22642,
     "electrical_extraction_passed": true,
     "electrical_nets": 833,
     "gds_cells": 6495,
@@ -213,8 +213,8 @@
     "logical_edges": 1792,
     "manifest_geometry_passed": true,
     "metal_regions": {
-      "M1": 6726,
-      "M2": 5895
+      "M1": 5062,
+      "M2": 4231
     },
     "mzi_count": 832,
     "optical_objects": 32392,
@@ -222,22 +222,23 @@
     "spare_terminations": 56,
     "switch_depth_max": 13,
     "switch_depth_min": 13,
-    "via_count": 11788
+    "via_count": 8460
   },
   "device": {
     "active_length_um": 680.0,
     "bends_per_branch": 8,
     "branch_geometric_length_um": 1033.6023179021822,
     "coupler_calibrated": false,
-    "internal_vias_per_device": 5,
+    "electrical_port_layer": "M2",
+    "internal_vias_per_device": 3,
     "min_radius_um": 20.0,
     "total_length_um": 1000
   },
   "electrical": {
     "channel_levels": 87,
-    "device_vias": 4160,
+    "device_vias": 2496,
     "direct_pad_nets": 762,
-    "external_fanout_vias": 6796,
+    "external_fanout_vias": 5132,
     "fabric_span_um": 36222.44,
     "fanout": "aligned",
     "ground_bus_vias": 832,
@@ -264,7 +265,7 @@
     "turns_per_net_mean": 2.0841346153846154,
     "turns_total": 3468,
     "via_per_net": null,
-    "vias_total": 11788,
+    "vias_total": 8460,
     "width_extra_um": 0
   },
   "equalization": {
@@ -13504,7 +13505,7 @@
         3810.0
       ]
     },
-    "gds_bytes": 5055974,
+    "gds_bytes": 4869382,
     "pad_bank_width_lower_bound_um": 33300.0,
     "pad_banks": {
       "north": {
@@ -13545,8 +13546,8 @@
     "width_target_met": false,
     "width_target_um": 20000
   },
-  "normalized_hash": "db5d1b56837ce81ebf84ee2e4b5ed3c926b6239bd3de498e0cb62d66cf2d255c",
-  "process_peak_rss_kib": 1290684,
+  "normalized_hash": "4d526b48032c9f07e856096521c7d718bb72da4b5de01f400f5b31efddff3ff8",
+  "process_peak_rss_kib": 1274628,
   "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:09:02) [GCC 11.2.0]",
   "realized": {
     "paths": [
@@ -16127,10 +16128,10 @@
     "pads": 1664,
     "selected_candidate": "candidate-000",
     "stages": 13,
-    "vias": 11788,
+    "vias": 8460,
     "width_mm": 36.394307
   },
-  "total_time_s": 188.24220337399674,
+  "total_time_s": 149.05367149000085,
   "uniformity": {
     "metrics": {
       "angle": {

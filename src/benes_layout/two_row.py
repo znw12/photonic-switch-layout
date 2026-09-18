@@ -115,7 +115,8 @@ def route(lib, m, groups, terminals, optical, step, slots):
     transfer = snap(edge + cfg.margin + (maximum+2)*step)
     pad_base = snap(transfer + cfg.margin + cfg.pad_size/2)
     m['electrical_plan'] = dict(mode=cfg.electrical_routing, channel_levels=maximum+1,
-        transfer_y=transfer, pad_base_y=pad_base, via_per_net=5,
+        transfer_y=transfer, pad_base_y=pad_base,
+        via_per_net=4 if terminals[0].get('source_layer','M1')=='M2' else 5,
         shared_interstage=cfg.share_interstage, optical_center_y=0,
         passive_m2_contract='insulated-placeholder-v1')
     if cfg.electrical_routing == 'three-row':
@@ -140,8 +141,12 @@ def route(lib, m, groups, terminals, optical, step, slots):
                 lib.poly(cell,layer,rectangle(min(a[0],b[0])-w,min(a[1],b[1])-w,
                                                max(a[0],b[0])+w,max(a[1],b[1])+w))
                 segments.append(dict(layer=layer,start=list(a),end=list(b)))
-            metal('M1',(t['x'],t['y']),(launch,t['y']))
-            metal('M2',(launch,t['y']),(tx,t['y']))
+            m2_source = t.get('source_layer','M1') == 'M2'
+            if m2_source:
+                metal('M2',(t['x'],t['y']),(tx,t['y']))
+            else:
+                metal('M1',(t['x'],t['y']),(launch,t['y']))
+                metal('M2',(launch,t['y']),(tx,t['y']))
             metal('M2',(tx,t['y']),(tx,fy))
             metal('M1',(tx,fy),(sx,fy))
             # Join nearby same-net M2 landings instead of leaving a sub-rule slot.
@@ -150,6 +155,8 @@ def route(lib, m, groups, terminals, optical, step, slots):
             metal('M2',(sx,fy),(sx,ly))
             metal('M1',(sx,ly),(sx,py))
             vias = [[launch,t['y']],[tx,fy],[sx,fy],[sx,ly],[sx,py]]
+            if m2_source:
+                vias = vias[1:]
             for at in vias:
                 lib.ref(cell,lib.via(),*at)
             lib.ref(groups['ELECTRICAL_FANOUT'],cell,id=t['net'])

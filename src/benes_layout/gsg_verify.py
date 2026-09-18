@@ -89,11 +89,16 @@ def verify_device(cells,cfg):
     expected=[]
     for y,width in zip(centers,[cfg.gsg_ground_width,cfg.gsg_signal_width,cfg.gsg_ground_width]):
         expected.append(dict(layer='M1',points=rectangle(start,y-width/2,end,y+width/2)))
-    gx,sx,bx,ex=end-60,end-20,end+20,cfg.mzi_length-20
+    port_layers=md.get('electrical_port_layers',{'G':'M1','S':'M1'})
+    require(port_layers in ({'G':'M1','S':'M1'},{'G':'M2','S':'M2'}),
+            'GSG electrical port layer contract mismatch')
+    m2_ports=port_layers['G']=='M2'
+    gx,sx,bx,ex=end-60,end-20,end+20,(1000 if m2_ports else 980)
     paths=[('M2',[gx,centers[0]],[gx,centers[2]]),('M2',[gx,15],[940,15]),
            ('M2',[940,15],[940,20]),('M2',[940,20],[ex,20]),
-           ('M2',[sx,mid],[bx,mid]),('M2',[bx,mid],[bx,40]),('M2',[bx,40],[ex,40]),
-           ('M1',[ex,20],[1000,20]),('M1',[ex,40],[1000,40])]
+           ('M2',[sx,mid],[bx,mid]),('M2',[bx,mid],[bx,40]),('M2',[bx,40],[ex,40])]
+    if not m2_ports:
+        paths += [('M1',[ex,20],[1000,20]),('M1',[ex,40],[1000,40])]
     half=cfg.metal_width/2
     for layer,a,b in paths:
         expected.append(dict(layer=layer,points=rectangle(min(a[0],b[0])-half,min(a[1],b[1])-half,
@@ -102,11 +107,15 @@ def verify_device(cells,cfg):
     require([p for p in c['polygons'] if p['layer'] in ('M1','M2')]==expected,
             'GSG device metal differs from approved local contract')
     vias=[r for r in c['refs'] if r['cell']=='VIA']
-    require(len(vias)==5 and Counter((r['x'],r['y']) for r in vias)==Counter(map(tuple,md['internal_vias'])),
+    expected_vias=[[gx,centers[0]],[gx,centers[2]],[sx,mid]]
+    if not m2_ports:expected_vias += [[ex,20],[ex,40]]
+    require(md['internal_vias']==expected_vias
+            and Counter((r['x'],r['y']) for r in vias)==Counter(map(tuple,expected_vias)),
             'GSG internal via inventory mismatch')
     return dict(total_length_um=1000,active_length_um=md['active_length_um'],
         branch_geometric_length_um=lengths[0],bends_per_branch=8,min_radius_um=cfg.radius,
-        internal_vias_per_device=len(vias),coupler_calibrated=False)
+        internal_vias_per_device=len(vias),coupler_calibrated=False,
+        **({'electrical_port_layer':'M2'} if m2_ports else {}))
 
 
 def verify_ground(m,cfg):

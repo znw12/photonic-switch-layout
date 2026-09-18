@@ -218,13 +218,15 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
                         net=f"{sid}:{name}",
                         instance=sid,
                         terminal=name,
+                        **({'source_layer':lib.mzi().metadata['electrical_port_layers'][name]}
+                           if 'electrical_port_layers' in lib.mzi().metadata else {}),
                         x=pos[0],
                         y=pos[1],
                     )
                 )
         terms.sort(key=lambda t: (t["y"], t["net"]))
         for side, bank in (("south", terms[:count]), ("north", terms[count:])):
-            # Increasing y order ensures terminal horizontal M1 runs cannot meet vias.
+            # Keep launch runs ordered with the trunks to avoid crossings.
             if two_row and side == "north":
                 bank = list(reversed(bank))
             for i, t in enumerate(bank):

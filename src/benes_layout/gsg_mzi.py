@@ -91,23 +91,22 @@ def build(lib):
     gy0, gy1 = mid-sw/2-gap-gw/2, mid+sw/2+gap+gw/2
     for y,width in ((gy0,gw),(mid,sw),(gy1,gw)):
         lib.poly(cell,'M1',rectangle(active_start,y-width/2,active_end,y+width/2))
-    ground_x, signal_x, bend_x, exit_x = active_end-60, active_end-20, active_end+20, L-20
+    ground_x, signal_x, bend_x = active_end-60, active_end-20, active_end+20
     electrical_paths = [
         ('M2',[ground_x,gy0],[ground_x,gy1]),
         ('M2',[ground_x,15],[L-60,15]),
         ('M2',[L-60,15],[L-60,20]),
-        ('M2',[L-60,20],[exit_x,20]),
+        ('M2',[L-60,20],[L,20]),
         ('M2',[signal_x,mid],[bend_x,mid]),
         ('M2',[bend_x,mid],[bend_x,40]),
-        ('M2',[bend_x,40],[exit_x,40]),
-        ('M1',[exit_x,20],[L,20]),('M1',[exit_x,40],[L,40]),
+        ('M2',[bend_x,40],[L,40]),
     ]
     for layer,v0,v1 in electrical_paths:
         half=cfg.metal_width/2
         # At the external boundary the metal ends exactly at x=L.
         lib.poly(cell,layer,rectangle(min(v0[0],v1[0])-half,min(v0[1],v1[1])-half,
                      min(L,max(v0[0],v1[0])+half),max(v0[1],v1[1])+half))
-    vias = [[ground_x,gy0],[ground_x,gy1],[signal_x,mid],[exit_x,20],[exit_x,40]]
+    vias = [[ground_x,gy0],[ground_x,gy1],[signal_x,mid]]
     for at in vias:lib.ref(cell,lib.via(),*at)
     cell.ports = {'i0':[0,0,180],'i1':[0,p,180],'o0':[L,0,0],'o1':[L,p,0],
                   'G':[L,20,0],'S':[L,40,0]}
@@ -116,7 +115,7 @@ def build(lib):
                       angle=4*(t0+t1),crossings=0,min_radius=r) for i in (0,1) for j in (0,1)]
     cell.metadata = dict(model='paper-gsg',geometry_defined=True,optical_transfer_calibrated=False,
         source_doi='10.1038/s41586-018-0551-y',drive='quasistatic',
-        terminal_names=['G','S'],allowed_transforms=[0,180],
+        terminal_names=['G','S'],electrical_port_layers={'G':'M2','S':'M2'},allowed_transforms=[0,180],
         interaction_bbox=[0,-edge,L,p+edge],bar=[['i0','o0'],['i1','o1']],cross=[['i0','o1'],['i1','o0']],
         optical_paths=paths,active_x=[active_start,active_end],active_length_um=active_end-active_start,
         phase_arm_y=[arm,p-arm],electrode_centers=[gy0,mid,gy1],internal_vias=vias,

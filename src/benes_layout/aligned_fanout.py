@@ -102,8 +102,12 @@ def route(lib, m, groups, terminals, optical, step):
                                                 max(a[0], b[0])+w, max(a[1], b[1])+w))
                 segments.append(dict(layer=layer, start=list(a), end=list(b)))
 
-            metal('M1', (t['x'], t['y']), (launch, t['y']))
-            metal('M2', (launch, t['y']), (tx, t['y']))
+            m2_source = t.get('source_layer','M1') == 'M2'
+            if m2_source:
+                metal('M2', (t['x'], t['y']), (tx, t['y']))
+            else:
+                metal('M1', (t['x'], t['y']), (launch, t['y']))
+                metal('M2', (launch, t['y']), (tx, t['y']))
             if direct:
                 metal('M2', (tx, t['y']), (tx, ly))
                 vias = [[launch, t['y']], [tx, ly], [sx, py]]
@@ -116,6 +120,8 @@ def route(lib, m, groups, terminals, optical, step):
                 metal('M2', (sx, fy), (sx, ly))
                 vias = [[launch, t['y']], [tx, fy], [sx, fy], [sx, ly], [sx, py]]
             metal('M1', (sx, ly), (sx, py))
+            if m2_source:
+                vias = vias[1:]
             for at in vias:
                 lib.ref(cell, lib.via(), *at)
             lib.ref(groups['ELECTRICAL_FANOUT'], cell, id=t['net'])

@@ -124,7 +124,8 @@ def verify_pad_banks(m):
                 "pad stagger or row placement mismatch",
             )
             direct = aligned and e['tx'] == e['pad'][0]
-            require(len(e["vias"]) == (3 if direct or not two_row else 5), "pad net via count mismatch")
+            expected_vias=(3 if direct or not two_row else 5)-int(two_row and e.get('source_layer','M1')=='M2')
+            require(len(e["vias"]) == expected_vias, "pad net via count mismatch")
             require(
                 box(
                     e["pad"][0] - half,
@@ -713,6 +714,8 @@ def verify_manifest(m):
         )
         i = inst[e["instance"]]
         at = cells[i["cell"]]["ports"][e["terminal"]]
+        source_layer=cells[i['cell']]['metadata'].get('electrical_port_layers',{}).get(e['terminal'],'M1')
+        require(e.get('source_layer','M1')==source_layer,'electrical source layer differs from MZI terminal')
         require(
             [e["x"], e["y"]] == point(i["x"], i["y"], i.get("angle", 0), at),
             "electrical source not at MZI terminal",
@@ -732,13 +735,18 @@ def verify_two_row_contract(m, cfg):
     """Bind route metadata and explicit vias to the rendered metal cells."""
     plan = m.get('electrical_plan', {})
     aligned = cfg.electrical_fanout == 'aligned'
+    source_layers={i['id']:m['cells'][i['cell']]['metadata'].get('electrical_port_layers',{})
+                   for i in m['instances']}
+    m2_ports=bool(source_layers) and all(v and set(v.values())=={'M2'} for v in source_layers.values())
     require(plan.get('mode') == cfg.electrical_routing
-            and plan.get('via_per_net') == (None if aligned else 5)
+            and plan.get('via_per_net') == (None if aligned else (4 if m2_ports else 5))
             and (not aligned or plan.get('fanout') == 'aligned')
             and plan.get('optical_center_y') == 0
             and plan.get('shared_interstage') == cfg.share_interstage,
             'two-row electrical contract mismatch')
     for e in m['electrical']:
+        source_layer=source_layers[e['instance']].get(e['terminal'],'M1')
+        require(e.get('source_layer','M1')==source_layer,'electrical source layer differs from MZI terminal')
         sign = 1 if e['side']=='north' else -1
         require(sign*e['y'] > 0, 'electrical source assigned to opposite bank')
         sx,py = e['pad']
@@ -758,6 +766,8 @@ def verify_two_row_contract(m, cfg):
             expected = expected[:2] + [('M2',[tx,e['y']],[tx,ly]), ('M1',[sx,ly],[sx,py])]
         elif abs(tx-sx) < cfg.via_size+2*cfg.via_enclosure+cfg.metal_spacing:
             expected.insert(4, ('M2',[tx,fy],[sx,fy]))
+        if source_layer=='M2':
+            expected = [('M2',[e['x'],e['y']],[tx,e['y']])] + expected[2:]
         expected = [dict(layer=l,start=a,end=b) for l,a,b in expected if a!=b]
         require(e['segments']==expected,'two-row electrical path metadata mismatch')
         polygons = []
@@ -770,6 +780,7 @@ def verify_two_row_contract(m, cfg):
         require(cell['polygons']==polygons,'two-row electrical polygon/path mismatch')
         vias = ([[launch,e['y']],[tx,ly],[sx,py]] if direct else
                 [[launch,e['y']],[tx,fy],[sx,fy],[sx,ly],[sx,py]])
+        if source_layer=='M2':vias=vias[1:]
         require(e['vias']==vias,'two-row via positions mismatch')
         require(Counter((r['cell'],r['x'],r['y'],r['angle']) for r in cell['refs'])
                 == Counter(('VIA',*p,0) for p in vias),'two-row via hierarchy mismatch')
@@ -882,8 +893,12 @@ def verify_gds(path, m, names):
     assigned = {}
     gsg = cfg.mzi_model == 'paper-gsg'
     net_roots = {}
+    source_layers={i['id']:m['cells'][i['cell']]['metadata'].get('electrical_port_layers',{})
+                   for i in m['instances']}
     for e in m["electrical"]:
-        a, b = conductor("M1", [e["x"], e["y"]]), conductor("M2", e["pad"])
+        source_layer=source_layers[e['instance']].get(e['terminal'],'M1')
+        require(e.get('source_layer','M1')==source_layer,'electrical source layer differs from MZI terminal')
+        a, b = conductor(source_layer, [e["x"], e["y"]]), conductor("M2", e["pad"])
         require(root(a) == root(b), f"electrical open: {e['net']}")
         electrical_net = 'GND' if gsg and e['terminal']=='G' else e['net']
         require(root(a) not in assigned or (gsg and assigned[root(a)]==electrical_net),

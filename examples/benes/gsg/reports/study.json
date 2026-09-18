@@ -4,12 +4,13 @@
     "bends_per_branch": 8,
     "branch_geometric_length_um": 1033.6023179021822,
     "coupler_calibrated": false,
-    "internal_vias_per_device": 5,
+    "electrical_port_layer": "M2",
+    "internal_vias_per_device": 3,
     "min_radius_um": 20.0,
     "total_length_um": 1000
   },
   "independent_readback": {
-    "cell_references": 24308,
+    "cell_references": 22642,
     "electrical_extraction_passed": true,
     "electrical_nets": 833,
     "gds_cells": 6495,
@@ -18,8 +19,8 @@
     "logical_edges": 1792,
     "manifest_geometry_passed": true,
     "metal_regions": {
-      "M1": 6726,
-      "M2": 5895
+      "M1": 5062,
+      "M2": 4231
     },
     "mzi_count": 832,
     "optical_objects": 32392,
@@ -27,9 +28,9 @@
     "spare_terminations": 56,
     "switch_depth_max": 13,
     "switch_depth_min": 13,
-    "via_count": 11788
+    "via_count": 8460
   },
-  "normalized_hash": "db5d1b56837ce81ebf84ee2e4b5ed3c926b6239bd3de498e0cb62d66cf2d255c",
+  "normalized_hash": "4d526b48032c9f07e856096521c7d718bb72da4b5de01f400f5b31efddff3ff8",
   "repeated_geometry_and_tables": true,
   "summary": {
     "active_ports": 100,
@@ -48,7 +49,7 @@
     "pads": 1664,
     "selected_candidate": "candidate-000",
     "stages": 13,
-    "vias": 11788,
+    "vias": 8460,
     "width_mm": 36.394307
   }
 }

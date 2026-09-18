@@ -4,10 +4,11 @@
   "branch_geometric_length_um": 1033.6023179021822,
   "bends_per_branch": 8,
   "min_radius_um": 20.0,
-  "internal_vias_per_device": 5,
+  "internal_vias_per_device": 3,
   "coupler_calibrated": false,
+  "electrical_port_layer": "M2",
   "cell_names": {
-    "MZI": "MZI_16b00628_879b0cc930",
+    "MZI": "MZI_16b00628_007c9a7654",
     "GSG_DC": "GSG_DC_16b00628_9533c40e51",
     "GSG_WAVEGUIDES": "GSG_WAVEGUIDES_16b00628_e855e11d89",
     "VIA": "VIA_16b00628_80d0a7b425"
@@ -23,6 +24,10 @@
       "G",
       "S"
     ],
+    "electrical_port_layers": {
+      "G": "M2",
+      "S": "M2"
+    },
     "allowed_transforms": [
       0,
       180
@@ -561,14 +566,6 @@
       [
         820.0,
         30.0
-      ],
-      [
-        980.0,
-        20
-      ],
-      [
-        980.0,
-        40
       ]
     ],
     "electrical_probes": {
