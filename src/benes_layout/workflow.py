@@ -49,6 +49,9 @@ def candidates(cfg):
 
 
 def generate(cfg, out, requests, *, choices=None):
+    if cfg.topology == 'as-benes':
+        from .as_workflow import generate as generate_exact
+        return generate_exact(cfg,out,requests,choices=choices)
     from .layout import build_layout
     from .verify import verify_manifest, verify_gds, normalized_hash
     from .metrics import uniformity, realized, objective, pad_banks
@@ -327,6 +330,10 @@ def generate(cfg, out, requests, *, choices=None):
 
 
 def verify_bundle(directory):
+    from pathlib import Path
+    if json.loads((Path(directory)/'config.json').read_text()).get('topology') == 'as-benes':
+        from .as_workflow import verify_bundle as verify_exact
+        return verify_exact(directory)
     from .verify import verify_manifest, verify_gds, normalized_hash, require
     from .metrics import uniformity, realized, pad_banks
 

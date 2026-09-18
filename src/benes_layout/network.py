@@ -16,6 +16,12 @@ def shuffle(size):
 
 
 class Network:
+    def __new__(cls, config=100):
+        if isinstance(config, Config) and config.topology == 'as-benes':
+            from .as_network import ASNetwork
+            return ASNetwork(config)
+        return super().__new__(cls)
+
     def __init__(self, config: Config | int = 100):
         self.cfg = Config(active_ports=config) if isinstance(config, int) else config
         self.p = self.cfg.internal_ports

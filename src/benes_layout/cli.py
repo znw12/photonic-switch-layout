@@ -36,10 +36,9 @@ def main(argv=None):
         p.add_argument("--config")
         p.add_argument("--n", type=int, help="number of active ports")
         p.add_argument("--internal", type=int)
+        p.add_argument('--topology', choices=('benes','as-benes'))
         p.add_argument("--connections", default="identity")
-        p.add_argument(
-            "--out", default="output/benes/n100" if command == "generate" else None
-        )
+        p.add_argument('--out')
         if command == "generate":
             p.add_argument("--candidates", type=int)
             p.add_argument("--pad-rows", type=int)
@@ -93,6 +92,7 @@ def main(argv=None):
                 args.config,
                 active_ports=args.n,
                 internal_ports=args.internal,
+                topology=args.topology,
                 max_candidates=getattr(args, "candidates", None),
                 pad_rows=getattr(args, "pad_rows", None),
                 pad_row_stagger=getattr(args, "pad_row_stagger", None),
@@ -123,7 +123,9 @@ def main(argv=None):
             else:
                 from .workflow import generate
 
-                result = generate(cfg, args.out, pairs)
+                out = args.out or (f'output/benes/exact100-balanced/n{cfg.active_ports}'
+                                   if cfg.topology == 'as-benes' else 'output/benes/n100')
+                result = generate(cfg, out, pairs)
                 print(json.dumps(result["summary"], indent=2))
         elif args.command == "verify":
             from .workflow import verify_bundle

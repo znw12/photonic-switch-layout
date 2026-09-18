@@ -9,6 +9,7 @@ from pathlib import Path
 
 @dataclass(frozen=True)
 class Config:
+    topology: str = "benes"
     active_ports: int = 100
     internal_ports: int | None = None
     input_map: tuple[int, ...] | None = None
@@ -85,9 +86,14 @@ class Config:
         if type(self.active_ports) is not int or self.active_ports < 1:
             raise ValueError("active_ports must be a positive integer")
         p = self.internal_ports
+        if self.topology not in ('benes', 'as-benes'):
+            raise ValueError('unknown topology')
+        exact = self.topology == 'as-benes'
         if p is None:
-            p = 1 << max(1, (self.active_ports - 1).bit_length())
-        if type(p) is not int or p < max(2, self.active_ports) or p & (p - 1):
+            p = self.active_ports if exact else 1 << max(1, (self.active_ports - 1).bit_length())
+        if exact and (type(p) is not int or p != self.active_ports):
+            raise ValueError('as-benes requires equal positive active/internal ports')
+        if not exact and (type(p) is not int or p < max(2, self.active_ports) or p & (p - 1)):
             raise ValueError(
                 "internal_ports must be a power of two >= max(2, active_ports)"
             )
@@ -150,8 +156,8 @@ class Config:
             raise ValueError("chord_error must be between grid and wg_width/10")
         if type(self.ground_pads_per_side) is not int or self.ground_pads_per_side < 0:
             raise ValueError('ground_pads_per_side must be a nonnegative integer')
-        compact = self.ground_pads_per_side > 0
-        if compact and not (self.mzi_model == 'paper-gsg' and self.electrical_fanout == 'aligned'
+        compact = self.ground_pads_per_side > 0 or exact
+        if compact and not exact and not (self.mzi_model == 'paper-gsg' and self.electrical_fanout == 'aligned'
                             and self.share_interstage and p >= 4
                             and self.ground_pads_per_side <= 2*(p.bit_length()-1)-1):
             raise ValueError('local ground pads require aligned shared-interstage GSG routing and at most one tap per stage per side')
@@ -169,10 +175,14 @@ class Config:
                            and tuple(self.terminal_offsets) == (12.5,12.5) and self.metal_width <= 4)
                           if compact else (self.lane_pitch == 60 and self.mzi_height == 100
                                            and tuple(self.terminal_offsets) == (20,40)))
+            if exact:
+                dimensions = (self.lane_pitch in (34,35) and self.mzi_height == 2*self.lane_pitch
+                              and tuple(self.terminal_offsets) == (self.lane_pitch/2,)*2
+                              and self.metal_width <= 4)
             if not (self.mzi_length == 1000 and dimensions
                     and tuple(self.terminal_names) == ('G','S')
-                    and self.electrical_routing == 'three-row' and self.fold_bands == 1):
-                raise ValueError('paper-gsg requires the legacy 60 um or compact 25 um interface, 1000 um length and single-band three-row routing')
+                    and self.electrical_routing == ('two-row' if exact else 'three-row') and self.fold_bands == 1):
+                raise ValueError('paper-gsg requires a supported interface (standard 60/25 um or AS 34/35 um), 1000 um length and matching single-band pad routing')
             landing = self.via_size + 2*self.via_enclosure
             if not (self.gsg_gap >= self.metal_spacing and self.gsg_gap > self.mzi_wg_width
                     and self.gsg_signal_width >= landing and self.gsg_ground_width >= landing
@@ -192,7 +202,7 @@ class Config:
         two_row = self.layered_electrical
         if self.electrical_fanout not in ('channel', 'aligned'):
             raise ValueError('invalid electrical_fanout')
-        if self.electrical_fanout == 'aligned' and self.electrical_routing != 'three-row':
+        if self.electrical_fanout == 'aligned' and self.electrical_routing != 'three-row' and not exact:
             raise ValueError('aligned fanout requires three-row electrical routing')
         if type(self.share_interstage) is not bool or (self.share_interstage and not two_row):
             raise ValueError("share_interstage requires layered electrical routing")
@@ -263,7 +273,7 @@ class Config:
             raise ValueError("pad row staggering requires four rows and a supported band profile")
         if (self.pad_rows - 1) * self.pad_row_stagger >= self.pad_pitch:
             raise ValueError("pad row stagger spans a full column pitch")
-        depth = 2 * (p.bit_length() - 1) - 1
+        depth = max(1, 2*(p-1).bit_length()-1) if exact else 2 * (p.bit_length() - 1) - 1
         if (
             type(self.fold_bands) is not int
             or not 1 <= self.fold_bands <= depth
@@ -364,6 +374,8 @@ class Config:
 
     def to_dict(self):
         data = asdict(self)
+        if self.topology == 'benes':
+            data.pop('topology')
         # Preserve serialized legacy profiles and their reproducibility hashes.
         if not self.ground_pads_per_side:
             data.pop('ground_pads_per_side')
