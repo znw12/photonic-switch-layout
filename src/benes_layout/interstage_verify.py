@@ -88,7 +88,10 @@ def verify_boundaries(m,cfg,net):
                     'measured core/transition dimensions differ')
         else:
             require(record['mode']=='continuous' and record['actual_pitch']==cfg.lane_pitch and
-                    record['fanin_width']==record['fanout_width']==0,'uncompressed strategy corrupted')
+                    (record['fanin_width']==record['fanout_width']==0 or
+                     (cfg.ground_pads_per_side and record.get('approach_offset',0)>0
+                      and record['fanin_width']==record['fanout_width']>0)),
+                    'uncompressed strategy corrupted')
         s=m['stages'][stage]
         sign = -1 if s.get('angle',0)==180 else 1
         require(abs(s['route_end']-s['escape_end']-sign*width)<=cfg.grid,'stage width differs from block')

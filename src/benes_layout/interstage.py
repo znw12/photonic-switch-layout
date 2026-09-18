@@ -86,6 +86,8 @@ def continuous(lib, size, pitch):
     ax, ay = r/sqrt(2), r*(1-1/sqrt(2))
     offset = ax-ay
     if (pitch/2-ay)*sqrt(2) <= cfg.crossing_half_length + cfg.wg_clearance:
+        if cfg.ground_pads_per_side:
+            return offset_continuous(lib, size, pitch)
         raise ValueError("shuffle pitch cannot fit crossing approaches")
     width = snap((size//2-1)*pitch + 2*offset)
     c = lib.cell(name, "shuffle")
@@ -125,6 +127,76 @@ def continuous(lib, size, pitch):
         attach(lib, c, path, segment(lib, [endx, y1], [width, y1]))
     return finish(lib, c, parts, perm, pitch, width, mode="continuous", inverse=False,
                   actual_pitch=pitch, core_width=width, fanin_width=0, fanout_width=0)
+
+
+def offset_continuous(lib, size, pitch):
+    """Keep the dense diagonal lattice; open only its first/last approaches.
+
+    Alternating launch shifts and half-bundle receive shifts add room around
+    the end crossing on each track. The interior parallel-line spacing stays
+    sqrt(2)*pitch. Circular S bends restore the regular external lane grid.
+    """
+    cfg, r = lib.cfg, lib.cfg.radius
+    ax, ay = r/sqrt(2), r*(1-1/sqrt(2))
+    offset = ax-ay
+    delta = snap(max(0, ay+(cfg.crossing_half_length+cfg.wg_clearance+1)/sqrt(2)-pitch/2))
+    if pitch-2*delta < cfg.wg_width+cfg.wg_clearance+1:
+        raise ValueError('compact shuffle end offsets cannot fit lane clearance')
+    # A short tangent joins the opposite curvatures robustly on the 1 nm grid.
+    tangent_length = 2.0
+    theta = acos((2*r-delta)/hypot(2*r,tangent_length))-atan2(tangent_length,2*r)
+    fan_width = snap(2*r*sin(theta)+tangent_length*cos(theta))
+    core_width = snap((size//2-1)*pitch+2*offset+2*delta)
+    width = snap(2*fan_width+core_width)
+    name = key('OFFSET_CONT_', [size,pitch,r,delta])
+    if name in lib.cells:
+        return lib.cells[name]
+    c=lib.cell(name,'shuffle')
+    perm=[i//2+(size//2 if i%2 else 0) for i in range(size)]
+    cross=bidirectional(lib.crossing())
+    crossings=[[] for _ in range(size)]
+    for i in range(size):
+        for j in range(i+1,size):
+            if perm[i] <= perm[j]:
+                continue
+            x,y=snap(fan_width+(j-i)*pitch/2+offset+delta),snap((i+j)*pitch/2)
+            lib.ref(c,cross,x,y,45,id=f'cross_{i}_{j}')
+            crossings[i].append((x,y,'w','e'))
+            crossings[j].append((x,y,'n','s'))
+    parts=[[] for _ in range(size)]
+
+    def shift(path,x,y,dy):
+        sign=1 if dy>0 else -1
+        first=arc(lib,x,y+sign*r,-sign*pi/2,-sign*pi/2+sign*theta)
+        last=arc(lib,x+fan_width,y+dy-sign*r,sign*pi/2+sign*theta,sign*pi/2)
+        attach(lib,c,path,first)
+        attach(lib,c,path,segment(lib,first.ports['e'][:2],last.ports['w'][:2]))
+        attach(lib,c,path,last)
+
+    for i,path in enumerate(parts):
+        y0,y1=i*pitch,perm[i]*pitch
+        if i in (0,size-1):
+            attach(lib,c,path,segment(lib,[0,y0],[width,y1]))
+            continue
+        sign=1 if y1>y0 else -1
+        start_y,end_y=y0-sign*delta,y1+sign*delta
+        shift(path,0,y0,-sign*delta)
+        endx=snap(fan_width+abs(end_y-start_y)+2*offset)
+        first=arc(lib,fan_width,start_y+sign*r,-sign*pi/2,-sign*pi/4)
+        last=arc(lib,endx,end_y-sign*r,sign*3*pi/4,sign*pi/2)
+        attach(lib,c,path,first)
+        previous=first.ports['e'][:2]
+        for x,y,entry,exit in sorted(crossings[i]):
+            attach(lib,c,path,segment(lib,previous,point(x,y,45,cross.ports[entry])))
+            attach(lib,c,path,cross,x,y,45,entry,exit,place=False)
+            previous=point(x,y,45,cross.ports[exit])
+        attach(lib,c,path,segment(lib,previous,last.ports['w'][:2]))
+        attach(lib,c,path,last)
+        attach(lib,c,path,segment(lib,[endx,end_y],[fan_width+core_width,end_y]))
+        shift(path,fan_width+core_width,end_y,-sign*delta)
+    return finish(lib,c,parts,perm,pitch,width,mode='continuous',inverse=False,
+                  actual_pitch=pitch,core_width=core_width,fanin_width=fan_width,
+                  fanout_width=fan_width,approach_offset=delta)
 
 
 def reverse_block(lib, source, pitch):

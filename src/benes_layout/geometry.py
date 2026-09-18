@@ -12,8 +12,21 @@ from waksman_layout.geometry import (
     rectangle,
     arc_polygon,
     line_polygon,
-    validate_mzi,
+    validate_mzi as validate_standard_mzi,
 )
+
+
+def validate_mzi(cell, cfg):
+    if not cfg.ground_pads_per_side:
+        return validate_standard_mzi(cell, cfg)
+    from copy import copy
+    # The compact device exports G at its local bridge, not at the east edge.
+    gx = cell.metadata['active_x'][1]-60
+    if cell.ports.get('G') != [gx,cfg.lane_pitch/2,90]:
+        raise ValueError('compact MZI ground bridge port changed')
+    interface = copy(cell)
+    interface.ports = {**cell.ports, 'G':[cfg.mzi_length,cfg.lane_pitch/2,0]}
+    validate_standard_mzi(interface,cfg)
 
 
 class Library(PrimitiveLibrary):

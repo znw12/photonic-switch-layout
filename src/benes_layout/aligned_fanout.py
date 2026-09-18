@@ -36,6 +36,26 @@ def allocate(cfg, sources, left, right, step):
         if available:
             add(x, min(available, key=lambda r: (len(rows[r]), r)), i)
             matched.add(i)
+    if cfg.ground_pads_per_side:
+        # Fill near the unaligned terminals, instead of packing every free slot
+        # against the west edge. Exact trunk alignments remain reserved above.
+        fixed_edges=[lo,hi]+[x+d for x in sources for d in (-trunk_clear,trunk_clear)]
+        for i in (j for j in range(total) if j not in matched):
+            edges=fixed_edges+[x+d for x in xs for d in (-step,step)]
+            choices=[]
+            for row in range(3):
+                if len(rows[row])==caps[row]:
+                    continue
+                candidates=edges+[sources[i]]+[x+d for x in rows[row] for d in (-cfg.pad_pitch,cfg.pad_pitch)]
+                for x in sorted(set(snap(x) for x in candidates),key=lambda x:(abs(x-sources[i]),x)):
+                    if (lo<=x<=hi and not conflicts(sources,x,trunk_clear)
+                            and not conflicts(xs,x,step) and not conflicts(rows[row],x,cfg.pad_pitch)):
+                        choices.append((abs(x-sources[i]),len(rows[row]),row,x))
+                        break
+            if not choices:
+                raise ValueError('compact aligned pad allocation exhausted legal row intervals')
+            _,_,row,x=min(choices)
+            add(x,row)
     for row in range(3):
         x = lo
         while x <= hi and len(rows[row]) < caps[row]:

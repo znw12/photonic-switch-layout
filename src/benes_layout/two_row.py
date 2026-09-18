@@ -187,6 +187,12 @@ def overpass_records(m):
         metal = unary_union(polys)
         for index in sorted(tree.query(metal,predicate='dwithin',distance=cfg['optical_metal_clearance'])):
             obj = objs[int(index)]
+            if cfg.get('ground_pads_per_side') and m['cells'][obj[0]]['kind']=='mzi':
+                from .config import Config
+                from .local_ground import permitted_device_m2
+                conflict=metal.intersection(shapes[int(index)].buffer(cfg['optical_metal_clearance']))
+                if conflict.difference(permitted_device_m2(m,Config(**cfg),obj[1]).buffer(2*cfg['grid'])).area < cfg['grid']**2:
+                    continue
             if m['cells'][obj[0]]['kind'] not in ('straight','segment','bend','crossing'):
                 raise VerificationError('two-row M2 overlaps an unauthorized optical device')
             conflict = metal.intersection(shapes[int(index)].buffer(cfg['optical_metal_clearance']))

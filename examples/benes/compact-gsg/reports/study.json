@@ -1,0 +1,70 @@
+{
+  "crossing_device": {
+    "center_width_um": 3.0,
+    "footprint_um": [
+      20.0,
+      20.0
+    ],
+    "max_width_um": 4.0,
+    "model": "cosine",
+    "optical_transfer_calibrated": false,
+    "port_straight_um": 0.5,
+    "port_width_um": 1.0,
+    "samples_per_arm": 33,
+    "source_url": "https://www.flexcompute.com/tidy3d/examples/notebooks/WaveguideCrossing/",
+    "taper_length_um": 8.0
+  },
+  "device": {
+    "active_length_um": 680.0,
+    "bends_per_branch": 8,
+    "branch_geometric_length_um": 1012.9170441632441,
+    "coupler_calibrated": false,
+    "electrical_port_layer": "M2",
+    "internal_vias_per_device": 3,
+    "min_radius_um": 20.0,
+    "total_length_um": 1000
+  },
+  "independent_readback": {
+    "cell_references": 19372,
+    "electrical_extraction_passed": true,
+    "electrical_nets": 833,
+    "gds_cells": 6764,
+    "gds_readback_passed": true,
+    "independent_signals": 832,
+    "logical_edges": 1792,
+    "manifest_geometry_passed": true,
+    "metal_regions": {
+      "M1": 3117,
+      "M2": 2283
+    },
+    "mzi_count": 832,
+    "optical_objects": 40096,
+    "shared_ground_nets": 1,
+    "spare_terminations": 56,
+    "switch_depth_max": 13,
+    "switch_depth_min": 13,
+    "via_count": 5398
+  },
+  "normalized_hash": "31b91939ffac09d92471ce3c8abab1b852d7b1d1ac4d8716d42cf6bcc5b35fd2",
+  "repeated_geometry_and_tables": true,
+  "summary": {
+    "active_ports": 100,
+    "area_mm2": 100.72557566404,
+    "band_stage_counts": [
+      13
+    ],
+    "fold_bands": 1,
+    "height_mm": 4.4840919999999995,
+    "internal_ports": 128,
+    "lane_pitch_um": 25,
+    "mzis": 832,
+    "pad_distribution": "central",
+    "pad_row_stagger_um": 25,
+    "pad_rows_per_side": 3,
+    "pads": 840,
+    "selected_candidate": "candidate-000",
+    "stages": 13,
+    "vias": 5398,
+    "width_mm": 22.46287
+  }
+}

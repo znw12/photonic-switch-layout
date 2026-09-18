@@ -158,6 +158,8 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
     two_row = cfg.layered_electrical
     if two_row:
         from .two_row import plan
+        if cfg.ground_pads_per_side:
+            from .local_ground import plan
         stages, right, planned_slots, _, step = plan(cfg, net, blocks, candidate)
         bands = [dict(band=0, y=stages[0]['y'], stages=list(range(net.depth)))]
         extra = cfg.termination_length if net.p > cfg.active_ports else 0.0
@@ -225,7 +227,16 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
                     )
                 )
         terms.sort(key=lambda t: (t["y"], t["net"]))
-        for side, bank in (("south", terms[:count]), ("north", terms[count:])):
+        ground_terms = []
+        if cfg.ground_pads_per_side:
+            from .local_ground import tap_stages
+            grounds=[t for t in terms if t['terminal']=='G']
+            if s['stage'] in tap_stages(net.depth,cfg.ground_pads_per_side):
+                for side,t in (('south',grounds[0]),('north',grounds[-1])):
+                    ground_terms.append({**t,'side':side,'tx':t['x'],'launch_x':t['x'],'stage':s['stage']})
+            terms=[t for t in terms if t['terminal']=='S']
+        split=len(terms)//2
+        for side, bank in (("south", terms[:split]), ("north", terms[split:])):
             # Keep launch runs ordered with the trunks to avoid crossings.
             if two_row and side == "north":
                 bank = list(reversed(bank))
@@ -239,6 +250,7 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
                         **({"stage": s["stage"]} if planned_slots is not None else {}),
                     }
                 )
+        terminals.extend(ground_terms)
 
     def new_route(source, target, start):
         route = dict(
@@ -437,6 +449,8 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
                           for i in m["instances"]}
     if cfg.mzi_model == 'paper-gsg':
         from .shared_ground import add
+        if cfg.ground_pads_per_side:
+            from .local_ground import add
         add(lib,m,top)
     frame = lib.cell("DIE_OUTLINE", "outline")
     lib.ref(top, frame)

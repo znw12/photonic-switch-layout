@@ -51,6 +51,7 @@ def main(argv=None):
             p.add_argument("--electrical-routing", choices=("legacy", "two-row", "three-row"))
             p.add_argument('--electrical-fanout', choices=('channel', 'aligned'))
             p.add_argument('--mzi-model', choices=('placeholder','paper-gsg'))
+            p.add_argument('--ground-pads-per-side', type=int)
             p.add_argument("--electrical-stage-bias", type=float)
             p.add_argument("--electrical-width-extra", type=float)
             p.add_argument("--share-interstage", action=argparse.BooleanOptionalAction, default=None)
@@ -102,6 +103,7 @@ def main(argv=None):
                 electrical_routing=getattr(args,"electrical_routing",None),
                 electrical_fanout=getattr(args,'electrical_fanout',None),
                 mzi_model=getattr(args,'mzi_model',None),
+                ground_pads_per_side=getattr(args,'ground_pads_per_side',None),
                 electrical_stage_bias=getattr(args,'electrical_stage_bias',None),
                 electrical_width_extra=getattr(args,'electrical_width_extra',None),
                 share_interstage=getattr(args,"share_interstage",None),

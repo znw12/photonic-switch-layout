@@ -1,0 +1,27 @@
+{
+  "full_suite_passed": 393,
+  "final_focused_tests_passed": 19,
+  "checks": {
+    "cell_references": 19372,
+    "electrical_extraction_passed": true,
+    "electrical_nets": 833,
+    "gds_cells": 6764,
+    "gds_readback_passed": true,
+    "independent_signals": 832,
+    "logical_edges": 1792,
+    "manifest_geometry_passed": true,
+    "metal_regions": {
+      "M1": 3117,
+      "M2": 2283
+    },
+    "mzi_count": 832,
+    "optical_objects": 40096,
+    "shared_ground_nets": 1,
+    "spare_terminations": 56,
+    "switch_depth_max": 13,
+    "switch_depth_min": 13,
+    "via_count": 5398
+  },
+  "repeated_geometry_and_tables": true,
+  "normalized_hash": "31b91939ffac09d92471ce3c8abab1b852d7b1d1ac4d8716d42cf6bcc5b35fd2"
+}

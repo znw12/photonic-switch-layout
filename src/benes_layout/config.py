@@ -30,6 +30,7 @@ class Config:
     gsg_signal_width: float = 20.0
     gsg_gap: float = 5.0
     gsg_ground_width: float = 10.0
+    ground_pads_per_side: int = 0
     terminal_names: tuple[str, str] = ("return", "control")
     terminal_offsets: tuple[float, float] = (20.0, 40.0)
     metal_width: float = 5.0
@@ -147,23 +148,35 @@ class Config:
             raise ValueError("radius must be >=20 um and exceed waveguide half width")
         if not self.grid <= self.chord_error <= self.wg_width / 10:
             raise ValueError("chord_error must be between grid and wg_width/10")
-        if self.lane_pitch < max(2 * self.radius, self.wg_width + self.wg_clearance):
+        if type(self.ground_pads_per_side) is not int or self.ground_pads_per_side < 0:
+            raise ValueError('ground_pads_per_side must be a nonnegative integer')
+        compact = self.ground_pads_per_side > 0
+        if compact and not (self.mzi_model == 'paper-gsg' and self.electrical_fanout == 'aligned'
+                            and self.share_interstage and p >= 4
+                            and self.ground_pads_per_side <= 2*(p.bit_length()-1)-1):
+            raise ValueError('local ground pads require aligned shared-interstage GSG routing and at most one tap per stage per side')
+        if self.lane_pitch < max(0 if compact else 2 * self.radius, self.wg_width + self.wg_clearance):
             raise ValueError("lane_pitch cannot fit bends/clearance")
-        if not self.lane_pitch < self.mzi_height < 2 * self.lane_pitch:
+        if not (self.lane_pitch < self.mzi_height <= 2 * self.lane_pitch if compact
+                else self.lane_pitch < self.mzi_height < 2 * self.lane_pitch):
             raise ValueError("mzi_height must lie between one and two lane pitches")
         if self.mzi_length < 8 * self.radius:
             raise ValueError("mzi_length cannot fit the placeholder")
         if self.mzi_model not in ('placeholder', 'paper-gsg'):
             raise ValueError('unknown mzi_model')
         if self.mzi_model == 'paper-gsg':
-            if not (self.mzi_length == 1000 and self.lane_pitch == 60 and self.mzi_height == 100
-                    and tuple(self.terminal_names) == ('G','S') and tuple(self.terminal_offsets) == (20,40)
+            dimensions = ((self.lane_pitch == 25 and self.mzi_height == 50
+                           and tuple(self.terminal_offsets) == (12.5,12.5) and self.metal_width <= 4)
+                          if compact else (self.lane_pitch == 60 and self.mzi_height == 100
+                                           and tuple(self.terminal_offsets) == (20,40)))
+            if not (self.mzi_length == 1000 and dimensions
+                    and tuple(self.terminal_names) == ('G','S')
                     and self.electrical_routing == 'three-row' and self.fold_bands == 1):
-                raise ValueError('paper-gsg requires a 1000 x 100 um device, 60 um lanes, G/S at 20/40 and single-band three-row routing')
+                raise ValueError('paper-gsg requires the legacy 60 um or compact 25 um interface, 1000 um length and single-band three-row routing')
             landing = self.via_size + 2*self.via_enclosure
             if not (self.gsg_gap >= self.metal_spacing and self.gsg_gap > self.mzi_wg_width
                     and self.gsg_signal_width >= landing and self.gsg_ground_width >= landing
-                    and self.gsg_signal_width + 2*(self.gsg_gap+self.gsg_ground_width) <= self.lane_pitch
+                    and self.gsg_signal_width + 2*(self.gsg_gap+self.gsg_ground_width) <= (self.mzi_height if compact else self.lane_pitch)
                     and self.coupler_gap+self.mzi_wg_width < self.gsg_signal_width+self.gsg_gap):
                 raise ValueError('GSG electrode or coupler dimensions cannot fit')
         if self.pad_pitch < self.pad_size + self.metal_spacing or self.pad_size < max(
@@ -304,12 +317,13 @@ class Config:
             + self.optical_metal_clearance
             + self.wg_width / 2
         )
-        if len(self.terminal_offsets) != 2 or any(
+        if not compact and (len(self.terminal_offsets) != 2 or any(
             not math.isfinite(y) or not c <= y <= self.lane_pitch - c
             for y in self.terminal_offsets
-        ):
+        )):
             raise ValueError("terminal_offsets violate optical/via clearance")
         if (
+            not compact and
             abs(self.terminal_offsets[1] - self.terminal_offsets[0])
             < self.via_size + 2 * self.via_enclosure + self.metal_spacing
         ):
@@ -349,7 +363,11 @@ class Config:
             raise ValueError("layer/datatype pairs must be valid and distinct")
 
     def to_dict(self):
-        return asdict(self)
+        data = asdict(self)
+        # Preserve serialized legacy profiles and their reproducibility hashes.
+        if not self.ground_pads_per_side:
+            data.pop('ground_pads_per_side')
+        return data
 
     @property
     def layered_electrical(self):

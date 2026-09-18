@@ -101,6 +101,10 @@ def build(lib):
         ('M2',[bend_x,mid],[bend_x,40]),
         ('M2',[bend_x,40],[L,40]),
     ]
+    compact = cfg.ground_pads_per_side > 0
+    if compact:
+        electrical_paths = [('M2',[ground_x,gy0],[ground_x,gy1]),
+                            ('M2',[signal_x,mid],[L,mid])]
     for layer,v0,v1 in electrical_paths:
         half=cfg.metal_width/2
         # At the external boundary the metal ends exactly at x=L.
@@ -110,6 +114,8 @@ def build(lib):
     for at in vias:lib.ref(cell,lib.via(),*at)
     cell.ports = {'i0':[0,0,180],'i1':[0,p,180],'o0':[L,0,0],'o1':[L,p,0],
                   'G':[L,20,0],'S':[L,40,0]}
+    if compact:
+        cell.ports.update(G=[ground_x,mid,90], S=[L,mid,0])
     length=L+4*r*((t0-sin(t0))+(t1-sin(t1)))
     cell.tracks=[dict(ports=[f'i{i}',f'o{j}'],length=length,bends=8,
                       angle=4*(t0+t1),crossings=0,min_radius=r) for i in (0,1) for j in (0,1)]
@@ -160,7 +166,10 @@ def export_device(cfg,out):
     grid=fig.add_gridspec(2,2,height_ratios=(1,2))
     axes=[fig.add_subplot(grid[0,:]),fig.add_subplot(grid[1,0]),fig.add_subplot(grid[1,1])]
     active_end=c.metadata['active_x'][1]
-    bounds=[(-5,-12,1005,72),(25,-3,160,63),(active_end-110,-2,active_end+40,62)]
+    edge = (cfg.mzi_height-cfg.lane_pitch)/2+5
+    bounds=[(-5,-edge,1005,cfg.lane_pitch+edge),
+            (25,-edge,160,cfg.lane_pitch+edge),
+            (active_end-110,-edge,active_end+40,cfg.lane_pitch+edge)]
     titles=[f"2 x 2 GSG MZI | total 1000 um | active electrode {c.metadata['active_length_um']:g} um | R >= {cfg.radius:g} um",
             'Input 2 x 2 directional coupler and circular S bends',
             'GSG electrodes and insulated common-G bridge']

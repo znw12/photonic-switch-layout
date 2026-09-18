@@ -1,0 +1,56 @@
+{
+  "active_ports": 100,
+  "internal_ports": 128,
+  "interstage_routing": "continuous",
+  "electrical_routing": "three-row",
+  "share_interstage": true,
+  "fold_bands": 1,
+  "pad_rows": 3,
+  "pad_distribution": "central",
+  "pad_pitch": 120,
+  "pad_row_stagger": 25,
+  "lane_pitch": 25,
+  "max_candidates": 1,
+  "gap_factors": [
+    1.0
+  ],
+  "corridor_factors": [
+    1.0
+  ],
+  "pad_factors": [
+    1.0
+  ],
+  "row_orders": [
+    "normal"
+  ],
+  "margin": 40,
+  "pad_row_pitch": 70,
+  "electrical_stage_bias": 0,
+  "electrical_width_extra": 0,
+  "electrical_fanout": "aligned",
+  "mzi_model": "paper-gsg",
+  "terminal_names": [
+    "G",
+    "S"
+  ],
+  "mzi_length": 1000.0,
+  "mzi_height": 50,
+  "mzi_wg_width": 0.8,
+  "coupler_gap": 0.3,
+  "coupler_length": 30.0,
+  "gsg_signal_width": 20.0,
+  "gsg_gap": 5.0,
+  "gsg_ground_width": 10.0,
+  "terminal_offsets": [
+    12.5,
+    12.5
+  ],
+  "radius": 20.0,
+  "crossing_model": "cosine",
+  "crossing_half_length": 10.0,
+  "crossing_center_width": 3.0,
+  "crossing_max_width": 4.0,
+  "crossing_port_straight": 0.5,
+  "ground_pads_per_side": 4,
+  "metal_width": 4
+}

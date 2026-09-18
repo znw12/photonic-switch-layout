@@ -68,7 +68,8 @@ def verify_device(cells,cfg):
         require(g.covers(Point((start+end)/2,y)),'GSG phase waveguide missing')
     for path,y in zip(md['optical_paths'],ys):
         phase=[s for s in path if s['kind']=='line'
-               and abs(s['start'][1]-y)<tol and abs(s['end'][1]-y)<tol]
+               and abs(s['start'][1]-y)<tol and abs(s['end'][1]-y)<tol
+               and s['start'][0]<=start and s['end'][0]>=end]
         require(len(phase)==1 and start-phase[0]['start'][0]>=20-tol
                 and phase[0]['end'][0]-end>=20-tol,
                 'GSG electrode lacks straight-section bend clearance')
@@ -97,6 +98,10 @@ def verify_device(cells,cfg):
     paths=[('M2',[gx,centers[0]],[gx,centers[2]]),('M2',[gx,15],[940,15]),
            ('M2',[940,15],[940,20]),('M2',[940,20],[ex,20]),
            ('M2',[sx,mid],[bx,mid]),('M2',[bx,mid],[bx,40]),('M2',[bx,40],[ex,40])]
+    if cfg.ground_pads_per_side:
+        require(m2_ports and c['ports']['G']==[gx,mid,90] and c['ports']['S']==[1000,mid,0],
+                'compact GSG electrical ports changed')
+        paths=[('M2',[gx,centers[0]],[gx,centers[2]]),('M2',[sx,mid],[1000,mid])]
     if not m2_ports:
         paths += [('M1',[ex,20],[1000,20]),('M1',[ex,40],[1000,40])]
     half=cfg.metal_width/2
@@ -119,6 +124,9 @@ def verify_device(cells,cfg):
 
 
 def verify_ground(m,cfg):
+    if cfg.ground_pads_per_side:
+        from .local_ground import verify
+        return verify(m,cfg)
     from .verify import require
     ground=m.get('ground_network',{});cell=m['cells'].get(ground.get('cell'),{})
     require(ground.get('net')=='GND' and cell.get('kind')=='ground_network','missing shared GSG ground')

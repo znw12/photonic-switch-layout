@@ -34,6 +34,8 @@ def verify_pad_banks(m):
     cells, tol = m["cells"], 2 * cfg.grid
     net = Network(cfg)
     count = len(net.switches)
+    if cfg.ground_pads_per_side:
+        count=count//2+cfg.ground_pads_per_side
     distributed = cfg.pad_distribution == "stage"
     stage_by_instance = {
         switch_id(s, i): s for s in range(net.depth) for i in range(net.p // 2)
@@ -663,6 +665,11 @@ def verify_manifest(m):
     expected_nets = {
         f"{sid}:{name}" for sid in net.switches for name in cfg.terminal_names
     }
+    if cfg.ground_pads_per_side:
+        expected_nets={f'{sid}:S' for sid in net.switches}
+        expected_nets.update(e['net'] for e in m['electrical'] if e['terminal']=='G')
+        require(len(expected_nets)==len(net.switches)+2*cfg.ground_pads_per_side,
+                'compact ground pad count mismatch')
     require(
         {e["net"] for e in m["electrical"]} == expected_nets
         and len(m["electrical"]) == len(expected_nets),
@@ -672,7 +679,9 @@ def verify_manifest(m):
         group = sorted(
             (e for e in m["electrical"] if e["side"] == side), key=lambda e: e["pad"][0]
         )
-        require(len(group) == len(net.switches), "unbalanced pad banks")
+        bank_count = (len(net.switches)//2+cfg.ground_pads_per_side
+                      if cfg.ground_pads_per_side else len(net.switches))
+        require(len(group) == bank_count, "unbalanced pad banks")
         rows = sorted({e["pad"][1] for e in group})
         require(
             len(rows)
@@ -976,6 +985,9 @@ def verify_gds(path, m, names):
                     # Only actual, internally validated device metal is permitted.
                     # Foreign routes remain subject to the normal keepout.
                     local=translate(rotate(device_shapes(name,layer),angle,origin=(0,0)),x,y)
+                    if cfg.ground_pads_per_side and layer=='M2':
+                        from .local_ground import permitted_device_m2
+                        local=local.union(permitted_device_m2(m,cfg,x))
                     conflict=metal.intersection(wgs[j].buffer(distance))
                     require(conflict.difference(local.buffer(dbu*2)).area<dbu*dbu,
                             'unauthorized metal enters GSG device keepout')

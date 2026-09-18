@@ -199,7 +199,8 @@ def generate(cfg, out, requests, *, choices=None):
             "extents_um": m["extents"],
             "pad_banks": pad_banks(m),
             "pad_bank_width_lower_bound_um": (
-                ceil(len(net.switches) / cfg.pad_rows) - 1
+                ceil((len(net.switches)//2+cfg.ground_pads_per_side
+                      if cfg.ground_pads_per_side else len(net.switches)) / cfg.pad_rows) - 1
             )
             * cfg.pad_pitch
             + cfg.pad_size,
