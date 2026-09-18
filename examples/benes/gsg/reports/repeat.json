@@ -41,11 +41,11 @@
       "row_order": "normal",
       "status": "verified",
       "timings_s": {
-        "build": 6.408382416000677,
-        "export": 3.560632060998614,
-        "geometry": 14.66534428900195,
-        "readback": 145.06336275899957,
-        "total": 169.72380928200073
+        "build": 7.1491212750006525,
+        "export": 2.080341117998614,
+        "geometry": 14.540926984001999,
+        "readback": 149.42785958199966,
+        "total": 173.22462194200125
       },
       "uniformity": {
         "metrics": {
@@ -225,7 +225,7 @@
     "via_count": 11788
   },
   "device": {
-    "active_length_um": 600.0,
+    "active_length_um": 680.0,
     "bends_per_branch": 8,
     "branch_geometric_length_um": 1033.6023179021822,
     "coupler_calibrated": false,
@@ -13545,8 +13545,8 @@
     "width_target_met": false,
     "width_target_um": 20000
   },
-  "normalized_hash": "6447234183c74b33f56deebd7f75cbfd824c182cb7a6acf13ca8195780ead767",
-  "process_peak_rss_kib": 1292580,
+  "normalized_hash": "db5d1b56837ce81ebf84ee2e4b5ed3c926b6239bd3de498e0cb62d66cf2d255c",
+  "process_peak_rss_kib": 1290684,
   "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:09:02) [GCC 11.2.0]",
   "realized": {
     "paths": [
@@ -16130,7 +16130,7 @@
     "vias": 11788,
     "width_mm": 36.394307
   },
-  "total_time_s": 176.92984197500118,
+  "total_time_s": 180.8776940759999,
   "uniformity": {
     "metrics": {
       "angle": {

@@ -21,7 +21,10 @@ def build(lib):
     b = a+2*r*sin(t0)
     c = b+dc
     d = c+2*r*sin(t1)
-    active_start, active_end = snap(max(160,d+20)), snap(min(760,L-d-20))
+    # Match the two straight-section end margins; the right-side bridge and
+    # pickups follow the electrode end while external electrical ports stay fixed.
+    active_start = snap(max(160,d+20))
+    active_end = snap(L-active_start)
     if active_end-active_start < 100 or L-2*d < 100:
         raise ValueError('1 mm MZI has no room for the requested couplers and bends')
     cell = lib.cell('MZI','mzi')
@@ -157,7 +160,8 @@ def export_device(cfg,out):
     fig=plt.figure(figsize=(15,7),layout='constrained');fig.patch.set_facecolor('#101923')
     grid=fig.add_gridspec(2,2,height_ratios=(1,2))
     axes=[fig.add_subplot(grid[0,:]),fig.add_subplot(grid[1,0]),fig.add_subplot(grid[1,1])]
-    bounds=[(-5,-12,1005,72),(25,-3,160,63),(650,-2,800,62)]
+    active_end=c.metadata['active_x'][1]
+    bounds=[(-5,-12,1005,72),(25,-3,160,63),(active_end-110,-2,active_end+40,62)]
     titles=[f"2 x 2 GSG MZI | total 1000 um | active electrode {c.metadata['active_length_um']:g} um | R >= {cfg.radius:g} um",
             'Input 2 x 2 directional coupler and circular S bends',
             'GSG electrodes and insulated common-G bridge']
@@ -169,7 +173,7 @@ def export_device(cfg,out):
         ax.tick_params(colors='#afc2d3');ax.set_xlabel('x (um)',color='#afc2d3');ax.set_ylabel('y (um)',color='#afc2d3')
         for spine in ax.spines.values():spine.set_color('#506475')
     for y,label in zip(c.metadata['electrode_centers'],('G','S','G')):
-        axes[2].text(665,y,label,color='#101923',weight='bold',va='center')
+        axes[2].text(active_end-95,y,label,color='#101923',weight='bold',va='center')
     fig.supxlabel('WG: teal  M1: amber  M2: blue  VIA: cream | Physical geometry; coupling ratio / EO transfer uncalibrated',color='#afc2d3')
     fig.savefig(out/'mzi.png',dpi=180);plt.close(fig)
     (out/'model.json').write_text(json.dumps(cells,indent=2)+'\n')

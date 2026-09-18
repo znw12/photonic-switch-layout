@@ -1,13 +1,13 @@
 {
   "total_length_um": 1000,
-  "active_length_um": 600.0,
+  "active_length_um": 680.0,
   "branch_geometric_length_um": 1033.6023179021822,
   "bends_per_branch": 8,
   "min_radius_um": 20.0,
   "internal_vias_per_device": 5,
   "coupler_calibrated": false,
   "cell_names": {
-    "MZI": "MZI_16b00628_33b2620d9b",
+    "MZI": "MZI_16b00628_879b0cc930",
     "GSG_DC": "GSG_DC_16b00628_9533c40e51",
     "GSG_WAVEGUIDES": "GSG_WAVEGUIDES_16b00628_e855e11d89",
     "VIA": "VIA_16b00628_80d0a7b425"
@@ -537,9 +537,9 @@
     ],
     "active_x": [
       160.0,
-      760.0
+      840.0
     ],
-    "active_length_um": 600.0,
+    "active_length_um": 680.0,
     "phase_arm_y": [
       17.5,
       42.5
@@ -551,15 +551,15 @@
     ],
     "internal_vias": [
       [
-        700.0,
+        780.0,
         10.0
       ],
       [
-        700.0,
+        780.0,
         50.0
       ],
       [
-        740.0,
+        820.0,
         30.0
       ],
       [
@@ -574,17 +574,17 @@
     "electrical_probes": {
       "G": [
         [
-          700.0,
+          780.0,
           10.0
         ],
         [
-          700.0,
+          780.0,
           50.0
         ]
       ],
       "S": [
         [
-          740.0,
+          820.0,
           30.0
         ]
       ]

@@ -1,13 +1,12 @@
 {
   "regression": {
-    "passed": 351,
+    "passed": 353,
     "failed": 0
   },
-  "final_targeted_tests": 27,
   "source_pdf_sha256": "b50d18659b52f15a313ad419b393080d92a2e6c87e00fc9d6061730c5f4586b3",
   "repeat": {
     "device": {
-      "active_length_um": 600.0,
+      "active_length_um": 680.0,
       "bends_per_branch": 8,
       "branch_geometric_length_um": 1033.6023179021822,
       "coupler_calibrated": false,
@@ -36,7 +35,7 @@
       "switch_depth_min": 13,
       "via_count": 11788
     },
-    "normalized_hash": "6447234183c74b33f56deebd7f75cbfd824c182cb7a6acf13ca8195780ead767",
+    "normalized_hash": "db5d1b56837ce81ebf84ee2e4b5ed3c926b6239bd3de498e0cb62d66cf2d255c",
     "repeated_geometry_and_tables": true,
     "summary": {
       "active_ports": 100,
@@ -81,5 +80,47 @@
     "settings.json",
     "pads.csv",
     "ports.csv"
-  ]
+  ],
+  "gsg_tests_in_regression": 29,
+  "electrode_600_bundle_readback": {
+    "manifest_geometry_passed": true,
+    "logical_edges": 1792,
+    "optical_objects": 32392,
+    "mzi_count": 832,
+    "spare_terminations": 56,
+    "switch_depth_min": 13,
+    "switch_depth_max": 13,
+    "gds_readback_passed": true,
+    "electrical_extraction_passed": true,
+    "metal_regions": {
+      "M1": 6726,
+      "M2": 5895
+    },
+    "electrical_nets": 833,
+    "shared_ground_nets": 1,
+    "independent_signals": 832,
+    "via_count": 11788,
+    "gds_cells": 6495,
+    "cell_references": 24308
+  },
+  "electrode_extension": {
+    "previous_active_x_um": [
+      160.0,
+      760.0
+    ],
+    "active_x_um": [
+      160.0,
+      840.0
+    ],
+    "previous_active_length_um": 600,
+    "active_length_um": 680,
+    "unchanged_chip_summary": true,
+    "unchanged_optical_paths": true,
+    "unchanged_other_cells": true,
+    "byte_identical_external_tables": [
+      "settings.json",
+      "pads.csv",
+      "ports.csv"
+    ]
+  }
 }

@@ -11,6 +11,10 @@
 - **WHEN** 生成 paper-gsg 单元
 - **THEN** 两入两出接口正确、各波导分支连续、耦合间隙存在、弯曲半径通过检查，输出有效电极长度和器件 GDS/预览。
 
+#### Scenario: Extended symmetric electrodes
+- **WHEN** 以默认 20 μm 半径生成 paper-gsg 单元
+- **THEN** 主电极位于 x=160–840 μm，有效长度 680 μm，两端直线段留白对称且各不少于 20 μm，公共 G 桥及 S 引出随之移动，器件总长和外部端口不变。
+
 ### Requirement: GSG and shared ground
 两臂 SHALL 分别位于 G–S 与 S–G 间隙。两个 G SHALL 在单元内连通，并接入矩阵公共地；每个 S SHALL 独立。共地网络 MUST 显式声明，不得将任意短路视为合法。
 

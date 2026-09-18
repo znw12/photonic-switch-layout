@@ -34,9 +34,22 @@ def test_gsg_device_radius_and_ports(radius):
     assert set(cell.ports)=={'i0','i1','o0','o1','G','S'}
     assert result['total_length_um']==1000 and result['min_radius_um']==radius
     assert result['branch_geometric_length_um']>1000
-    assert result['active_length_um']<1000
+    start,end=cell.metadata['active_x']
+    assert start+end==pytest.approx(cfg.mzi_length)
+    if radius==20:
+        assert (start,end)==(160,840)
+        assert result['active_length_um']==680
     assert result['internal_vias_per_device']==5
     assert not result['coupler_calibrated']
+
+
+@pytest.mark.parametrize('active_x',[(150,840),(160,850)])
+def test_gsg_electrode_bend_clearance(active_x):
+    cfg=profile();lib=Library(cfg);cell=lib.mzi()
+    cell.metadata['active_x']=list(active_x)
+    cell.metadata['active_length_um']=active_x[1]-active_x[0]
+    with pytest.raises(VerificationError,match='straight-section bend clearance'):
+        verify_device(lib.export(),cfg)
 
 
 @pytest.mark.parametrize('n,reverse',[(1,False),(4,False),(5,True),(16,False)])
@@ -74,7 +87,10 @@ def test_gsg_manifest_faults(defect):
 @pytest.mark.parametrize('defect',['ground_signal_short','signal_signal_short','ground_open','internal_ground_open'])
 def test_gsg_physical_faults(tmp_path,defect):
     lib,m=build_layout(profile())
-    if defect=='ground_signal_short':lib.poly(lib.cells['MZI'],'M2',rectangle(697.5,27.5,742.5,32.5))
+    if defect=='ground_signal_short':
+        c=lib.cells['MZI'];gx=c.metadata['electrical_probes']['G'][0][0]
+        sx,sy=c.metadata['electrical_probes']['S'][0]
+        lib.poly(c,'M2',rectangle(gx-2.5,sy-2.5,sx+2.5,sy+2.5))
     elif defect=='signal_signal_short':
         signals=sorted((e for e in m['electrical'] if e['terminal']=='S' and e['side']=='north'),key=lambda e:e['pad'][0])
         a,b=signals[:2]
@@ -93,7 +109,7 @@ def test_gsg_physical_faults(tmp_path,defect):
 
 def test_gsg_bundle_and_standalone(tmp_path):
     result=generate(profile(4),tmp_path,list(enumerate(range(4))))
-    assert result['device']['active_length_um']==600
+    assert result['device']['active_length_um']==680
     assert result['summary']['vias']==result['electrical']['vias_total']
     assert (tmp_path/'device/mzi.gds').is_file() and (tmp_path/'device/mzi.png').is_file()
     assert 'electrical_net' in (tmp_path/'pads.csv').read_text().splitlines()[0]

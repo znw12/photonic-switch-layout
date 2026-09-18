@@ -1,6 +1,6 @@
 {
   "device": {
-    "active_length_um": 600.0,
+    "active_length_um": 680.0,
     "bends_per_branch": 8,
     "branch_geometric_length_um": 1033.6023179021822,
     "coupler_calibrated": false,
@@ -29,7 +29,7 @@
     "switch_depth_min": 13,
     "via_count": 11788
   },
-  "normalized_hash": "6447234183c74b33f56deebd7f75cbfd824c182cb7a6acf13ca8195780ead767",
+  "normalized_hash": "db5d1b56837ce81ebf84ee2e4b5ed3c926b6239bd3de498e0cb62d66cf2d255c",
   "repeated_geometry_and_tables": true,
   "summary": {
     "active_ports": 100,

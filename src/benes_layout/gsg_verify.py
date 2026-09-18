@@ -66,6 +66,12 @@ def verify_device(cells,cfg):
     require(md['phase_arm_y']==ys,'GSG arms not centered in electrode gaps')
     for g,y in zip(rails,ys):
         require(g.covers(Point((start+end)/2,y)),'GSG phase waveguide missing')
+    for path,y in zip(md['optical_paths'],ys):
+        phase=[s for s in path if s['kind']=='line'
+               and abs(s['start'][1]-y)<tol and abs(s['end'][1]-y)<tol]
+        require(len(phase)==1 and start-phase[0]['start'][0]>=20-tol
+                and phase[0]['end'][0]-end>=20-tol,
+                'GSG electrode lacks straight-section bend clearance')
     clearance=(cfg.gsg_gap-cfg.mzi_wg_width)/2
     require(abs(md['local_optical_metal_clearance_um']-clearance)<tol,'GSG optical clearance contract changed')
     require(shape('MZI','M1').distance(wg)>=clearance-tol,'GSG electrode touches or approaches optical rail')
