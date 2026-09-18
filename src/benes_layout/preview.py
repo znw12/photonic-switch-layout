@@ -116,7 +116,8 @@ def render(m, path, detail=False):
         pad=15,
     )
     fig.supxlabel(
-        "WG: teal    M1: amber    M2/pads: blue    VIA: cream    PLACEHOLDER TECHNOLOGY",
+        "WG: teal    M1: amber    M2/pads: blue    VIA: cream    "
+        + ('GSG MZI / TRANSFER UNCALIBRATED' if cfg.get('mzi_model')=='paper-gsg' else 'PLACEHOLDER TECHNOLOGY'),
         color="#afc2d3",
         fontsize=9,
     )

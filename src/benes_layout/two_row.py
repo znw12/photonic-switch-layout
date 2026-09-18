@@ -203,4 +203,12 @@ def statistics(m):
     if m['config'].get('electrical_fanout') == 'aligned':
         from .aligned_fanout import routing_metrics
         result.update(routing_metrics(m))
+    if m['config'].get('mzi_model') == 'paper-gsg':
+        result['routing_metrics_scope']='External MZI terminal to pad; excludes device interior and common-ground bus'
+        result['external_fanout_vias']=sum(len(e['vias']) for e in m['electrical'])
+        result['device_vias']=sum(len(m['cells'][i['cell']]['metadata']['internal_vias']) for i in m['instances'])
+        result['ground_bus_vias']=len(m['ground_network']['vias'])
+        result['vias_total']=result['external_fanout_vias']+result['device_vias']+result['ground_bus_vias']
+        result['shared_ground_nets']=1
+        result['independent_signals']=len(m['instances'])
     return result

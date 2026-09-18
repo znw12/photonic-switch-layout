@@ -1,0 +1,54 @@
+{
+  "device": {
+    "active_length_um": 600.0,
+    "bends_per_branch": 8,
+    "branch_geometric_length_um": 1033.6023179021822,
+    "coupler_calibrated": false,
+    "internal_vias_per_device": 5,
+    "min_radius_um": 20.0,
+    "total_length_um": 1000
+  },
+  "independent_readback": {
+    "cell_references": 24308,
+    "electrical_extraction_passed": true,
+    "electrical_nets": 833,
+    "gds_cells": 6495,
+    "gds_readback_passed": true,
+    "independent_signals": 832,
+    "logical_edges": 1792,
+    "manifest_geometry_passed": true,
+    "metal_regions": {
+      "M1": 6726,
+      "M2": 5895
+    },
+    "mzi_count": 832,
+    "optical_objects": 32392,
+    "shared_ground_nets": 1,
+    "spare_terminations": 56,
+    "switch_depth_max": 13,
+    "switch_depth_min": 13,
+    "via_count": 11788
+  },
+  "normalized_hash": "6447234183c74b33f56deebd7f75cbfd824c182cb7a6acf13ca8195780ead767",
+  "repeated_geometry_and_tables": true,
+  "summary": {
+    "active_ports": 100,
+    "area_mm2": 395.000224667064,
+    "band_stage_counts": [
+      13
+    ],
+    "fold_bands": 1,
+    "height_mm": 10.853352000000001,
+    "internal_ports": 128,
+    "lane_pitch_um": 60,
+    "mzis": 832,
+    "pad_distribution": "central",
+    "pad_row_stagger_um": 25,
+    "pad_rows_per_side": 3,
+    "pads": 1664,
+    "selected_candidate": "candidate-000",
+    "stages": 13,
+    "vias": 11788,
+    "width_mm": 36.394307
+  }
+}

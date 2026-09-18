@@ -433,6 +433,9 @@ def build_reshaped(cfg, candidate=None, component_factory=None):
                                           pins={f"{side}{pin}": f"{side}{pin ^ i['pin_flip']}"
                                                 for side in ("i","o") for pin in (0,1)})
                           for i in m["instances"]}
+    if cfg.mzi_model == 'paper-gsg':
+        from .shared_ground import add
+        add(lib,m,top)
     frame = lib.cell("DIE_OUTLINE", "outline")
     lib.ref(top, frame)
     a, b, c, d = m["die_bbox"]

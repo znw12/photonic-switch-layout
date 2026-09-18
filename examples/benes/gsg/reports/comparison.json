@@ -1,0 +1,106 @@
+{
+  "global_optimum_proven": false,
+  "results": [
+    {
+      "active_ports": 100,
+      "area_mm2": 391.761131344064,
+      "band_stage_counts": [
+        13
+      ],
+      "bend_max": 24,
+      "bend_min": 0,
+      "bundle": "output/benes/aligned/pitch-120",
+      "crossing_max": 240,
+      "crossing_min": 0,
+      "crossings": 7680,
+      "electrical_routing": "three-row",
+      "fanout_bbox_um": [
+        0.0,
+        -5342.176,
+        36314.307,
+        5342.176
+      ],
+      "fold_bands": 1,
+      "height_mm": 10.764352,
+      "internal_ports": 128,
+      "interstage_routing": "continuous",
+      "lane_pitch_um": 60,
+      "length_max_mm": 42.17837282106857,
+      "length_min_mm": 36.234307,
+      "maximum_dimension_mm": 36.394307,
+      "normalized_hash": "502184652fed769b415f82962b38ef44acd6ce7495f363d2e220a11bed164a84",
+      "objective": [
+        391761131344064,
+        5944.065821068572,
+        240,
+        24,
+        3353523.3216474247,
+        "candidate-000"
+      ],
+      "pad_bank_width_mm": 36.265436,
+      "pad_distribution": "central",
+      "pad_row_stagger_um": 25,
+      "pad_rows": 3,
+      "pad_width_lower_bound_mm": 33.3,
+      "pareto_width_area": true,
+      "share_interstage": true,
+      "shuffle_pitch_um": null,
+      "status": "verified",
+      "width_mm": 36.394307,
+      "width_target_met": false
+    },
+    {
+      "active_ports": 100,
+      "area_mm2": 395.000224667064,
+      "band_stage_counts": [
+        13
+      ],
+      "bend_max": 128,
+      "bend_min": 104,
+      "bundle": "output/benes/gsg/n100",
+      "crossing_max": 240,
+      "crossing_min": 0,
+      "crossings": 7680,
+      "electrical_routing": "three-row",
+      "fanout_bbox_um": [
+        0.0,
+        -5342.176,
+        36314.307,
+        5342.176
+      ],
+      "fold_bands": 1,
+      "height_mm": 10.853352000000001,
+      "internal_ports": 128,
+      "interstage_routing": "continuous",
+      "lane_pitch_um": 60,
+      "length_max_mm": 42.61520295379696,
+      "length_min_mm": 36.67113713272837,
+      "maximum_dimension_mm": 36.394307,
+      "normalized_hash": "6447234183c74b33f56deebd7f75cbfd824c182cb7a6acf13ca8195780ead767",
+      "objective": [
+        395000224667064,
+        5944.065821068587,
+        240,
+        24,
+        3353523.3216474247,
+        "candidate-000"
+      ],
+      "pad_bank_width_mm": 36.265436,
+      "pad_distribution": "central",
+      "pad_row_stagger_um": 25,
+      "pad_rows": 3,
+      "pad_width_lower_bound_mm": 33.3,
+      "pareto_width_area": false,
+      "share_interstage": true,
+      "shuffle_pitch_um": null,
+      "status": "verified",
+      "width_mm": 36.394307,
+      "width_target_met": false
+    }
+  ],
+  "scope": "Measured generation reports; rerun benes-layout verify on a bundle for fresh physical readback.",
+  "smallest_area": "output/benes/aligned/pitch-120",
+  "smallest_maximum_dimension": "output/benes/aligned/pitch-120",
+  "smallest_width": "output/benes/aligned/pitch-120",
+  "target_width_mm": 20
+}

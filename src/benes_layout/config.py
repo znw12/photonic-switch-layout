@@ -23,6 +23,13 @@ class Config:
     shuffle_pitch: float | None = None
     mzi_length: float = 1000.0
     mzi_height: float = 100.0
+    mzi_model: str = 'placeholder'
+    mzi_wg_width: float = 0.8
+    coupler_gap: float = 0.3
+    coupler_length: float = 30.0
+    gsg_signal_width: float = 20.0
+    gsg_gap: float = 5.0
+    gsg_ground_width: float = 10.0
     terminal_names: tuple[str, str] = ("return", "control")
     terminal_offsets: tuple[float, float] = (20.0, 40.0)
     metal_width: float = 5.0
@@ -101,6 +108,8 @@ class Config:
             "lane_pitch",
             "mzi_length",
             "mzi_height",
+            "mzi_wg_width", "coupler_gap", "coupler_length",
+            "gsg_signal_width", "gsg_gap", "gsg_ground_width",
             "metal_width",
             "metal_spacing",
             "via_size",
@@ -131,6 +140,19 @@ class Config:
             raise ValueError("mzi_height must lie between one and two lane pitches")
         if self.mzi_length < 8 * self.radius:
             raise ValueError("mzi_length cannot fit the placeholder")
+        if self.mzi_model not in ('placeholder', 'paper-gsg'):
+            raise ValueError('unknown mzi_model')
+        if self.mzi_model == 'paper-gsg':
+            if not (self.mzi_length == 1000 and self.lane_pitch == 60 and self.mzi_height == 100
+                    and tuple(self.terminal_names) == ('G','S') and tuple(self.terminal_offsets) == (20,40)
+                    and self.electrical_routing == 'three-row' and self.fold_bands == 1):
+                raise ValueError('paper-gsg requires a 1000 x 100 um device, 60 um lanes, G/S at 20/40 and single-band three-row routing')
+            landing = self.via_size + 2*self.via_enclosure
+            if not (self.gsg_gap >= self.metal_spacing and self.gsg_gap > self.mzi_wg_width
+                    and self.gsg_signal_width >= landing and self.gsg_ground_width >= landing
+                    and self.gsg_signal_width + 2*(self.gsg_gap+self.gsg_ground_width) <= self.lane_pitch
+                    and self.coupler_gap+self.mzi_wg_width < self.gsg_signal_width+self.gsg_gap):
+                raise ValueError('GSG electrode or coupler dimensions cannot fit')
         if self.pad_pitch < self.pad_size + self.metal_spacing or self.pad_size < max(
             self.metal_width, self.via_size + 2 * self.via_enclosure
         ):

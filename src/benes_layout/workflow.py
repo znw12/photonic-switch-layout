@@ -236,6 +236,19 @@ def generate(cfg, out, requests, *, choices=None):
     if 'electrical_plan' in m:
         from .two_row import statistics
         report['electrical'] = statistics(m)
+    if cfg.mzi_model == 'paper-gsg':
+        from .gsg_verify import verify_device
+        from .gsg_mzi import export_device
+        report['device']=verify_device(m['cells'],cfg)
+        report['ground_network']=m['ground_network']
+        report['assumptions']=[s for s in report['assumptions'] if not any(
+            term in s for term in ('Placeholder TFLN','ideal black-box','returns remain separate'))]
+        report['assumptions'] += [
+            'Physical 1 mm GSG MZI; 2x2 directional-coupler split and EO transfer are uncalibrated.',
+            'Quasi-static GSG drive; no 50 ohm termination or RF performance claim.',
+            'G electrodes and G pads share one GND; every S remains independent.',
+            'Local insulated M2 bridges are restricted to verified device metal; stack and crossings still require process qualification.']
+        export_device(cfg,out/'device')
     for filename, value in (
         ("config.json", cfg.to_dict()),
         ("manifest.json", m),
@@ -268,7 +281,7 @@ def generate(cfg, out, requests, *, choices=None):
                 "column",
                 "row_offset_um",
                 "pad_group",
-            ]
+            ] + (['electrical_net'] if cfg.mzi_model=='paper-gsg' else [])
         )
         for e in m["electrical"]:
             w.writerow(
@@ -283,7 +296,7 @@ def generate(cfg, out, requests, *, choices=None):
                     e.get("pad_column", columns[e["side"]][e["pad"][0]]),
                     e.get("pad_row_offset", 0),
                     e.get("pad_group", ""),
-                ]
+                ] + ([e['electrical_net']] if cfg.mzi_model=='paper-gsg' else [])
             )
     with (out / "ports.csv").open("w", newline="") as f:
         w = csv.writer(f)
@@ -338,6 +351,10 @@ def verify_bundle(directory):
     if cfg.layered_electrical:
         from .two_row import statistics
         require(report.get('electrical') == statistics(m), 'electrical report mismatch')
+    if cfg.mzi_model=='paper-gsg':
+        from .gsg_verify import verify_device
+        require(report.get('device')==verify_device(m['cells'],cfg),'GSG device report mismatch')
+        require(report.get('ground_network')==m['ground_network'],'GSG ground report mismatch')
     if "pad_banks" in report["metrics"]:
         require(
             pad_banks(m) == report["metrics"]["pad_banks"], "pad bank report mismatch"

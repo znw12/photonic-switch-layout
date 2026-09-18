@@ -18,6 +18,9 @@ from waksman_layout.geometry import (
 
 class Library(PrimitiveLibrary):
     def mzi(self):
+        if self.cfg.mzi_model == 'paper-gsg':
+            from .gsg_mzi import build
+            return build(self)
         c = super().mzi()
         if not c.tracks:
             for a in range(2):

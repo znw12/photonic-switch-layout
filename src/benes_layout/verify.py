@@ -236,6 +236,10 @@ def spatial_objects(m):
 
 def verify_manifest(m):
     cfg, cells = Config(**m["config"]), m["cells"]
+    if cfg.mzi_model == 'paper-gsg':
+        from .gsg_verify import verify_device, verify_ground
+        verify_device(cells,cfg)
+        verify_ground(m,cfg)
     verify_pad_banks(m)
     if cfg.layered_electrical:
         verify_two_row_contract(m, cfg)
@@ -616,7 +620,9 @@ def verify_manifest(m):
     tree = STRtree(geoms)
     for i, g in enumerate(geoms):
         require(
-            g.is_valid and g.geom_type == "Polygon",
+            g.is_valid and (g.geom_type == "Polygon" or
+                (cfg.mzi_model=='paper-gsg' and cells[objs[i][0]]['kind']=='mzi'
+                 and g.geom_type=='MultiPolygon' and len(g.geoms)==2)),
             "disconnected/invalid optical primitive geometry",
         )
         require(die.buffer(tol).covers(g), "optical geometry outside die")
@@ -874,17 +880,35 @@ def verify_gds(path, m, names):
         return int(found[0]) + (n1 if layer == "M2" else 0)
 
     assigned = {}
+    gsg = cfg.mzi_model == 'paper-gsg'
+    net_roots = {}
     for e in m["electrical"]:
         a, b = conductor("M1", [e["x"], e["y"]]), conductor("M2", e["pad"])
         require(root(a) == root(b), f"electrical open: {e['net']}")
-        require(root(a) not in assigned, f"electrical short: {e['net']}")
-        assigned[root(a)] = e["net"]
+        electrical_net = 'GND' if gsg and e['terminal']=='G' else e['net']
+        require(root(a) not in assigned or (gsg and assigned[root(a)]==electrical_net),
+                f"electrical short: {e['net']}")
+        require(electrical_net not in net_roots or net_roots[electrical_net]==root(a),
+                f"common ground disconnected: {e['net']}")
+        assigned[root(a)] = electrical_net
+        net_roots[electrical_net] = root(a)
+    if gsg:
+        for inst in m['instances']:
+            probes=m['cells'][inst['cell']]['metadata']['electrical_probes']
+            for terminal,points in probes.items():
+                target='GND' if terminal=='G' else f"{inst['id']}:S"
+                for at in points:
+                    require(root(conductor('M1',point(inst['x'],inst['y'],inst.get('angle',0),at)))
+                            ==net_roots[target],'GSG electrode open or connected to wrong net')
+        require(len(net_roots)==len(m['instances'])+1,'GSG independent signal count mismatch')
     require(
         len({root(i) for i in range(n1 + n2)}) == len(assigned),
         "unassigned conductor island",
     )
     require(
-        len(parts["VIA"]) == sum(len(e["vias"]) for e in m["electrical"]),
+        len(parts["VIA"]) == sum(len(e["vias"]) for e in m["electrical"])
+        + (sum(len(m['cells'][i['cell']]['metadata']['internal_vias']) for i in m['instances'])
+           +len(m['ground_network']['vias']) if gsg else 0),
         "via count mismatch",
     )
     die = box(*m["die_bbox"])
@@ -910,6 +934,7 @@ def verify_gds(path, m, names):
     for row in window_rows.values():
         row.sort()
     passive = defaultdict(list)
+    device_shapes = cell_geometries(m['cells']) if gsg else None
     if cfg.layered_electrical:
         from .two_row import overpass_records
         require(m.get('passive_overpasses') == overpass_records(m),
@@ -929,6 +954,14 @@ def verify_gds(path, m, names):
                 j = int(j)
                 name, x, y, angle = objs[j]
                 kind = m["cells"][name]["kind"]
+                if gsg and kind=='mzi':
+                    # Only actual, internally validated device metal is permitted.
+                    # Foreign routes remain subject to the normal keepout.
+                    local=translate(rotate(device_shapes(name,layer),angle,origin=(0,0)),x,y)
+                    conflict=metal.intersection(wgs[j].buffer(distance))
+                    require(conflict.difference(local.buffer(dbu*2)).area<dbu*dbu,
+                            'unauthorized metal enters GSG device keepout')
+                    continue
                 if layer == "M1" and kind == "mzi":
                     continue  # Declared placeholder electrode region.
                 if cfg.layered_electrical and layer == 'M2':
@@ -970,6 +1003,8 @@ def verify_gds(path, m, names):
         "gds_readback_passed": True,
         "electrical_extraction_passed": True,
         "metal_regions": {"M1": n1, "M2": n2},
+        **({'electrical_nets':len(net_roots),'shared_ground_nets':1,
+            'independent_signals':len(m['instances'])} if gsg else {}),
         "via_count": len(parts["VIA"]),
         "gds_cells": len(actual),
         "cell_references": sum(len(c["refs"]) for c in m["cells"].values()),
