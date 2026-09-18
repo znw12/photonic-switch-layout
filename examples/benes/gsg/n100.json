@@ -45,5 +45,10 @@
     20.0,
     40.0
   ],
-  "radius": 20.0
+  "radius": 20.0,
+  "crossing_model": "cosine",
+  "crossing_half_length": 10.0,
+  "crossing_center_width": 3.0,
+  "crossing_max_width": 4.0,
+  "crossing_port_straight": 0.5
 }

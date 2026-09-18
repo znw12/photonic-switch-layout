@@ -75,3 +75,5 @@ MPLCONFIGDIR=/tmp/layout-mpl .venv/bin/benes-layout gsg-study --reuse
 `gsg-study` 重复生成并核对规范化几何、尺寸、光程、器件、电学及地网络报告，逐字节核对开关设置和端口/pad 表，再独立回读重复版。见 [验证摘要](../examples/benes/gsg/reports/verification.json) 和 [重复生成结果](../examples/benes/gsg/reports/study.json)。
 
 完整 GDS 与预览位于 `output/benes/gsg/n100/`；单元的 `mzi.gds`、`mzi.png`、模型及参数报告位于其 `device/` 子目录。代码、示例和报告纳入 Git，大型派生 GDS 留在输出目录。
+
+后续 crossing 更新：最新配置将 7680 个十字占位 crossing 替换为四臂余弦渐变轮廓，footprint 仍为 20×20 μm，端口及矩阵尺寸保持不变。独立单元 GDS/图位于 `crossing/` 子目录；形状依据、尺寸及新增验证见 [余弦 crossing 设计](BENES_COSINE_CROSSING.md)。上文 357 项为 M2 接口版验证记录，后续回归总数见 crossing 文档及最新验证报告。

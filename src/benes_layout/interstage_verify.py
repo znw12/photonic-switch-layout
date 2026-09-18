@@ -42,9 +42,13 @@ def verify_crossing(c,cfg):
     h,w = cfg.crossing_half_length,cfg.wg_width/2
     require(c["ports"] == {"w":[-h,0,180],"e":[h,0,0],"s":[0,-h,270],"n":[0,h,90]},
             "crossing ports corrupted")
-    polygons = [rectangle(-h,-w,h,w),rectangle(-w,-h,w,h)]
-    require(c["polygons"] == [dict(layer="WG",points=[[snap(x),snap(y)] for x,y in p]) for p in polygons],
-            "crossing geometry corrupted")
+    if cfg.crossing_model=='cosine':
+        from .cosine_crossing import verify
+        verify(c,cfg)
+    else:
+        polygons = [rectangle(-h,-w,h,w),rectangle(-w,-h,w,h)]
+        require(c["polygons"] == [dict(layer="WG",points=[[snap(x),snap(y)] for x,y in p]) for p in polygons],
+                "crossing geometry corrupted")
     verify_transfers(c,[dict(ports=p,length=2*h,bends=0,angle=0,crossings=1,min_radius=None)
                        for p in (["w","e"],["s","n"])])
 

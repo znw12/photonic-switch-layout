@@ -8,7 +8,8 @@
     "Physical 1 mm GSG MZI; 2x2 directional-coupler split and EO transfer are uncalibrated.",
     "Quasi-static GSG drive; no 50 ohm termination or RF performance claim.",
     "G electrodes and G pads share one GND; every S remains independent.",
-    "Local insulated M2 bridges are restricted to verified device metal; stack and crossings still require process qualification."
+    "Local insulated M2 bridges are restricted to verified device metal; stack and crossings still require process qualification.",
+    "Cosine crossing shape inspired by the Flexcompute silicon example; TFLN loss, crosstalk and phase uncalibrated."
   ],
   "baseline_comparison": {
     "area_reduction_percent": 0.0,
@@ -41,11 +42,11 @@
       "row_order": "normal",
       "status": "verified",
       "timings_s": {
-        "build": 5.976074074002099,
-        "export": 1.827793202999601,
-        "geometry": 12.611275300998386,
-        "readback": 117.27452924099998,
-        "total": 137.71412743700057
+        "build": 7.954647904000012,
+        "export": 1.7913759350012697,
+        "geometry": 14.462972774999798,
+        "readback": 120.5143522569997,
+        "total": 144.74784758199894
       },
       "uniformity": {
         "metrics": {
@@ -223,6 +224,21 @@
     "switch_depth_max": 13,
     "switch_depth_min": 13,
     "via_count": 8460
+  },
+  "crossing_device": {
+    "center_width_um": 3.0,
+    "footprint_um": [
+      20.0,
+      20.0
+    ],
+    "max_width_um": 4.0,
+    "model": "cosine",
+    "optical_transfer_calibrated": false,
+    "port_straight_um": 0.5,
+    "port_width_um": 1.0,
+    "samples_per_arm": 33,
+    "source_url": "https://www.flexcompute.com/tidy3d/examples/notebooks/WaveguideCrossing/",
+    "taper_length_um": 8.0
   },
   "device": {
     "active_length_um": 680.0,
@@ -13505,7 +13521,7 @@
         3810.0
       ]
     },
-    "gds_bytes": 4869382,
+    "gds_bytes": 4871814,
     "pad_bank_width_lower_bound_um": 33300.0,
     "pad_banks": {
       "north": {
@@ -13546,8 +13562,8 @@
     "width_target_met": false,
     "width_target_um": 20000
   },
-  "normalized_hash": "4d526b48032c9f07e856096521c7d718bb72da4b5de01f400f5b31efddff3ff8",
-  "process_peak_rss_kib": 1274628,
+  "normalized_hash": "ec90a33a8906752b2f9bcb388dcbbb90799e1bd41778cc307831c08bc8a27ed6",
+  "process_peak_rss_kib": 1855684,
   "python": "3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:09:02) [GCC 11.2.0]",
   "realized": {
     "paths": [
@@ -16131,7 +16147,7 @@
     "vias": 8460,
     "width_mm": 36.394307
   },
-  "total_time_s": 143.7585816849969,
+  "total_time_s": 154.0750221140006,
   "uniformity": {
     "metrics": {
       "angle": {

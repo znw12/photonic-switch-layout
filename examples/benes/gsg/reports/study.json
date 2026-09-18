@@ -1,4 +1,19 @@
 {
+  "crossing_device": {
+    "center_width_um": 3.0,
+    "footprint_um": [
+      20.0,
+      20.0
+    ],
+    "max_width_um": 4.0,
+    "model": "cosine",
+    "optical_transfer_calibrated": false,
+    "port_straight_um": 0.5,
+    "port_width_um": 1.0,
+    "samples_per_arm": 33,
+    "source_url": "https://www.flexcompute.com/tidy3d/examples/notebooks/WaveguideCrossing/",
+    "taper_length_um": 8.0
+  },
   "device": {
     "active_length_um": 680.0,
     "bends_per_branch": 8,
@@ -30,7 +45,7 @@
     "switch_depth_min": 13,
     "via_count": 8460
   },
-  "normalized_hash": "4d526b48032c9f07e856096521c7d718bb72da4b5de01f400f5b31efddff3ff8",
+  "normalized_hash": "ec90a33a8906752b2f9bcb388dcbbb90799e1bd41778cc307831c08bc8a27ed6",
   "repeated_geometry_and_tables": true,
   "summary": {
     "active_ports": 100,

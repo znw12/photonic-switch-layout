@@ -1,0 +1,15 @@
+{
+  "model": "cosine",
+  "footprint_um": [
+    20.0,
+    20.0
+  ],
+  "port_width_um": 1.0,
+  "center_width_um": 3.0,
+  "max_width_um": 4.0,
+  "taper_length_um": 8.0,
+  "port_straight_um": 0.5,
+  "samples_per_arm": 33,
+  "optical_transfer_calibrated": false,
+  "source_url": "https://www.flexcompute.com/tidy3d/examples/notebooks/WaveguideCrossing/"
+}

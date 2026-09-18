@@ -1,0 +1,21 @@
+{
+  "manifest_geometry_passed": true,
+  "logical_edges": 1792,
+  "optical_objects": 32392,
+  "mzi_count": 832,
+  "spare_terminations": 56,
+  "switch_depth_min": 13,
+  "switch_depth_max": 13,
+  "gds_readback_passed": true,
+  "electrical_extraction_passed": true,
+  "metal_regions": {
+    "M1": 5062,
+    "M2": 4231
+  },
+  "electrical_nets": 833,
+  "shared_ground_nets": 1,
+  "independent_signals": 832,
+  "via_count": 8460,
+  "gds_cells": 6495,
+  "cell_references": 22642
+}

@@ -49,6 +49,10 @@ class Config:
     bundle_pitch: float = 6.01
     margin: float = 100.0
     crossing_half_length: float = 10.0
+    crossing_model: str = 'placeholder'
+    crossing_center_width: float = 3.0
+    crossing_max_width: float = 4.0
+    crossing_port_straight: float = 0.5
     termination_length: float = 40.0
     insulated_m2_overpasses: bool = True
     electrical_routing: str = "legacy"
@@ -122,6 +126,7 @@ class Config:
             "bundle_pitch",
             "margin",
             "crossing_half_length",
+            "crossing_center_width", "crossing_max_width", "crossing_port_straight",
             "termination_length",
         )
         for name in positive:
@@ -130,6 +135,14 @@ class Config:
                 raise ValueError(f"{name} must be finite and positive")
         if self.grid != 0.001:
             raise ValueError("export profile requires grid=0.001 um")
+        if self.crossing_model not in ('placeholder','cosine'):
+            raise ValueError('unknown crossing_model')
+        if self.crossing_model=='cosine' and not (
+            self.wg_width < self.crossing_center_width < self.crossing_max_width
+            and self.crossing_max_width < self.crossing_half_length
+            and self.crossing_port_straight >= 5*self.grid
+            and self.crossing_half_length-self.crossing_port_straight-self.crossing_center_width/2 > self.wg_width):
+            raise ValueError('cosine crossing dimensions cannot fit the fixed footprint')
         if self.radius < 20 or self.radius <= self.wg_width / 2:
             raise ValueError("radius must be >=20 um and exceed waveguide half width")
         if not self.grid <= self.chord_error <= self.wg_width / 10:

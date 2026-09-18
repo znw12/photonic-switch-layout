@@ -595,6 +595,9 @@ def verify_manifest(m):
             if cfg.interstage_routing != "legacy":
                 from .interstage_verify import verify_crossing
                 verify_crossing(c, cfg)
+            elif cfg.crossing_model=='cosine':
+                from .cosine_crossing import verify
+                verify(c,cfg)
         if c["kind"] == "mzi":
             require(
                 c["metadata"]["bar"] == [["i0", "o0"], ["i1", "o1"]]

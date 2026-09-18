@@ -8,10 +8,10 @@
   "coupler_calibrated": false,
   "electrical_port_layer": "M2",
   "cell_names": {
-    "MZI": "MZI_16b00628_007c9a7654",
-    "GSG_DC": "GSG_DC_16b00628_9533c40e51",
-    "GSG_WAVEGUIDES": "GSG_WAVEGUIDES_16b00628_e855e11d89",
-    "VIA": "VIA_16b00628_80d0a7b425"
+    "MZI": "MZI_53cde6ac_007c9a7654",
+    "GSG_DC": "GSG_DC_53cde6ac_9533c40e51",
+    "GSG_WAVEGUIDES": "GSG_WAVEGUIDES_53cde6ac_e855e11d89",
+    "VIA": "VIA_53cde6ac_80d0a7b425"
   },
   "source_doi": "10.1038/s41586-018-0551-y",
   "metadata": {

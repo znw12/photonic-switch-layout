@@ -1,10 +1,25 @@
 {
   "regression": {
-    "passed": 357,
+    "passed": 376,
     "failed": 0
   },
   "source_pdf_sha256": "b50d18659b52f15a313ad419b393080d92a2e6c87e00fc9d6061730c5f4586b3",
   "repeat": {
+    "crossing_device": {
+      "center_width_um": 3.0,
+      "footprint_um": [
+        20.0,
+        20.0
+      ],
+      "max_width_um": 4.0,
+      "model": "cosine",
+      "optical_transfer_calibrated": false,
+      "port_straight_um": 0.5,
+      "port_width_um": 1.0,
+      "samples_per_arm": 33,
+      "source_url": "https://www.flexcompute.com/tidy3d/examples/notebooks/WaveguideCrossing/",
+      "taper_length_um": 8.0
+    },
     "device": {
       "active_length_um": 680.0,
       "bends_per_branch": 8,
@@ -36,7 +51,7 @@
       "switch_depth_min": 13,
       "via_count": 8460
     },
-    "normalized_hash": "4d526b48032c9f07e856096521c7d718bb72da4b5de01f400f5b31efddff3ff8",
+    "normalized_hash": "ec90a33a8906752b2f9bcb388dcbbb90799e1bd41778cc307831c08bc8a27ed6",
     "repeated_geometry_and_tables": true,
     "summary": {
       "active_ports": 100,
@@ -145,7 +160,12 @@
     "gds_cells": 6495,
     "cell_references": 24308
   },
-  "m2_interface": {
+  "cosine_crossing_tests_in_regression": 19,
+  "final_export_tests": {
+    "passed": 2,
+    "failed": 0
+  },
+  "historical_m2_interface": {
     "electrical_port_layer": "M2",
     "previous_vias": 11788,
     "vias": 8460,
@@ -161,5 +181,51 @@
       "ports.csv"
     ],
     "pad_table_unchanged_except_removed_launch_vias": true
+  },
+  "straight_crossing_bundle_readback": {
+    "manifest_geometry_passed": true,
+    "logical_edges": 1792,
+    "optical_objects": 32392,
+    "mzi_count": 832,
+    "spare_terminations": 56,
+    "switch_depth_min": 13,
+    "switch_depth_max": 13,
+    "gds_readback_passed": true,
+    "electrical_extraction_passed": true,
+    "metal_regions": {
+      "M1": 5062,
+      "M2": 4231
+    },
+    "electrical_nets": 833,
+    "shared_ground_nets": 1,
+    "independent_signals": 832,
+    "via_count": 8460,
+    "gds_cells": 6495,
+    "cell_references": 22642
+  },
+  "cosine_crossing": {
+    "center_width_um": 3.0,
+    "footprint_um": [
+      20.0,
+      20.0
+    ],
+    "max_width_um": 4.0,
+    "model": "cosine",
+    "optical_transfer_calibrated": false,
+    "port_straight_um": 0.5,
+    "port_width_um": 1.0,
+    "samples_per_arm": 33,
+    "source_url": "https://www.flexcompute.com/tidy3d/examples/notebooks/WaveguideCrossing/",
+    "taper_length_um": 8.0,
+    "instances": 7680,
+    "only_crossing_cell_changed": true,
+    "unchanged_chip_dimensions": true,
+    "unchanged_electrical_routes": true,
+    "unchanged_optical_centerline_metrics": true,
+    "byte_identical_external_tables": [
+      "settings.json",
+      "pads.csv",
+      "ports.csv"
+    ]
   }
 }

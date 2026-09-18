@@ -47,6 +47,9 @@ class Library(PrimitiveLibrary):
 
     def crossing(self):
         c = super().crossing()
+        if self.cfg.crossing_model=='cosine' and c.metadata.get('model')!='cosine':
+            from .cosine_crossing import populate
+            populate(self,c)
         for t in c.tracks:
             t.update(bends=0, angle=0, crossings=1)
         c.metadata.setdefault("allowed_transforms", [0, 45, 90, 135, 180, 225, 270, 315])

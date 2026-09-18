@@ -249,6 +249,10 @@ def generate(cfg, out, requests, *, choices=None):
             'G electrodes and G pads share one GND; every S remains independent.',
             'Local insulated M2 bridges are restricted to verified device metal; stack and crossings still require process qualification.']
         export_device(cfg,out/'device')
+    if cfg.crossing_model=='cosine':
+        from .cosine_crossing import export_device as export_crossing
+        report['crossing_device']=export_crossing(cfg,out/'crossing')
+        report['assumptions'] += ['Cosine crossing shape inspired by the Flexcompute silicon example; TFLN loss, crosstalk and phase uncalibrated.']
     for filename, value in (
         ("config.json", cfg.to_dict()),
         ("manifest.json", m),
@@ -355,6 +359,14 @@ def verify_bundle(directory):
         from .gsg_verify import verify_device
         require(report.get('device')==verify_device(m['cells'],cfg),'GSG device report mismatch')
         require(report.get('ground_network')==m['ground_network'],'GSG ground report mismatch')
+    if cfg.crossing_model=='cosine':
+        from .cosine_crossing import verify as verify_crossing
+        crossing=m['cells'].get('CROSSING')
+        if crossing is None:
+            from .geometry import Library
+            lib=Library(cfg);lib.crossing();crossing=lib.export()['CROSSING']
+        require(report.get('crossing_device')==verify_crossing(crossing,cfg),
+                'crossing device report mismatch')
     if "pad_banks" in report["metrics"]:
         require(
             pad_banks(m) == report["metrics"]["pad_banks"], "pad bank report mismatch"
