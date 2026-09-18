@@ -195,8 +195,10 @@ class Config:
             raise ValueError("pad geometry violates metal spacing/enclosure")
         if type(self.pad_rows) is not int or self.pad_rows not in (1, 2, 3, 4):
             raise ValueError("pad_rows must be 1, 2, 3 or 4")
-        if self.pad_distribution not in ("central", "stage"):
-            raise ValueError("pad_distribution must be central or stage")
+        if self.pad_distribution not in ("central", "stage", "routing"):
+            raise ValueError("pad_distribution must be central, stage or routing")
+        if self.pad_distribution == "routing" and not (exact and self.electrical_routing == "two-row"):
+            raise ValueError("routing pad distribution requires AS-Benes two-row routing")
         if self.electrical_routing not in ("legacy", "two-row", "three-row"):
             raise ValueError("invalid electrical_routing")
         two_row = self.layered_electrical
@@ -218,7 +220,7 @@ class Config:
             raise ValueError("electrical_width_extra must be finite, nonnegative, on grid and used with layered routing")
         if two_row and not (
             self.pad_rows == (2 if self.electrical_routing == 'two-row' else 3) and self.fold_bands == 1
-            and self.pad_distribution == "central" and self.interstage_routing == "continuous"
+            and self.pad_distribution in ("central", "routing") and self.interstage_routing == "continuous"
             and self.insulated_m2_overpasses and not self.equalize
             and (self.pad_pitch >= 100 if self.electrical_fanout == 'aligned' else self.pad_pitch == 100)
             and tuple(self.pad_factors) == (1.0,)

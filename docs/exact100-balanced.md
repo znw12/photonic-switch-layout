@@ -2,7 +2,43 @@
 
 本版本通过 `benes-layout` 的独立 `as-benes` 模式生成精确 100×100 网络。原有 `compact-gsg` 配置继续使用 128 路标准 Beneš，两个配置分别生成、分别验证，控制状态不可混用。
 
-## 已验证的 100 路结果
+## 当前版本：pad 配合布线，末端 M2 直连
+
+当前增量版保留已经选定的 34 µm 光学布局和 `RRLLLLRRRRRLL` 列方向，将南北 pad 改为按引线分组布置。两排各 151 个、同排中心距至少 100 µm、60 µm pad 和 70 µm 排距保留；组间允许不等距，不再强制整侧统一错位。全部 pad 的末端直接接入 M2，无需 M2–M1–M2 绕接。
+
+| 指标 | 原固定格点 AS-Beneš | 当前按引线排布 |
+| --- | ---: | ---: |
+| 整片尺寸 | 20.252711 × 4.947168 mm | 20.252711 × 4.555112 mm |
+| 面积 | 100.193564 mm² | 92.253367 mm² |
+| Via | 3748 | 2528 |
+| Pad 转接区横向轨道数 | 40 | 27 |
+| Pad 转接区横线总长 | 616.556 mm | 189.310 mm |
+| 转接区不同网络横纵投影交点 | 10432 | 0 |
+| 同列同方向阶梯反向跳变 | 68 | 0 |
+
+面积减少 **7.92%**，转接横线总长减少 **69.30%**。横纵交点统计只覆盖南北 pad 转接区内不同电学网络的 M1 水平线与 M2 竖线中心线，排除器件内部、共同 G 母线和光学 crossing；原有交点是绝缘跨层交叉，并非短路。实际金属净距与连接另由完整 GDS 读回检查，仍为 596 个独立 S 网络及 1 个共地网络。
+
+Pad 的合并 x 序列保持与源干线同序，交替分到两排，相邻合并位置至少间隔 50 µm。通过有界单调最小二乘拟合将 pad 靠近对应干线；自然形成局部规则线束和组间空隙。同排中心距不会小于 100 µm，外排 4 µm 引线与内排 pad 的最小横向净距至少为 18 µm。向左和向右的线束分别采用顺序和逆序的阶梯高度，保留 via 落点及相邻干线的硬性避让关系。
+
+Pad 区横向包络由 15.110 mm 增至 **17.999852 mm**，但位于原芯片宽度内，换得更短的横线和更低的布线区；整片左右尺寸没有增加。几何核对确认 MZI、光学路由、端口、旁路及共享 G 的位置均与上一版一致。这次固定光学布局，只验证一个电学增量方案，没有重新宣称完成 18 个候选的全局择优。
+
+```bash
+MPLCONFIGDIR=/tmp/layout-mpl .venv/bin/benes-layout generate \
+  --config examples/benes/exact100-balanced/regular.json \
+  --layout-choice examples/benes/exact100-balanced/regular-choice.json \
+  --out output/benes/exact100-balanced/n100-regular
+
+MPLCONFIGDIR=/tmp/layout-mpl .venv/bin/benes-layout verify \
+  output/benes/exact100-balanced/n100-regular
+```
+
+`pad_distribution: "routing"` 启用此排布；`--layout-choice` 固定原选定的列方向、间距和偏移参考。若有序布线超出原固定格点方案的通道高度预算，程序尝试紧凑分配并在 `electrical_plan.channel_ordering` 中记录，否则拒绝该候选。当前 100 路方案使用有序分配。输出包含 `electrical_left.png`、`electrical_right.png`、`pads_detail.png` 及总览；`pads.csv` 给出更新后的绑定位置，行列编号表示排内次序，不再表示全局等距格点。前后量化结果另存于输出父目录的 `routing-comparison.json`。
+
+本次回归 **428 项通过**。新版本重复生成并独立读回后，规范化几何、连接、状态与指标一致，记录见 `regular-reproducibility.json`。共地接点、光学弯曲半径及 crossing 单元继续通过原有检查。
+
+## 原固定格点版的 100 路结果
+
+以下数值描述保留的旧产物。当前生成器即使选用 `central` 固定格点，也已采用 pad 末端 M2 直连，因此重新运行旧示例不会重建旧版多余的 via。
 
 18 个候选全部通过检查，最终选择 `as-p34-06`，34 µm 光学间距。按西到东的列顺序，引出方向为 `RRLLLLRRRRRLL`（R=右出，L=左出）。
 

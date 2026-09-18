@@ -16,7 +16,7 @@ from .geometry import Library
 from .as_geometry import shuffle
 from .verify import normalized_hash
 from .cli import save
-from .as_channel import channel_levels
+from .as_channel import channel_levels, fanout_metrics
 
 
 def direction_patterns(depth, budget=8192):
@@ -276,11 +276,14 @@ def metrics(m, settings):
         width_target_um=20000,
         width_target_met=m["width"] <= 20000,
         extents_um=physical_extents(m),
-        pad_only_width_um=(
-            15110 if net.p == 100 else m["extents"]["pads"][2] - m["extents"]["pads"][0]
-        ),
+        pad_only_width_um=m["extents"]["pads"][2] - m["extents"]["pads"][0],
         signal_turns_per_net=turns / len(m["instances"]),
         routing_metrics_scope="External S terminal to pad turns; external S and G fanout wire length. Device interiors and common G bus excluded.",
+        **(
+            {"fanout": fanout_metrics(m)}
+            if m["electrical_plan"].get("pad_connection") == "direct-m2"
+            else {}
+        ),
     )
 
 
@@ -451,7 +454,9 @@ def generate(cfg, out, requests, choices=None):
             pads=len(m["electrical"]),
             pad_rows_per_side=2,
             pad_pitch_um=100,
-            pad_row_stagger_um=50,
+            pad_placement=cfg.pad_distribution,
+            pad_pitch_rule="minimum" if cfg.pad_distribution == "routing" else "fixed",
+            pad_row_stagger_um=None if cfg.pad_distribution == "routing" else 50,
             lane_pitch_um=m["config"]["lane_pitch"],
             width_mm=m["width"] / 1000,
             height_mm=m["height"] / 1000,

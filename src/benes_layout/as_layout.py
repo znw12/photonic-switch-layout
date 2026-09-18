@@ -4,7 +4,7 @@ from .geometry import Library, snap, rectangle, point
 from .network import Network
 from .as_geometry import shuffle, variants, ground_column
 from .interstage import segment
-from .as_channel import channel_levels
+from .as_channel import plan_channels
 
 
 def profile(cfg):
@@ -378,18 +378,11 @@ def build(cfg, candidate=None):
         )
         for b in ("south", "north")
     }
-    levels = {
-        b: channel_levels(
-            [t["tx"] for t in ts],
-            [v["px"] for v in grids[b]],
-            cfg.via_size + 2 * cfg.via_enclosure + cfg.metal_spacing + 0.002,
-        )
-        for b, ts in banks.items()
-    }
+    grids, levels, channel_plan = plan_channels(banks, grids, width, cfg)
     level_step = cfg.via_size + 2 * cfg.via_enclosure + cfg.metal_spacing + 0.002
     maxlevel = max(max(v) for v in levels.values())
     fanbase = ground_y + level_step
-    transfer = snap(fanbase + (maxlevel + 1) * level_step)
+    transfer = snap(fanbase + maxlevel * level_step)
     padbase = snap(
         transfer
         + cfg.pad_size / 2
@@ -404,17 +397,16 @@ def build(cfg, candidate=None):
         ):
             tx, sx = t["tx"], slot["px"]
             fy = snap(sign * (fanbase + level * level_step))
-            ly = snap(sign * transfer)
             py = snap(sign * (padbase + slot["row"] * cfg.pad_row_pitch))
             cell = lib.cell(f"AS_NET_{bank}_{i}", "electrical_route")
             segments = []
             direct = abs(tx - sx) < cfg.grid
             wire(cell, "M2", [t["x"], t["y"]], [tx, t["y"]], segments)
-            wire(cell, "M2", [tx, t["y"]], [tx, ly if direct else fy], segments)
+            wire(cell, "M2", [tx, t["y"]], [tx, py if direct else fy], segments)
             via_points = []
             if not direct:
                 wire(cell, "M1", [tx, fy], [sx, fy], segments)
-                wire(cell, "M2", [sx, fy], [sx, ly], segments)
+                wire(cell, "M2", [sx, fy], [sx, py], segments)
                 if (
                     abs(tx - sx)
                     < cfg.via_size + 2 * cfg.via_enclosure + cfg.metal_spacing
@@ -425,8 +417,8 @@ def build(cfg, candidate=None):
                     via_points.append([snap((tx + sx) / 2), fy])
                 else:
                     via_points += [[tx, fy], [sx, fy]]
-            wire(cell, "M1", [sx, ly], [sx, py], segments)
-            via_points += [[sx, ly], [sx, py]]
+            # Half-pitch staggering leaves a clear M2 corridor to the outer
+            # row. Keep the stem on the pad layer; no terminal underpass/vias.
             for at in via_points:
                 lib.ref(cell, lib.via(), *at)
             lib.ref(groups["ELECTRICAL_FANOUT"], cell, id=t["net"])
@@ -442,6 +434,7 @@ def build(cfg, candidate=None):
                     "vias": via_points,
                     "segments": segments,
                     "direct_pad": direct,
+                    "channel_level": level,
                 }
             )
     m["ground_network"] = dict(
@@ -453,6 +446,9 @@ def build(cfg, candidate=None):
     )
     m["electrical_plan"] = dict(
         mode="as-two-row",
+        pad_connection="direct-m2",
+        pad_placement=cfg.pad_distribution,
+        channel_ordering=channel_plan,
         channel_levels=maxlevel + 1,
         transfer_y=transfer,
         pad_base_y=padbase,

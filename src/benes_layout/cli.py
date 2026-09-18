@@ -40,10 +40,11 @@ def main(argv=None):
         p.add_argument("--connections", default="identity")
         p.add_argument('--out')
         if command == "generate":
+            p.add_argument("--layout-choice", help="JSON AS-Benes column/phase choice; refine one fixed optical floorplan")
             p.add_argument("--candidates", type=int)
             p.add_argument("--pad-rows", type=int)
             p.add_argument("--pad-row-stagger", type=float)
-            p.add_argument("--pad-distribution", choices=("central", "stage"))
+            p.add_argument("--pad-distribution", choices=("central", "stage", "routing"))
             p.add_argument("--lane-pitch", type=float)
             p.add_argument("--interstage-routing", choices=("legacy","continuous","compressed"))
             p.add_argument("--shuffle-pitch", type=float)
@@ -125,7 +126,13 @@ def main(argv=None):
 
                 out = args.out or (f'output/benes/exact100-balanced/n{cfg.active_ports}'
                                    if cfg.topology == 'as-benes' else 'output/benes/n100')
-                result = generate(cfg, out, pairs)
+                if args.layout_choice:
+                    if cfg.topology != "as-benes":
+                        raise ValueError("--layout-choice requires AS-Benes")
+                    choice = json.loads(Path(args.layout_choice).read_text())
+                    result = generate(cfg, out, pairs, choices=[choice])
+                else:
+                    result = generate(cfg, out, pairs)
                 print(json.dumps(result["summary"], indent=2))
         elif args.command == "verify":
             from .workflow import verify_bundle

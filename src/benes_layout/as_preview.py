@@ -125,6 +125,29 @@ def render(gds, m, out):
     view(
         "pads_detail.png",
         [p[0] - 350, base - 200, p[0] + 350, base + cfg["pad_row_pitch"] + 60],
-        "North pads: 100 um same-row pitch / 50 um stagger",
+        (
+            "North pads: M2 direct stems / minimum 100 um pitch"
+            if cfg["pad_distribution"] == "routing"
+            else "North pads: 100 um same-row pitch / 50 um stagger"
+        ),
         (13, 6),
     )
+    for label, selected_stages in (
+        ("left", m["stages"][:2]),
+        ("right", m["stages"][-2:]),
+    ):
+        routes = [
+            e for e in pads if e["stage"] in {s["stage"] for s in selected_stages}
+        ]
+        xs = [x for e in routes for x in (e["tx"], e["pad"][0])]
+        view(
+            f"electrical_{label}.png",
+            [
+                min(xs) - 100,
+                m["electrical_plan"]["ground_y"] - 180,
+                max(xs) + 100,
+                base + cfg["pad_row_pitch"] + 60,
+            ],
+            f"{label.title()} electrical fanout | M1 amber / M2 blue / vias white",
+            (16, 6),
+        )

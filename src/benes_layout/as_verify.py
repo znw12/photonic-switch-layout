@@ -438,10 +438,40 @@ def verify_manifest(m):
             + (len(expected_signals) % 2 if side == "north" else 0),
             "bank imbalance",
         )
-        origins = {
-            snap(e["pad"][0] - 100 * e["pad_column"] - 50 * e["pad_row"]) for e in es
-        }
-        require(len(origins) == 1, "pad half-pitch grid violated")
+        if cfg.pad_distribution == "routing":
+            ordered = sorted(es, key=lambda e: e["tx"])
+            xs = [e["pad"][0] for e in ordered]
+            require(
+                all(
+                    b - a >= cfg.pad_pitch / 2 - cfg.grid / 2
+                    for a, b in zip(xs, xs[1:])
+                ),
+                "aligned pad order/pitch violated",
+            )
+            for row in (0, 1):
+                row_xs = sorted(e["pad"][0] for e in es if e["pad_row"] == row)
+                require(
+                    all(
+                        b - a >= cfg.pad_pitch - cfg.grid / 2
+                        for a, b in zip(row_xs, row_xs[1:])
+                    ),
+                    "aligned same-row pad spacing violated",
+                )
+            require(
+                all(
+                    cfg.margin + half
+                    <= x
+                    <= m["extents"]["core"][2] - cfg.margin - half
+                    for x in xs
+                ),
+                "aligned pad exceeds core width budget",
+            )
+        else:
+            origins = {
+                snap(e["pad"][0] - 100 * e["pad_column"] - 50 * e["pad_row"])
+                for e in es
+            }
+            require(len(origins) == 1, "pad half-pitch grid violated")
         require(
             Counter((e["pad_column"], e["pad_row"]) for e in es)
             == Counter((i // 2, i % 2) for i in range(len(es))),
@@ -461,6 +491,24 @@ def verify_manifest(m):
             )
     for e in m["electrical"]:
         c = cells[e["cell"]]
+        if m["electrical_plan"].get("pad_connection") == "direct-m2":
+            require(
+                any(
+                    s["layer"] == "M2"
+                    and s["end"] == e["pad"]
+                    and s["start"][0] == e["pad"][0]
+                    for s in e["segments"]
+                ),
+                "pad lacks direct M2 stem",
+            )
+            require(
+                not any(
+                    s["layer"] == "M1" and s["start"][0] == s["end"][0]
+                    for s in e["segments"]
+                ),
+                "unnecessary pad M1 underpass",
+            )
+            require(not any(at == e["pad"] for at in e["vias"]), "unnecessary pad via")
         expected = []
         for seg in e["segments"]:
             a, b = seg["start"], seg["end"]

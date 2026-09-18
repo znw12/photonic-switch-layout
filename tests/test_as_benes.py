@@ -100,11 +100,13 @@ def physical_config(n=5, pitch=35):
 @pytest.mark.parametrize(
     "n,pitch,side", [(5, 34, "R"), (7, 35, "L"), (12, 34, "R"), (13, 35, "L")]
 )
-def test_exact_physical_roundtrip(tmp_path, n, pitch, side):
+@pytest.mark.parametrize("pad_distribution", ["central", "routing"])
+def test_exact_physical_roundtrip(tmp_path, n, pitch, side, pad_distribution):
+    from dataclasses import replace
     from benes_layout.as_layout import build
     from benes_layout.as_verify import verify_manifest, verify_gds
 
-    cfg = physical_config(n, pitch)
+    cfg = replace(physical_config(n, pitch), pad_distribution=pad_distribution)
     net = Network(cfg)
     lib, m = build(cfg, dict(id="test", exits=side * net.depth, pad_phase=0))
     verify_manifest(m)
@@ -112,6 +114,17 @@ def test_exact_physical_roundtrip(tmp_path, n, pitch, side):
     result = verify_gds(tmp_path / "layout.gds", m, names)
     assert result["electrical_nets"] == len(net.switches) + 1
     assert len(m["ground_rails"]) < 2 * len(net.switches)
+    assert all(
+        not any(
+            s["layer"] == "M1" and s["start"][0] == s["end"][0] for s in e["segments"]
+        )
+        and e["pad"] not in e["vias"]
+        for e in m["electrical"]
+    )
+    assert (
+        m["electrical_plan"]["channel_levels"]
+        <= m["electrical_plan"]["channel_ordering"]["level_budget"]
+    )
     assert all(
         v["extra_bypass_bends"] == 0
         for v in [c["metadata"] for c in m["cells"].values()]
@@ -200,6 +213,58 @@ def test_channel_vertical_precedence_and_cycle():
                 assert levels[i] < levels[j]
     with pytest.raises(ValueError):
         channel_levels([0, 50], [50, 0])
+
+
+@pytest.mark.parametrize("targets", [[100, 150, 200, 250], [-250, -200, -150, -100]])
+def test_ordered_channel_avoids_foreign_vertical_legs(targets):
+    from benes_layout.as_channel import channel_levels
+
+    sources = [0, 20, 40, 60]
+    levels = channel_levels(sources, targets, ordered=True)
+    for i, (source, target) in enumerate(zip(sources, targets)):
+        lo, hi = sorted((source, target))
+        for j in range(len(sources)):
+            if i == j:
+                continue
+            assert not (lo < sources[j] < hi and levels[i] < levels[j])
+            assert not (lo < targets[j] < hi and levels[i] > levels[j])
+    with pytest.raises(ValueError, match="monotone"):
+        channel_levels(sources, list(reversed(targets)), ordered=True)
+
+
+def test_routing_pad_fit_preserves_pitch_and_width():
+    from benes_layout.as_channel import aligned_slots
+
+    cfg = physical_config()
+    sources = [200, 210, 220, 230, 1000, 1010, 1020, 1030]
+    fitted = aligned_slots(sources, 1500, cfg)
+    xs = [v["px"] for v in fitted]
+    assert fitted == aligned_slots(sources, 1500, cfg)
+    assert xs[0] >= 70 and xs[-1] <= 1430
+    assert all(b - a >= 50 for a, b in zip(xs, xs[1:]))
+    for row in (0, 1):
+        rr = xs[row::2]
+        assert all(b - a >= 100 for a, b in zip(rr, rr[1:]))
+    uniform = [575 + i * 50 for i in range(len(xs))]
+    assert sum((x - s) ** 2 for x, s in zip(xs, sources)) < sum(
+        (x - s) ** 2 for x, s in zip(uniform, sources)
+    )
+    with pytest.raises(ValueError, match="fit"):
+        aligned_slots(sources, 300, cfg)
+
+
+def test_aligned_pad_spacing_fault_is_rejected():
+    from dataclasses import replace
+    from benes_layout.as_layout import build
+    from benes_layout.as_verify import verify_manifest
+
+    _, m = build(replace(physical_config(), pad_distribution="routing"))
+    es = sorted(
+        (e for e in m["electrical"] if e["side"] == "north"), key=lambda e: e["tx"]
+    )
+    es[1]["pad"][0] = es[0]["pad"][0] + 30
+    with pytest.raises(ValueError, match="pitch"):
+        verify_manifest(m)
 
 
 def test_large_direction_search_is_bounded():

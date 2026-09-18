@@ -43,17 +43,31 @@ Define a compact physical layout for the exact-port AS-Beneš network using reus
 
 ### Requirement: Two precisely staggered pad rows
 
-100 路参考 SHALL 在南北各放两排 pad，同排中心距固定为 100 µm，两排横向错开 50 µm；pad 尺寸为 60 µm 方形。每侧 SHALL 包含 298 个独立 S pad 和 4 个分布式 G pad，两排各 151 个，合计 604 个 pad。行距 SHALL 不小于 70 µm且通过实际几何检查；G pad SHALL 占用相同固定格点并连接公共 G 网络。
+100 路参考 SHALL 在南北各放两排 pad，默认同排中心距固定为 100 µm，两排横向错开 50 µm；新增 `routing` 分布允许 pad 服务于布线，同排中心距不小于 100 µm，局部错位量不再固定；pad 尺寸为 60 µm 方形。每侧 SHALL 包含 298 个独立 S pad 和 4 个分布式 G pad，两排各 151 个，合计 604 个 pad。行距 SHALL 不小于 70 µm且通过实际几何检查；G pad SHALL 占用相同固定格点并连接公共 G 网络。
 
 #### Scenario: Pad grid and counts
 
 - **WHEN** 读取 100 路参考的南北 pad 表及 GDS
-- **THEN** 每侧两排各 151 个 pad，相邻同排中心差为 100 µm，两排格点偏移为 50 µm；全片恰好有 596 个 S pad 与 8 个 G pad
+- **THEN** 每侧两排各 151 个 pad，默认分布相邻同排中心差为 100 µm，两排格点偏移为 50 µm，`routing` 分布检查同排至少 100 µm 和实际引线净距；全片恰好有 596 个 S pad 与 8 个 G pad
 
 #### Scenario: Pad width estimate is not die width
 
 - **WHEN** 报告该固定格点的横向包络
 - **THEN** 151 个位置/排、两排及 60 µm pad 的 15.110 mm 包络仅标注为 pad 区尺寸，整片宽度另由全部实际几何求出
+
+### Requirement: Direct pad stems and bounded channel regularization
+
+两排错位 pad 的末端 SHALL 采用连续 M2 引线直接接入 M2 pad，并通过实际金属间距及连接检查；不再统一插入无避让作用的 M1 竖线和两次换层。系统 SHALL 支持按源干线顺序自适应布置 pad，在现有芯片宽度内保持两排及同排至少 100 µm 中心距，并让外排 M2 引线避开内排 pad。电学通道 SHALL 在已选光学布局和原通道高度预算内，确定性地减少不同网络的横纵跨层穿插和同列阶梯顺序跳变，同时保留同层间距与干线先后约束。
+
+#### Scenario: Outer row lead passes between inner pads
+
+- **WHEN** 采用至少 100 µm 同排中心距、相邻交替排 pad 至少 50 µm 横向间隔和 60 µm pad 的两排布局
+- **THEN** 外排 M2 引线从内排 pad 之间的空隙通过，所有 pad 和电极仍属于正确网络，报告减少的 via 数量
+
+#### Scenario: Regularization cannot increase channel height
+
+- **WHEN** 对已选择的 100 路布局规整横向转接轨道
+- **THEN** 优化后轨道数不超过原分配，报告明确统计范围的穿插数量及列内阶梯反向次数，交付左右端局部预览和完整读回结果
 
 ### Requirement: One contact per shareable ground rail
 
