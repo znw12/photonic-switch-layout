@@ -5,14 +5,19 @@ from benes_layout.config import Config
 from benes_layout.network import Network
 
 
-def test_exact_config_preserves_legacy_hash():
+def test_exact_config_preserves_legacy_hash(tmp_path, monkeypatch):
     import json
     from pathlib import Path
 
-    data = json.loads(Path("output/benes/compact-gsg/n100/config.json").read_text())
-    assert (
-        Config(**data).to_dict() == data
-        or json.loads(json.dumps(Config(**data).to_dict())) == data
+    # Frozen compact-GSG configuration from 49ec22c, before AS-Benes was added.
+    fixture = Path(__file__).resolve().parent / "fixtures" / "compact_gsg_legacy_config.json"
+    monkeypatch.chdir(tmp_path)
+    assert not Path("output").exists()
+    data = json.loads(fixture.read_text())
+    cfg = Config(**data)
+    assert json.loads(json.dumps(cfg.to_dict())) == data
+    assert cfg.digest == (
+        "6df086d8f368c692394e3fdbda42d76ec1f2f13418644f849a3a0b8823f20e19"
     )
     assert "topology" not in Config().to_dict()
     for n in (1, 2, 3, 5, 13, 25, 100, 128):
