@@ -1,0 +1,64 @@
+{
+  "assumptions": [
+    "Geometrical TFLN GSG model; coupling, loss, RF impedance and foundry signoff remain uncalibrated.",
+    "M2 passive overpasses assume insulation; vias obey explicit optical keepouts.",
+    "AS paths have unequal switch counts; rearrangement is not hitless.",
+    "Unrequested inputs must remain dark in single-connection operation."
+  ],
+  "checks": {
+    "actual_mzi_counts": {
+      "11": 28,
+      "12": 28,
+      "13": 40,
+      "7": 4
+    },
+    "bypass_count": 108,
+    "cell_references": 10097,
+    "connections": 100,
+    "crossings": 4522,
+    "electrical_extraction_passed": true,
+    "electrical_nets": 597,
+    "gds_cells": 4489,
+    "gds_readback_passed": true,
+    "ground_contacts": 710,
+    "independent_signals": 596,
+    "internal_paths": 100,
+    "manifest_geometry_passed": true,
+    "mzi_count": 596,
+    "optical_objects": 18718,
+    "passive_m2_overpass_count": 28155,
+    "passive_m2_overpass_digest": "6752c8b455832a8ef36f6e1ffbe5c700328505c14abd34d27732aac68cb8c10d",
+    "shared_ground_nets": 1,
+    "switch_depth": 13,
+    "via_count": 2528
+  },
+  "config": "examples/benes/exact100-balanced/regular.json",
+  "design_commit": "d66327202f7fe88802ddddff57568f53491c3df6",
+  "layout_choice": "examples/benes/exact100-balanced/regular-choice.json",
+  "normalized_hash": "d51610f7da8b76c6e45de433dfe7814be745ac9ccb3571cdcfe0598f47a48562",
+  "summary": {
+    "active_ports": 100,
+    "area_mm2": 92.25336690863199,
+    "column_exits": "RRLLLLRRRRRLL",
+    "height_mm": 4.555112,
+    "internal_ports": 100,
+    "lane_pitch_um": 34,
+    "mzis": 596,
+    "pad_pitch_rule": "minimum",
+    "pad_pitch_um": 100,
+    "pad_placement": "routing",
+    "pad_row_stagger_um": null,
+    "pad_rows_per_side": 2,
+    "pads": 604,
+    "selected_candidate": "as-p34-06-regular",
+    "stages": 13,
+    "topology": "as-benes",
+    "width_mm": 20.252710999999998
+  },
+  "versions": {
+    "gdsfactory": "9.51.0",
+    "kfactory": "3.0.4",
+    "klayout": "0.30.12",
+    "shapely": "2.1.2"
+  }
+}

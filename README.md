@@ -1,140 +1,60 @@
-# Parametric photonic switching layouts
+# 100 × 100 photonic switch layout
 
-项目提供两个生成器：`waksman-layout` 使用精确 N 端口 Waksman 网络；`benes-layout` 默认使用完整、等开关级数的标准 Beneš，也可显式选择精确 N 端口的 `as-benes`。标准 Beneš 默认外部 100×100、内部 128×128，采用 **整片面积优先、路径均匀性其次** 的优化顺序。
+A parameterized, hierarchical layout generator for a reconfigurable photonic switching matrix, built with **Python, gdsfactory, and KLayout**. The final example uses an **exact-size arbitrary-size Beneš (AS-Beneš) network** with 100 physical inputs and outputs. Earlier Waksman and padded 128-port Beneš designs remain in the history for comparison.
 
-新版的运行方法、尺寸与验证结果见 [Beneš 使用与设计说明](docs/BENES.md)。以下保留原 Waksman 版本的说明。
+![Final 100 × 100 layout: waveguides in teal, M1 in amber, M2 in blue](docs/assets/final-layout.png)
 
-新增 [精确 100 路 AS-Beneš 版](docs/exact100-balanced.md)：596 个 MZI、34 μm 连续斜线连接、逐列左右引线和共享 G 单接点。最新电学优化让南北各两排 pad 配合引线分组排布，同排中心距至少 100 μm，末端 M2 直连；尺寸 **20.253 × 4.555 mm**，比上一固定格点版本面积减少 **7.92%**，via 从 3748 减到 2528。
+*Rendered from the generated GDS polygons. Inputs are on the west, outputs on the east; electrical pads occupy two rows on each of the north and south sides.*
 
-保留的标准 Beneš 紧凑参考采用 **25 μm 光端口间距、局部地母线及南北各 4 个 G pad**，完整尺寸为 **22.463 × 4.484 mm**，面积比其上一版减少 **74.5%**。保留 832 个独立 S pad、南北各三排 pad、同排最小中心距 120 μm、1 mm MZI 和 R≥20 μm；MZI 内的 S 引出为直线。配置、验证结果与生成方法见 [25 μm 与局部共地版](docs/compact-gsg.md)。
+## Final design
 
-上一器件版参考 Nature 2018 的 TFLN GSG 设计，使用 **1 mm 四光端口 MZI**（有效电极段 680 μm、R≥20 μm），全片 **1 个公共地 + 832 个独立 S**。G/S 用 M2 连续引出，全片 via 为 **8460**。完整矩阵为 **36.394 × 10.853 mm**；几何已验证，2×2 耦合比例和光电性能待标定，见 [GSG MZI 设计与验证](docs/BENES_GSG_MZI.md)。
+| Property | Verified reference |
+|---|---|
+| Full layout envelope, including pads | **20.252711 × 4.555112 mm** (92.253367 mm²) |
+| Switching core | 596 independently controlled 2×2 MZIs; up to 13 columns |
+| MZI geometry | 1 mm long, GSG electrodes, minimum bend radius 20 µm |
+| Optical routing | Continuous diagonal permutations; 4,522 reusable crossing instances |
+| Electrical routing | Two metal layers plus vias; shared ground; 2,528 vias |
+| External pads | 596 signal + 8 common-ground pads; same-row center spacing ≥100 µm |
 
-级间 crossing 已加入参考 Flexcompute 的四臂余弦渐变形状，保持 **20×20 μm footprint** 和原端口；最新配置复用该单元，见 [余弦 crossing 设计](docs/BENES_COSINE_CROSSING.md)。
+The network supports any single input/output pair and simultaneous one-to-one permutations. It is **rearrangeably nonblocking**: changing a connection may require changing existing paths. AS-Beneš paths traverse 7–13 MZIs; equal optical loss is not claimed. In single-connection operation, unrequested inputs must remain dark.
 
-此前的布线版本在三排 pad 基础上减少电线转折：同排最小中心距扩大到 **120 μm**，按引出位置非均匀错列，**762 条连接只转一次**。左右尺寸保持，完整尺寸为 **36.394 × 10.764 mm**，总转折减少 **30.53%**、via 减少 **18.32%**；见 [pad 对齐与转折简化](docs/BENES_ALIGNED_PADS.md)。
+## Engineering approach
 
-原三排紧凑版仍保留，同排中心距固定 100 μm、排间横向错位 25 μm、纵向排距 70 μm，完整尺寸为 **36.394 × 10.792 mm**；见 [三排紧凑布局与验证](docs/BENES_THREE_ROW_ELECTRICAL.md)。
+- **Parameterization:** explicit topology, device, spacing, pad, and layer configurations.
+- **Hierarchy:** reusable MZI, crossing, routing, pad, and via cells in hierarchical GDS.
+- **Routing strategy:** continuous optical shuffles, selectable left/right electrode exits, local shared grounds, and pad placement fitted to ordered fanout.
+- **Scalability:** recursive topology with O(N log N) switches and bounded layout searches. Larger topology benchmarks do not imply validated larger physical layouts.
+- **Verification:** independent path tracing, geometry checks, GDS readback, metal/via connectivity extraction, and injected faults.
 
-两排 pad 的共享置换区布局仍保留，完整尺寸为 **41.785 × 10.288 mm**，较原四排 continuous 版面积减少 **1.50%**；见 [两排电学布局与验证](docs/BENES_TWO_ROW_ELECTRICAL.md)。
+Area takes priority over path uniformity. The retained history includes alternatives that were rejected or superseded: for example, folding shortened the chip but substantially increased area. The final electrical refinement reduced area by 7.92% and vias from 3,748 to 2,528 without moving the optical layout.
 
-此前的局部 40 μm 光学间距、按级分组四排 pad 布局约为 **40.086 × 10.464 mm**，见 [级间置换优化结果与运行方法](docs/BENES_INTERSTAGE.md)。MZI 接口行距仍为 60 μm；**45.486 × 10.464 mm** 的默认布局继续保留，见 [紧凑版基线](docs/BENES_DISTRIBUTED_PADS.md)。
+## Reproduce the final layout
 
-连续斜线也支持三带折叠，保留西侧输入、东侧输出及南北四排错位 pad。完整尺寸约 **31.507 × 28.737 mm**；左右尺寸缩短，但总面积增加，见 [三带结果与运行方法](docs/BENES_CONTINUOUS_THREE_BANDS.md)。
-
-一个可运行的任意 N 端口光子交换矩阵版图生成器。默认精确生成 100×100 Waksman：573 个占位 2×2 TFLN MZI，保留同时 100 条一对一连接能力，支持先只启用一条连接。
-
-这是 **placeholder technology 的完整布线示例**。波导、耦合器、交叉、电极尺寸不是经过工艺验证的 TFLN 器件；bar/cross 状态也不是已校准的驱动电压。
-
-## 安装与运行
-
-已验证环境：Python 3.13.5、gdsfactory 9.51.0、KLayout 0.30.12。全部 Python 依赖版本保存在 `requirements.lock`。
+From the repository root, with Python **3.13.5** installed:
 
 ```bash
 python3.13 -m venv .venv
 .venv/bin/python -m pip install -r requirements.lock
 .venv/bin/python -m pip install --no-build-isolation --no-deps -e .
+export MPLCONFIGDIR="$PWD/.venv/matplotlib-cache"
 
-.venv/bin/waksman-layout generate --config examples/n100.json --out output/n100 --connections 0:73
-.venv/bin/waksman-layout verify output/n100
-```
-
-当前工作目录已建立 `.venv`，可直接运行后两条命令。也可以使用提供的 Conda 配方：
-
-```bash
-conda env create -f environment.yml
-conda activate waksman-layout
-waksman-layout generate --config examples/n100.json --out output/n100
-```
-
-端口编号为 **0–N−1**。输入连接可以是 `0:73,1:4`、JSON 文件、`identity`、`reverse` 或 `none`。
-
-```bash
-.venv/bin/waksman-layout solve --n 100 --connections examples/connections.json --out output/settings.json
-.venv/bin/waksman-layout generate --n 4 --out output/n4 --connections reverse
-.venv/bin/waksman-layout generate --n 16 --out output/n16 --connections reverse
-.venv/bin/waksman-layout benchmark --sizes 16,100,256,1024 --out output/scaling.json
 .venv/bin/python -m pytest -q
+.venv/bin/benes-layout generate \
+  --config examples/benes/exact100-balanced/regular.json \
+  --layout-choice examples/benes/exact100-balanced/regular-choice.json \
+  --out output/review-final
+.venv/bin/benes-layout verify output/review-final
 ```
 
-没有显示器的环境可以设置 `MPLCONFIGDIR=/tmp/waksman-mpl`。生成器使用 Agg 渲染器，不需要图形桌面。`solve` 和 `benchmark` 不导入版图依赖，也不生成几何。
+This selects the final fixed floorplan rather than rerunning the historical candidate search. Outputs include `layout.gds`, previews, a resolved configuration, switch settings, pad assignments, and verification reports. Generated bundles remain under ignored `output/`.
 
-## 五项设计要求
+**Review validation:** 428 tests passed in a fresh checkout with no pre-existing output, using the pinned development environment. Tests include all 10,000 single input/output pairs at N=100, sampled full permutations, exhaustive small networks, and geometry/electrical fault injection. The final 100-port GDS was separately regenerated and read back. See the [compact result snapshot](docs/assets/final-layout-summary.json) and [exact reproduction instructions](docs/REPRODUCING.md), including Conda, routing a single connection, and regenerating this preview.
 
-| 要求 | 实现 |
-|---|---|
-| Parameterization | `Config` 校验 N、器件尺寸、端口、半径、金属/via、pads、层与搜索预算；输出完整解析配置 |
-| Hierarchy | CHIP → 递归子网络 → MZI；复用 straight、swap/crossing、pad、via 单元；GDS 不扁平化 |
-| Routing strategy | 显式相邻交换 crossing 网络；分栏电学逃逸通道；M1 横向引出、M2 纵向到 north/south pads |
-| Scalability | 任意正整数 N；开关数 O(N log N)，逻辑深度 O(log N)；分别测量拓扑和完整几何的资源需求 |
-| Verification | 独立状态遍历、端口/几何检查、空间索引查碰撞、GDS 回读和实际金属连通区域提取 |
+## Scope and authorship
 
-网络使用 `S(n)=n−1+S(floor(n/2))+S(ceil(n/2))`，`S(1)=0`，不将 100 填充为 128。单个 MZI 可以同时传递两路光，要求各输入映射到不同输出。部分连接请求会被确定性补成完整排列；未请求的光路仍存在，单连接工作时其他输入需保持无光。重配置可以改变已有路径，不保证不中断。
+This is a **layout-engineering demonstrator**, not a foundry-qualified chip. TFLN coupling ratios, optical loss/crosstalk, RF impedance, the insulated metal-over-optics stack, and manufacturing DRC remain uncalibrated. Finite tests do not enumerate all 100! permutations or establish physical optical performance.
 
-## 光学和电学布局
+The project was developed through **human design direction and inspection with Codex-assisted programming, GDS generation, and verification**. See [AI workflow and contribution boundaries](docs/AI_WORKFLOW.md).
 
-- 西侧输入、东侧输出；光学中心线最小弯曲半径 20 um。
-- 每次必要的端口换序使用显式、可定位的 crossing 单元；交叉点不被当成任意四通连接。
-- 圆弧采用误差受控的多边形离散化，内部接缝有 5 nm 受控重叠，避免 1 nm 网格取整造成断点。外部端口在网格上对齐。
-- 两层金属与 VIA 使用不同 GDS layer/datatype；只有显式 via 建立跨层电连接。
-- M2 在预留的直波导窗口上绝缘跨越，窗口禁止放置 via。这是本示例明确采用的绝缘堆栈假设，需要真实工艺重新确认。
-- 每个 MZI 默认两个独立电学端口，各接一个 pad：100 端口例子共 **1146 pads**。默认不合并公共回流。电学端口数量、名称和位置可配置。
-- north/south pad 分配支持按位置分半的 `nearest` 和每个 MZI 上下分开的 `split`；同一 x 的相反方向 M2 干线必须在 y 方向分离。
-- 搜索预算内比较不同 pad/channel pitch 与分配策略，最小化包含 pads 的完整 die 包围盒；随后比较最坏路径 crossing 数和总波导长度。搜索不宣称全局最优。
-
-初始 profile 的单排 pads 下界：每侧 573 pads，100 um pitch、60 um pad 宽，对应至少 **57.26 mm** 的横向跨度。默认完整布线结果约 **89.098 × 8.240 mm**，包含 4522 个光学 crossings。该结果展示可扩展布线能力，不能视为低损耗或可直接投片的交换芯片；真实 MZI、电极与封装规则会显著改变尺寸。
-
-## 输出与失败行为
-
-| 文件 | 内容 |
-|---|---|
-| `layout.gds` | 带子网络和组件层次的完整几何 |
-| `preview.png`, `detail.png` | 从真实多边形渲染的全局图与局部图 |
-| `config.json` | 完整解析参数和层映射 |
-| `network.json` | 与几何无关的逻辑边和开关端口映射 |
-| `manifest.json`, `cell_names.json` | 物理位置、路由段、接口与 GDS 单元映射 |
-| `pads.csv` | 每个电学端口与 north/south pad 的对应关系 |
-| `settings.json` | 请求连接、补全连接、每个 MZI 的 bar/cross 状态 |
-| `report.json` | 候选比较、检查结果、长度/面积/交叉/资源指标和假设 |
-
-`report.json` 中的最坏路径长度包括 MZI 占位长度；`total_interconnect_length_um` 仅统计单元间波导。最大长度与最大 crossing 数分别对合法路径求最大值，不要求发生在同一条路径。峰值 RSS 是整个进程的高水位，不是各阶段独立内存。
-
-不能合法布线或候选预算耗尽时，CLI 返回非零退出码，写出失败报告，不把残缺 GDS 当作成功结果。生成目录是派生输出，不要把手工编辑文件放在其中。`output/` 与 `.venv/` 不纳入 Git。
-
-## 替换器件与修改参数
-
-优先修改 JSON 配置后重新生成。例如改变 `mzi_length`、`terminal_offsets` 或 `pad_pitch`，逻辑开关编号保持不变，物理位置和路线会重算。完整可配置字段参见 `src/waksman_layout/config.py`。
-
-Python API 的 `build_layout(config, mzi_factory=...)` 接受自定义器件工厂。工厂须在传入的 `Library` 注册并返回名为 `MZI` 的 `Cell`，包含：
-
-- `i0/i1/o0/o1` 光端口，位置和方向符合配置；
-- 配置声明的电学端口；
-- bar/cross 传输对和合法方向声明；
-- 自身几何、子单元与局部器件交互范围。
-
-布局器检查接口，不兼容时直接报错。实际 PDK 的复杂器件需通过适配器转换到这个接口，并补充器件内部专用规则；当前校验器不代替 foundry DRC。请同时调整配置中的外形与端口位置，而非把更大的器件硬塞进旧占位尺寸。
-
-## 验证覆盖
-
-- N=1–7 的全部排列；N=100 的全部 10000 个单输入/输出组合。
-- N=100 的恒等、反序、全部循环移位和 100 个固定种子的随机全排列。
-- N=25、101 等奇数规模，以及 N=256、1024 的拓扑/状态验证。
-- N=4、16、100 完整版图，以及小规模奇数网络的几何回读。
-- 故障注入：断波导、交叉映射错误、半径不足、意外交叉、短路、缺失 via、via 包围不足和导出文件被修改。
-- GDS 单元多边形与实例变换核对；从回读的 M1/M2/VIA 提取实际导体分区，检查每个端口是否到达对应 pad。
-
-全排列抽样不等于遍历 100! 种组合。验证报告也不声称评估了 TFLN 损耗、串扰、消光比、电极高速性能或制造良率。
-
-## 模块
-
-- `network.py`：逻辑图、递归染色求解、独立遍历。
-- `config.py`：配置和规则校验。
-- `geometry.py`：显式组件几何、接口、gdsfactory 层次输出。
-- `layout.py`：stage 放置、crossing 调度、电学通道和 pad 分配。
-- `verify.py`：几何核对、GDS 回读和电学提取。
-- `cli.py`：候选搜索、命令行、输出与规模指标。
-- `preview.py`：实际几何的离线渲染。
-
-Beneš 多排 pad 与折叠布局：见 [实验说明](docs/BENES_RESHAPE.md)，支持南北各 2/3 排 pad，附六种 100 端口布局的尺寸及验证比较。
-
-单条带、南北各四排错位 pad：见 [实现与测量结果](docs/BENES_STAGGERED_PADS.md)，相邻排错开 25 μm，附完整 100 端口验证。
+For deeper review: [final architecture and measured tradeoffs](docs/exact100-balanced.md), [GSG device and paper attribution](docs/BENES_GSG_MZI.md), [crossing shape and source attribution](docs/BENES_COSINE_CROSSING.md), and [AS-Beneš design rationale](openspec/changes/exact100-benes-balanced-routing/design.md). Detailed development notes are primarily in Chinese. Device geometry is inspired by cited public sources; no foundry PDK is bundled.
