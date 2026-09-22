@@ -1,0 +1,57 @@
+{
+  "active_ports": 100,
+  "internal_ports": 128,
+  "interstage_routing": "continuous",
+  "electrical_routing": "two-row",
+  "share_interstage": true,
+  "fold_bands": 1,
+  "pad_rows": 2,
+  "pad_distribution": "routing",
+  "pad_pitch": 100,
+  "pad_row_stagger": 50,
+  "lane_pitch": 34,
+  "max_candidates": 18,
+  "gap_factors": [
+    1.0
+  ],
+  "corridor_factors": [
+    1.0
+  ],
+  "pad_factors": [
+    1.0
+  ],
+  "row_orders": [
+    "normal"
+  ],
+  "margin": 40,
+  "pad_row_pitch": 70,
+  "electrical_stage_bias": 0,
+  "electrical_width_extra": 0,
+  "electrical_fanout": "aligned",
+  "mzi_model": "paper-gsg",
+  "terminal_names": [
+    "G",
+    "S"
+  ],
+  "mzi_length": 1000.0,
+  "mzi_height": 68,
+  "mzi_wg_width": 0.8,
+  "coupler_gap": 0.3,
+  "coupler_length": 30.0,
+  "gsg_signal_width": 20.0,
+  "gsg_gap": 5.0,
+  "gsg_ground_width": 10.0,
+  "terminal_offsets": [
+    17,
+    17
+  ],
+  "radius": 20.0,
+  "crossing_model": "cosine",
+  "crossing_half_length": 10.0,
+  "crossing_center_width": 3.0,
+  "crossing_max_width": 4.0,
+  "crossing_port_straight": 0.5,
+  "ground_pads_per_side": 4,
+  "metal_width": 4,
+  "topology": "pruned-banyan"
+}

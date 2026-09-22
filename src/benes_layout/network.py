@@ -20,6 +20,9 @@ class Network:
         if isinstance(config, Config) and config.topology == 'as-benes':
             from .as_network import ASNetwork
             return ASNetwork(config)
+        if isinstance(config, Config) and config.topology == 'pruned-banyan':
+            from .banyan_network import BanyanNetwork
+            return BanyanNetwork(config)
         return super().__new__(cls)
 
     def __init__(self, config: Config | int = 100):

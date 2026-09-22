@@ -86,9 +86,12 @@ class Config:
         if type(self.active_ports) is not int or self.active_ports < 1:
             raise ValueError("active_ports must be a positive integer")
         p = self.internal_ports
-        if self.topology not in ('benes', 'as-benes'):
+        if self.topology not in ('benes', 'as-benes', 'pruned-banyan'):
             raise ValueError('unknown topology')
+        banyan = self.topology == 'pruned-banyan'
         exact = self.topology == 'as-benes'
+        if banyan and self.active_ports < 2:
+            raise ValueError('pruned-banyan requires active_ports >= 2')
         if p is None:
             p = self.active_ports if exact else 1 << max(1, (self.active_ports - 1).bit_length())
         if exact and (type(p) is not int or p != self.active_ports):
@@ -97,10 +100,19 @@ class Config:
             raise ValueError(
                 "internal_ports must be a power of two >= max(2, active_ports)"
             )
+        if banyan and p != 1 << (self.active_ports - 1).bit_length():
+            raise ValueError('pruned-banyan requires the smallest power-of-two parent')
         object.__setattr__(self, "internal_ports", p)
+        if banyan:
+            from .banyan_network import matched_outputs
+            expected_outputs = matched_outputs(self.active_ports, p)
         for name in ("input_map", "output_map"):
             v = getattr(self, name)
-            v = tuple(range(self.active_ports)) if v is None else tuple(v)
+            default = (expected_outputs if banyan and name == "output_map"
+                       else tuple(range(self.active_ports)))
+            v = default if v is None else tuple(v)
+            if banyan and v != default:
+                raise ValueError(f'unsupported pruned-banyan {name} selection')
             if (
                 len(v) != self.active_ports
                 or len(set(v)) != len(v)
@@ -156,8 +168,9 @@ class Config:
             raise ValueError("chord_error must be between grid and wg_width/10")
         if type(self.ground_pads_per_side) is not int or self.ground_pads_per_side < 0:
             raise ValueError('ground_pads_per_side must be a nonnegative integer')
-        compact = self.ground_pads_per_side > 0 or exact
-        if compact and not exact and not (self.mzi_model == 'paper-gsg' and self.electrical_fanout == 'aligned'
+        exact_profile = exact or banyan
+        compact = self.ground_pads_per_side > 0 or exact_profile
+        if compact and not exact_profile and not (self.mzi_model == 'paper-gsg' and self.electrical_fanout == 'aligned'
                             and self.share_interstage and p >= 4
                             and self.ground_pads_per_side <= 2*(p.bit_length()-1)-1):
             raise ValueError('local ground pads require aligned shared-interstage GSG routing and at most one tap per stage per side')
@@ -175,13 +188,13 @@ class Config:
                            and tuple(self.terminal_offsets) == (12.5,12.5) and self.metal_width <= 4)
                           if compact else (self.lane_pitch == 60 and self.mzi_height == 100
                                            and tuple(self.terminal_offsets) == (20,40)))
-            if exact:
+            if exact_profile:
                 dimensions = (self.lane_pitch in (34,35) and self.mzi_height == 2*self.lane_pitch
                               and tuple(self.terminal_offsets) == (self.lane_pitch/2,)*2
                               and self.metal_width <= 4)
             if not (self.mzi_length == 1000 and dimensions
                     and tuple(self.terminal_names) == ('G','S')
-                    and self.electrical_routing == ('two-row' if exact else 'three-row') and self.fold_bands == 1):
+                    and self.electrical_routing == ('two-row' if exact_profile else 'three-row') and self.fold_bands == 1):
                 raise ValueError('paper-gsg requires a supported interface (standard 60/25 um or AS 34/35 um), 1000 um length and matching single-band pad routing')
             landing = self.via_size + 2*self.via_enclosure
             if not (self.gsg_gap >= self.metal_spacing and self.gsg_gap > self.mzi_wg_width
@@ -197,14 +210,14 @@ class Config:
             raise ValueError("pad_rows must be 1, 2, 3 or 4")
         if self.pad_distribution not in ("central", "stage", "routing"):
             raise ValueError("pad_distribution must be central, stage or routing")
-        if self.pad_distribution == "routing" and not (exact and self.electrical_routing == "two-row"):
+        if self.pad_distribution == "routing" and not (exact_profile and self.electrical_routing == "two-row"):
             raise ValueError("routing pad distribution requires AS-Benes two-row routing")
         if self.electrical_routing not in ("legacy", "two-row", "three-row"):
             raise ValueError("invalid electrical_routing")
         two_row = self.layered_electrical
         if self.electrical_fanout not in ('channel', 'aligned'):
             raise ValueError('invalid electrical_fanout')
-        if self.electrical_fanout == 'aligned' and self.electrical_routing != 'three-row' and not exact:
+        if self.electrical_fanout == 'aligned' and self.electrical_routing != 'three-row' and not exact_profile:
             raise ValueError('aligned fanout requires three-row electrical routing')
         if type(self.share_interstage) is not bool or (self.share_interstage and not two_row):
             raise ValueError("share_interstage requires layered electrical routing")
@@ -276,6 +289,8 @@ class Config:
         if (self.pad_rows - 1) * self.pad_row_stagger >= self.pad_pitch:
             raise ValueError("pad row stagger spans a full column pitch")
         depth = max(1, 2*(p-1).bit_length()-1) if exact else 2 * (p.bit_length() - 1) - 1
+        if banyan:
+            depth = p.bit_length() - 1
         if (
             type(self.fold_bands) is not int
             or not 1 <= self.fold_bands <= depth

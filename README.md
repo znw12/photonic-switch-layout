@@ -19,6 +19,12 @@ A parameterized, hierarchical layout generator for a reconfigurable photonic swi
 
 The network supports any single input/output pair and simultaneous one-to-one permutations. It is **rearrangeably nonblocking**: changing a connection may require changing existing paths. AS-Beneš paths traverse 7–13 MZIs; equal optical loss is not claimed. In single-connection operation, unrequested inputs must remain dark.
 
+## Reduced-device blocking alternative
+
+A separate [100-port pruned Banyan reference](docs/PRUNED_BANYAN.md) uses **400 MZIs and 2,433 physical crossings**, with a verified **12.851003 × 5.535116 mm** envelope. It retains every single input/output connection and a demonstrated simultaneous 100-connection reference, while accepting internal blocking for other permutations. It has exactly 100 external ports per side, a partially retained 128-lane parent, and 56 on-chip placeholder terminations.
+
+Use `examples/benes/pruned-banyan/n100.json` with `n100-choice.json` for the fixed result. The existing AS-Beneš reference and its rearrangeably nonblocking behavior remain available. See the [measured comparison, blocking semantics and reproduction commands](docs/PRUNED_BANYAN.md).
+
 ## Engineering approach
 
 - **Parameterization:** explicit topology, device, spacing, pad, and layer configurations.

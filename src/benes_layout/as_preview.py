@@ -64,10 +64,15 @@ def render(gds, m, out):
         fig.savefig(out / path, dpi=200)
         plt.close(fig)
 
+    label = (
+        "pruned Banyan (blocking)"
+        if cfg.get("topology") == "pruned-banyan"
+        else "AS-Benes"
+    )
     view(
         "preview.png",
         m["die_bbox"],
-        f"Exact {cfg['active_ports']} x {cfg['active_ports']} AS-Benes | {m['width']/1000:.3f} x {m['height']/1000:.3f} mm | WG teal / M1 amber / M2 blue",
+        f"Exact {cfg['active_ports']} x {cfg['active_ports']} {label} | {m['width']/1000:.3f} x {m['height']/1000:.3f} mm | WG teal / M1 amber / M2 blue",
     )
     for side in ("L", "R"):
         inst = next((i for i in m["instances"] if i["cell"] == "AS_MZI_" + side), None)
@@ -96,6 +101,31 @@ def render(gds, m, out):
         "Shared G rail: one landing and via; independent S electrodes",
         (9, 7),
     )
+    if m.get("terminations"):
+        t = m["terminations"][0]
+        view(
+            "termination_detail.png",
+            [t["x"] - 90, t["y"] - 70, t["x"] + 90, t["y"] + 70],
+            "On-chip termination placeholder | reflection uncalibrated",
+            (10, 7),
+        )
+        selected = [v for v in m["interfaces"] if v["side"] == "east"]
+        x0 = m["stages"][-1]["x"] + cfg["mzi_length"]
+        x1 = max(v["position"][0] for v in selected)
+        ys = [v["position"][1] for v in selected]
+        view(
+            "output_compression.png",
+            [
+                x0 - 20,
+                min(ys) - 50,
+                x1 + 20,
+                m["bands"][0]["y"]
+                + (m["network"]["parent_ports"] - 1) * cfg["lane_pitch"]
+                + 50,
+            ],
+            f"Ordered output compression: {len(selected)} external ports",
+            (10, 10),
+        )
     if m["bypasses"]:
         b = m["bypasses"][0]
         view(

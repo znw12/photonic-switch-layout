@@ -49,6 +49,9 @@ def candidates(cfg):
 
 
 def generate(cfg, out, requests, *, choices=None):
+    if cfg.topology == "pruned-banyan":
+        from .banyan_workflow import generate as generate_banyan
+        return generate_banyan(cfg, out, requests, choices=choices)
     if cfg.topology == 'as-benes':
         from .as_workflow import generate as generate_exact
         return generate_exact(cfg,out,requests,choices=choices)
@@ -330,7 +333,9 @@ def generate(cfg, out, requests, *, choices=None):
 
 
 def verify_bundle(directory):
-    from pathlib import Path
+    if json.loads((Path(directory)/"config.json").read_text()).get("topology") == "pruned-banyan":
+        from .banyan_workflow import verify_bundle as verify_banyan
+        return verify_banyan(directory)
     if json.loads((Path(directory)/'config.json').read_text()).get('topology') == 'as-benes':
         from .as_workflow import verify_bundle as verify_exact
         return verify_exact(directory)

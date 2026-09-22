@@ -164,192 +164,12 @@ def verify_manifest(m):
             )
         elif c["kind"] == "crossing":
             verify_crossing(c, cfg)
-    expected_objects = Counter()
-    for i in m["instances"]:
-        v = net.switches[i["id"]]
-        s = stages[v["stage"]]
-        require(
-            i["row"] == v["row"]
-            and i["stage"] == v["stage"]
-            and i["x"] == s["x"]
-            and abs(i["y"] - (origin + v["row"] * cfg.lane_pitch)) < tol,
-            "MZI placement mismatch",
-        )
-        require(i["cell"] == "AS_MZI_" + s["exit_side"], "column exit mismatch")
-        expected_objects[(i["cell"], i["x"], i["y"], 0)] += 1
-    require(
-        [(b["stage"], b["row"]) for b in m["bypasses"]]
-        == [(b["stage"], b["row"]) for b in net.bypasses],
-        "bypass inventory mismatch",
-    )
-    for b in m["bypasses"]:
-        require(
-            b["x"] == stages[b["stage"]]["x"]
-            and abs(b["y"] - origin - b["row"] * cfg.lane_pitch) < tol,
-            "bypass placement mismatch",
-        )
-        c = cells[b["cell"]]
-        require(
-            c["ports"] == {"w": [0, 0, 180], "e": [1000, 0, 0]},
-            "bypass must traverse the device column",
-        )
-        require(
-            shapes(b["cell"], "WG").equals(
-                box(0, -cfg.wg_width / 2, 1000, cfg.wg_width / 2)
-            ),
-            "bypass geometry changed",
-        )
-        expected_objects[(b["cell"], b["x"], b["y"], 0)] += 1
-    require(
-        len(m["routes"]) == (net.depth - 1) * net.p, "interstage route count mismatch"
-    )
-    seen = set()
-    crossings = Counter()
-    crossing_pairs = defaultdict(list)
-    physical_joints = []
-    instances = {i["id"]: i for i in m["instances"]}
-    bypasses = {(b["stage"], b["row"]): b for b in m["bypasses"]}
+    if cfg.topology == "pruned-banyan":
+        from .banyan_verify import verify_optics
 
-    def column_object(s, row):
-        slot = net.slots[s].get(row)
-        item = instances[slot[0]] if slot else bypasses[s, row]
-        return (item["cell"], item["x"], item["y"], 0)
-
-    for route in m["routes"]:
-        s, row, dest = route["stage"], route["row"], route["dest"]
-        require((s, row) not in seen, "duplicate optical route")
-        seen.add((s, row))
-        require(
-            net.boundaries[s]["permutation"][row] == dest,
-            "route bypass/permutation mismatch",
-        )
-        last = [stages[s]["x"] + 1000, origin + row * cfg.lane_pitch]
-        direction = 0
-        previous = column_object(s, row)
-        for part in route["pieces"]:
-            c = cells[part["cell"]]
-            angle = part.get("angle", 0)
-            a = point(part["x"], part["y"], angle, c["ports"][part["entry"]])
-            b = point(part["x"], part["y"], angle, c["ports"][part["exit"]])
-            require(hypot(a[0] - last[0], a[1] - last[1]) <= tol, "optical route gap")
-            incoming = (c["ports"][part["entry"]][2] + angle + 180) % 360
-            require(
-                abs((incoming - direction + 180) % 360 - 180) < 0.01,
-                "optical route tangent mismatch",
-            )
-            track(c, part["entry"], part["exit"])
-            direction = (c["ports"][part["exit"]][2] + angle) % 360
-            last = b
-            obj = (c["name"], part["x"], part["y"], angle % 360)
-            physical_joints.append((previous, obj))
-            previous = obj
-            if c["kind"] == "crossing":
-                crossings[obj] += 1
-                crossing_pairs[obj].append(frozenset((part["entry"], part["exit"])))
-            else:
-                expected_objects[obj] += 1
-        require(
-            hypot(
-                last[0] - stages[s + 1]["x"], last[1] - origin - dest * cfg.lane_pitch
-            )
-            <= tol
-            and abs(direction) < 0.01,
-            "optical route misses destination",
-        )
-        physical_joints.append((previous, column_object(s + 1, dest)))
-    require(
-        all(n == 2 for n in crossings.values()),
-        "crossing does not have paired transfers",
-    )
-    require(
-        all(
-            set(v) == {frozenset(("w", "e")), frozenset(("s", "n"))}
-            for v in crossing_pairs.values()
-        ),
-        "crossing paired paths are duplicated or switched",
-    )
-    expected_objects.update({k: 1 for k in crossings})
-    require(m["crossing_count"] == len(crossings), "crossing count mismatch")
-    require(len(m["interfaces"]) == 2 * net.p, "optical IO count mismatch")
-    for side in ("west", "east"):
-        bank = [v for v in m["interfaces"] if v["side"] == side]
-        require(
-            sorted(v["internal"] for v in bank) == list(range(net.p)),
-            "IO index mismatch",
-        )
-        for v in bank:
-            c = cells[v["cell"]]
-            row = v["internal"]
-            y = origin + row * cfg.lane_pitch
-            target = (
-                [stages[0]["x"], y] if side == "west" else [stages[-1]["x"] + 1000, y]
-            )
-            require(
-                c["ports"]["e" if side == "west" else "w"][:2] == target,
-                "IO misses column",
-            )
-            require(
-                c["ports"]["w" if side == "west" else "e"][:2] == v["position"],
-                "external optical port misses geometry",
-            )
-            expected_objects[(v["cell"], 0, 0, 0)] += 1
-            physical_joints.append(
-                (
-                    (v["cell"], 0, 0, 0),
-                    column_object(0 if side == "west" else net.depth - 1, row),
-                )
-            )
-    objs, geoms, ports = spatial_objects(m)
-    # Rigid transforms of unions can leave sub-grid collapsed rings at tangent
-    # overlaps. Evaluate on the same 1 nm grid as the emitted GDS polygons.
-    geoms = [set_precision(g, cfg.grid) for g in geoms]
-    require(
-        Counter(objs) == expected_objects,
-        "optical hierarchy differs from connected route inventory",
-    )
-    placed = dict(zip(objs, geoms))
-    for a, b in physical_joints:
-        require(
-            placed[a].distance(placed[b]) < 1e-8,
-            "optical polygons disconnected at route joint",
-        )
-    tree = STRtree(geoms)
-    die = box(*m["die_bbox"])
-    for i, g in enumerate(geoms):
-        require(
-            g.is_valid and not g.is_empty and die.buffer(tol).covers(g),
-            "invalid/outside optical geometry",
-        )
-        require(
-            all(g.buffer(tol).covers(Point(v)) for v in ports[i]),
-            "optical primitive misses port",
-        )
-        for j in tree.query(g, predicate="dwithin", distance=cfg.wg_clearance - tol):
-            j = int(j)
-            if j <= i:
-                continue
-            common = {
-                ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
-                for a in ports[i]
-                for b in ports[j]
-                if hypot(a[0] - b[0], a[1] - b[1]) <= tol
-            }
-            require(
-                bool(common),
-                f"unintended optical contact/clearance: {objs[i]} / {objs[j]}",
-            )
-            require(
-                g.intersection(geoms[j]).area < cfg.wg_width * tol * 4,
-                "overlapping connected waveguides",
-            )
-            exempt = unary_union(
-                [Point(v).buffer(2 * (cfg.wg_clearance + cfg.wg_width)) for v in common]
-            )
-            a, b = g.difference(exempt), geoms[j].difference(exempt)
-            require(
-                a.is_empty or b.is_empty or a.distance(b) >= cfg.wg_clearance - tol,
-                "optical clearance away from endpoint",
-            )
+        crossings, objs = verify_optics(m, net, cfg, shapes)
+    else:
+        crossings, objs = verify_optics_as(m, net, cfg, shapes)
     # Ground ownership is reconstructed from real adjacent rows, not copied counts.
     expected_rails = []
     for s in stages:
@@ -544,6 +364,199 @@ def verify_manifest(m):
         optical_objects=len(objs),
         ground_contacts=len(expected_rails),
     )
+
+
+def verify_optics_as(m, net, cfg, shapes):
+    cells, stages = m["cells"], m["stages"]
+    tol = 2 * cfg.grid
+    origin = -(net.p - 1) * cfg.lane_pitch / 2
+    expected_objects = Counter()
+    for i in m["instances"]:
+        v = net.switches[i["id"]]
+        s = stages[v["stage"]]
+        require(
+            i["row"] == v["row"]
+            and i["stage"] == v["stage"]
+            and i["x"] == s["x"]
+            and abs(i["y"] - (origin + v["row"] * cfg.lane_pitch)) < tol,
+            "MZI placement mismatch",
+        )
+        require(i["cell"] == "AS_MZI_" + s["exit_side"], "column exit mismatch")
+        expected_objects[(i["cell"], i["x"], i["y"], 0)] += 1
+    require(
+        [(b["stage"], b["row"]) for b in m["bypasses"]]
+        == [(b["stage"], b["row"]) for b in net.bypasses],
+        "bypass inventory mismatch",
+    )
+    for b in m["bypasses"]:
+        require(
+            b["x"] == stages[b["stage"]]["x"]
+            and abs(b["y"] - origin - b["row"] * cfg.lane_pitch) < tol,
+            "bypass placement mismatch",
+        )
+        c = cells[b["cell"]]
+        require(
+            c["ports"] == {"w": [0, 0, 180], "e": [1000, 0, 0]},
+            "bypass must traverse the device column",
+        )
+        require(
+            shapes(b["cell"], "WG").equals(
+                box(0, -cfg.wg_width / 2, 1000, cfg.wg_width / 2)
+            ),
+            "bypass geometry changed",
+        )
+        expected_objects[(b["cell"], b["x"], b["y"], 0)] += 1
+    require(
+        len(m["routes"]) == (net.depth - 1) * net.p, "interstage route count mismatch"
+    )
+    seen = set()
+    crossings = Counter()
+    crossing_pairs = defaultdict(list)
+    physical_joints = []
+    instances = {i["id"]: i for i in m["instances"]}
+    bypasses = {(b["stage"], b["row"]): b for b in m["bypasses"]}
+
+    def column_object(s, row):
+        slot = net.slots[s].get(row)
+        item = instances[slot[0]] if slot else bypasses[s, row]
+        return (item["cell"], item["x"], item["y"], 0)
+
+    for route in m["routes"]:
+        s, row, dest = route["stage"], route["row"], route["dest"]
+        require((s, row) not in seen, "duplicate optical route")
+        seen.add((s, row))
+        require(
+            net.boundaries[s]["permutation"][row] == dest,
+            "route bypass/permutation mismatch",
+        )
+        last = [stages[s]["x"] + 1000, origin + row * cfg.lane_pitch]
+        direction = 0
+        previous = column_object(s, row)
+        for part in route["pieces"]:
+            c = cells[part["cell"]]
+            angle = part.get("angle", 0)
+            a = point(part["x"], part["y"], angle, c["ports"][part["entry"]])
+            b = point(part["x"], part["y"], angle, c["ports"][part["exit"]])
+            require(hypot(a[0] - last[0], a[1] - last[1]) <= tol, "optical route gap")
+            incoming = (c["ports"][part["entry"]][2] + angle + 180) % 360
+            require(
+                abs((incoming - direction + 180) % 360 - 180) < 0.01,
+                "optical route tangent mismatch",
+            )
+            track(c, part["entry"], part["exit"])
+            direction = (c["ports"][part["exit"]][2] + angle) % 360
+            last = b
+            obj = (c["name"], part["x"], part["y"], angle % 360)
+            physical_joints.append((previous, obj))
+            previous = obj
+            if c["kind"] == "crossing":
+                crossings[obj] += 1
+                crossing_pairs[obj].append(frozenset((part["entry"], part["exit"])))
+            else:
+                expected_objects[obj] += 1
+        require(
+            hypot(
+                last[0] - stages[s + 1]["x"], last[1] - origin - dest * cfg.lane_pitch
+            )
+            <= tol
+            and abs(direction) < 0.01,
+            "optical route misses destination",
+        )
+        physical_joints.append((previous, column_object(s + 1, dest)))
+    require(
+        all(n == 2 for n in crossings.values()),
+        "crossing does not have paired transfers",
+    )
+    require(
+        all(
+            set(v) == {frozenset(("w", "e")), frozenset(("s", "n"))}
+            for v in crossing_pairs.values()
+        ),
+        "crossing paired paths are duplicated or switched",
+    )
+    expected_objects.update({k: 1 for k in crossings})
+    require(m["crossing_count"] == len(crossings), "crossing count mismatch")
+    require(len(m["interfaces"]) == 2 * net.p, "optical IO count mismatch")
+    for side in ("west", "east"):
+        bank = [v for v in m["interfaces"] if v["side"] == side]
+        require(
+            sorted(v["internal"] for v in bank) == list(range(net.p)),
+            "IO index mismatch",
+        )
+        for v in bank:
+            c = cells[v["cell"]]
+            row = v["internal"]
+            y = origin + row * cfg.lane_pitch
+            target = (
+                [stages[0]["x"], y] if side == "west" else [stages[-1]["x"] + 1000, y]
+            )
+            require(
+                c["ports"]["e" if side == "west" else "w"][:2] == target,
+                "IO misses column",
+            )
+            require(
+                c["ports"]["w" if side == "west" else "e"][:2] == v["position"],
+                "external optical port misses geometry",
+            )
+            expected_objects[(v["cell"], 0, 0, 0)] += 1
+            physical_joints.append(
+                (
+                    (v["cell"], 0, 0, 0),
+                    column_object(0 if side == "west" else net.depth - 1, row),
+                )
+            )
+    objs, geoms, ports = spatial_objects(m)
+    # Rigid transforms of unions can leave sub-grid collapsed rings at tangent
+    # overlaps. Evaluate on the same 1 nm grid as the emitted GDS polygons.
+    geoms = [set_precision(g, cfg.grid) for g in geoms]
+    require(
+        Counter(objs) == expected_objects,
+        "optical hierarchy differs from connected route inventory",
+    )
+    placed = dict(zip(objs, geoms))
+    for a, b in physical_joints:
+        require(
+            placed[a].distance(placed[b]) < 1e-8,
+            "optical polygons disconnected at route joint",
+        )
+    tree = STRtree(geoms)
+    die = box(*m["die_bbox"])
+    for i, g in enumerate(geoms):
+        require(
+            g.is_valid and not g.is_empty and die.buffer(tol).covers(g),
+            "invalid/outside optical geometry",
+        )
+        require(
+            all(g.buffer(tol).covers(Point(v)) for v in ports[i]),
+            "optical primitive misses port",
+        )
+        for j in tree.query(g, predicate="dwithin", distance=cfg.wg_clearance - tol):
+            j = int(j)
+            if j <= i:
+                continue
+            common = {
+                ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+                for a in ports[i]
+                for b in ports[j]
+                if hypot(a[0] - b[0], a[1] - b[1]) <= tol
+            }
+            require(
+                bool(common),
+                f"unintended optical contact/clearance: {objs[i]} / {objs[j]}",
+            )
+            require(
+                g.intersection(geoms[j]).area < cfg.wg_width * tol * 4,
+                "overlapping connected waveguides",
+            )
+            exempt = unary_union(
+                [Point(v).buffer(2 * (cfg.wg_clearance + cfg.wg_width)) for v in common]
+            )
+            a, b = g.difference(exempt), geoms[j].difference(exempt)
+            require(
+                a.is_empty or b.is_empty or a.distance(b) >= cfg.wg_clearance - tol,
+                "optical clearance away from endpoint",
+            )
+    return crossings, objs
 
 
 def verify_gds(path, m, names, windows_path=None):
@@ -781,7 +794,7 @@ def verify_gds(path, m, names, windows_path=None):
                         c["kind"] in ("straight", "segment", "bend", "crossing")
                         and cfg.share_interstage
                         and cfg.insulated_m2_overpasses,
-                        "unauthorized passive overpass",
+                        f"unauthorized passive overpass near {objs[j]} / {metal.bounds}",
                     )
                     windows.append(
                         dict(

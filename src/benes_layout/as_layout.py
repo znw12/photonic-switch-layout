@@ -52,7 +52,17 @@ def slots(count, center, cfg):
     return [{**v, "px": snap(v["px"] + origin)} for v in raw]
 
 
-def placement(cfg, net, widths, exits, bank_map, pad_phase=0):
+def placement(
+    cfg,
+    net,
+    widths,
+    exits,
+    bank_map,
+    pad_phase=0,
+    *,
+    input_keeps=None,
+    output_keeps=None,
+):
     landing = cfg.via_size + 2 * cfg.via_enclosure
     step = snap((landing + cfg.metal_width) / 2 + cfg.metal_spacing + 2 * cfg.grid)
     keep = cfg.optical_metal_clearance + landing / 2 + cfg.wg_width / 2 + 2 * cfg.grid
@@ -86,16 +96,31 @@ def placement(cfg, net, widths, exits, bank_map, pad_phase=0):
             # Right trunks of the previous column and left trunks of this one
             # occupy disjoint parts of their common gap.
             lo = cursor
+            input_keep = input_keeps[s] if input_keeps else 0
+            output_keep = output_keeps[s] if output_keeps else 0
+            optical_keep = (
+                cfg.optical_metal_clearance + cfg.metal_width / 2 + 2 * cfg.grid
+            )
+            if s and output_keeps:
+                lo = max(
+                    lo,
+                    stages[-1]["x"]
+                    + cfg.mzi_length
+                    + output_keeps[s - 1]
+                    + optical_keep,
+                )
             if s == 0:
                 start = cfg.margin
             else:
                 start = stages[-1]["x"] + cfg.mzi_length + max(widths[s - 1], 2 * keep)
                 if prev_right:
-                    start = max(start, prev_right[-1] + keep)
+                    start = max(
+                        start, prev_right[-1] + max(keep, input_keep + optical_keep)
+                    )
             left = []
             if exits[s] == "L":
                 left = [snap(lo + keep + i * step) for i in range(counts[s])]
-                start = max(start, left[-1] + keep)
+                start = max(start, left[-1] + max(keep, input_keep + optical_keep))
             x = snap(start)
             if s:
                 tail = x - (stages[-1]["x"] + cfg.mzi_length + widths[s - 1])
@@ -103,7 +128,15 @@ def placement(cfg, net, widths, exits, bank_map, pad_phase=0):
                 if cfg.grid < tail < minimum_tail:
                     x = snap(x + minimum_tail - tail)
             right = (
-                [snap(x + cfg.mzi_length + keep + i * step) for i in range(counts[s])]
+                [
+                    snap(
+                        x
+                        + cfg.mzi_length
+                        + max(keep, output_keep + optical_keep)
+                        + i * step
+                    )
+                    for i in range(counts[s])
+                ]
                 if exits[s] == "R"
                 else []
             )
@@ -314,6 +347,14 @@ def build(cfg, candidate=None):
                     cell=c.name,
                 )
             )
+    return complete_layout(lib, net, m, groups, terminals, grids, width)
+
+
+def complete_layout(lib, net, m, groups, terminals, grids, width):
+    """Common G bus, pad fanout and reachable-cell export for a single band."""
+    cfg, stages = lib.cfg, m["stages"]
+    p, origin = cfg.lane_pitch, m["bands"][0]["y"]
+    top = lib.cells[m["top"]]
     edge = max(abs(origin), abs(origin + (net.p - 1) * p)) + p / 2
     ground_y = snap(edge + cfg.margin / 2)
     ground_cell = groups["GROUND"]

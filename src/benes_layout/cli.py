@@ -36,11 +36,11 @@ def main(argv=None):
         p.add_argument("--config")
         p.add_argument("--n", type=int, help="number of active ports")
         p.add_argument("--internal", type=int)
-        p.add_argument('--topology', choices=('benes','as-benes'))
-        p.add_argument("--connections", default="identity")
+        p.add_argument('--topology', choices=('benes','as-benes','pruned-banyan'))
+        p.add_argument("--connections", help="identity, reverse, reference, none, pairs or JSON file")
         p.add_argument('--out')
         if command == "generate":
-            p.add_argument("--layout-choice", help="JSON AS-Benes column/phase choice; refine one fixed optical floorplan")
+            p.add_argument("--layout-choice", help="JSON AS-Benes/Banyan column and pad phase choice")
             p.add_argument("--candidates", type=int)
             p.add_argument("--pad-rows", type=int)
             p.add_argument("--pad-row-stagger", type=float)
@@ -112,23 +112,37 @@ def main(argv=None):
                 band_stage_counts=(tuple(map(int,args.band_stage_counts.split(',')))
                                    if getattr(args,"band_stage_counts",None) else None),
             )
-            pairs = request_pairs(args.connections, cfg.active_ports)
+            net = Network(cfg)
+            connection_mode = args.connections or ('reference' if cfg.topology == 'pruned-banyan' else 'identity')
+            if connection_mode == 'reference':
+                if cfg.topology != 'pruned-banyan':
+                    raise ValueError('reference connections require pruned-banyan')
+                pairs = net.reference
+            else:
+                pairs = request_pairs(connection_mode, cfg.active_ports)
             if args.command == "solve":
-                net = Network(cfg)
                 settings = net.solve(pairs)
                 net.verify(settings)
                 if args.out:
-                    save(args.out, settings)
+                    if cfg.topology == 'pruned-banyan':
+                        from .banyan_workflow import save_settings
+                        save_settings(args.out, settings)
+                    else:
+                        save(args.out, settings)
                 else:
                     print(json.dumps(settings, indent=2))
             else:
                 from .workflow import generate
 
-                out = args.out or (f'output/benes/exact100-balanced/n{cfg.active_ports}'
-                                   if cfg.topology == 'as-benes' else 'output/benes/n100')
+                default_out = {
+                    'pruned-banyan': f'output/benes/pruned-banyan/n{cfg.active_ports}',
+                    'as-benes': f'output/benes/exact100-balanced/n{cfg.active_ports}',
+                    'benes': 'output/benes/n100',
+                }
+                out = args.out or default_out[cfg.topology]
                 if args.layout_choice:
-                    if cfg.topology != "as-benes":
-                        raise ValueError("--layout-choice requires AS-Benes")
+                    if cfg.topology not in ("as-benes", "pruned-banyan"):
+                        raise ValueError("--layout-choice requires AS-Benes or pruned-banyan")
                     choice = json.loads(Path(args.layout_choice).read_text())
                     result = generate(cfg, out, pairs, choices=[choice])
                 else:
@@ -179,6 +193,11 @@ def main(argv=None):
             print(json.dumps(result, indent=2))
         return 0
     except (ValueError, KeyError, TypeError, OSError) as error:
+        if (args.command == 'solve' and args.out and 'cfg' in locals()
+                and cfg.topology == 'pruned-banyan'):
+            from .banyan_workflow import record_failure
+            failure = record_failure(args.out, locals().get('pairs', args.connections), error)
+            print(f'failed request; previous output preserved={Path(args.out).exists()}; see {failure}', file=sys.stderr)
         print(f"error: {error}", file=sys.stderr)
         return 2
 

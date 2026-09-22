@@ -34,7 +34,7 @@ def direction_patterns(depth, budget=8192):
     return sorted(patterns)[:budget]
 
 
-def candidates(cfg):
+def candidates(cfg, *, placement_fn=placement, width_adjust=None, prefix="as"):
     net = Network(cfg)
     bankmap = assign_banks(net)
     results = []
@@ -91,7 +91,10 @@ def candidates(cfg):
                 counts[-1] * step if dirs[-1] == "R" else 0
             )
             span = net.depth * 1000 + edge + 2 * cfg.margin
-            for s, w in enumerate(widths):
+            adjusted = (
+                width_adjust(c, net, widths, dirs, bankmap) if width_adjust else widths
+            )
+            for s, w in enumerate(adjusted):
                 tracks = (counts[s] if dirs[s] == "R" else 0) + (
                     counts[s + 1] if dirs[s + 1] == "L" else 0
                 )
@@ -102,7 +105,7 @@ def candidates(cfg):
         for _, dirs in ranked[:8]:
             scored = []
             for phase in (-25, -12.5, 0, 12.5, 25):
-                stages, width, grids, _ = placement(
+                stages, width, grids, _ = placement_fn(
                     c, net, widths, dirs, bankmap, phase
                 )
                 # Coarse pad channel height based on actual source ordering.
@@ -148,7 +151,7 @@ def candidates(cfg):
             shortlist.append(dict(exits=right, pad_phase=0, lane_pitch=pitch))
         for i, v in enumerate(shortlist):
             results.append(
-                dict(id=f"as-p{pitch}-{i:02d}", **v, control=v["exits"] == right)
+                dict(id=f"{prefix}-p{pitch}-{i:02d}", **v, control=v["exits"] == right)
             )
     return results[: cfg.max_candidates]
 
